@@ -2,60 +2,46 @@
 
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Sliders } from 'lucide-react';
+import { Key, Sliders } from 'lucide-react';
 import PropertyCard from '@/components/public/PropertyCard';
+import Reveal from '@/components/common/Reveal';
 import { mockProperties } from '@/lib/mockProperties';
 import type { Property } from '@/types';
 
-export default function ImoveisPage() {
+const rentalProperties = mockProperties.filter((p) => p.purpose === 'rent');
+
+export default function AlugarPage() {
   const searchParams = useSearchParams();
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(
-    mockProperties
-  );
+  const [filteredProperties, setFilteredProperties] =
+    useState<Property[]>(rentalProperties);
   const [showFilters, setShowFilters] = useState(false);
 
-  // Filter states
   const [filters, setFilters] = useState({
     city: searchParams.get('city') || '',
-    type: searchParams.get('type') || '',
-    purpose: searchParams.get('purpose') || '',
-    minPrice: searchParams.get('price_min') || '',
+    type: '',
+    bedrooms: '',
     maxPrice: searchParams.get('price_max') || '',
-    bedrooms: searchParams.get('bedrooms') || '',
     sortBy: 'newest',
   });
 
-  // Apply filters
   useEffect(() => {
-    let result = [...mockProperties];
+    let result = [...rentalProperties];
 
     if (filters.city) {
       result = result.filter((p) =>
         p.city.toLowerCase().includes(filters.city.toLowerCase())
       );
     }
-
     if (filters.type) {
       result = result.filter((p) => p.type === filters.type);
     }
-
-    if (filters.purpose) {
-      result = result.filter((p) => p.purpose === filters.purpose);
+    if (filters.bedrooms) {
+      result = result.filter((p) => p.bedrooms >= Number(filters.bedrooms));
     }
-
-    if (filters.minPrice) {
-      result = result.filter((p) => p.value >= Number(filters.minPrice));
-    }
-
     if (filters.maxPrice) {
       result = result.filter((p) => p.value <= Number(filters.maxPrice));
     }
 
-    if (filters.bedrooms) {
-      result = result.filter((p) => p.bedrooms >= Number(filters.bedrooms));
-    }
-
-    // Sort
     switch (filters.sortBy) {
       case 'price_asc':
         result.sort((a, b) => a.value - b.value);
@@ -66,7 +52,6 @@ export default function ImoveisPage() {
       case 'popular':
         result.sort((a, b) => b.views_count - a.views_count);
         break;
-      case 'newest':
       default:
         result.sort(
           (a, b) =>
@@ -78,38 +63,53 @@ export default function ImoveisPage() {
   }, [filters]);
 
   const handleFilterChange = (key: string, value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="font-display text-4xl font-bold text-navy-950 mb-2">
-            Encontre seu imóvel
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero */}
+      <section className="relative overflow-hidden bg-noise-navy text-white py-16 md:py-20">
+        <div
+          className="pointer-events-none absolute -top-16 -right-16 h-72 w-72 rounded-full bg-gold-500/20 blur-3xl animate-float"
+          aria-hidden="true"
+        />
+        <div className="container relative mx-auto px-4 animate-fade-in-up">
+          <span className="inline-flex items-center gap-2 mb-4 px-4 py-1.5 rounded-full border border-gold-400/40 bg-gold-500/10 text-gold-300 text-sm font-medium">
+            <Key className="w-4 h-4" />
+            Aluguel
+          </span>
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-4">
+            Encontre seu próximo <span className="text-gradient-gold">lar para alugar</span>
           </h1>
-          <p className="text-gray-600">
-            {filteredProperties.length} imóvel{filteredProperties.length !== 1 ? 'is' : ''} encontrado{filteredProperties.length !== 1 ? 's' : ''}
+          <p className="text-xl text-navy-100 max-w-2xl">
+            Imóveis para locação com contratos seguros e corretores prontos para
+            agendar sua visita.
           </p>
         </div>
+      </section>
+
+      <div className="container mx-auto px-4 py-10">
+        <Reveal className="mb-8">
+          <p className="text-gray-600">
+            {filteredProperties.length} imóvel
+            {filteredProperties.length !== 1 ? 'is' : ''} disponív
+            {filteredProperties.length !== 1 ? 'eis' : 'el'} para aluguel
+          </p>
+        </Reveal>
 
         <div className="flex gap-6">
           {/* Sidebar Filters */}
           <div
             className={`${
               showFilters ? 'block' : 'hidden'
-            } md:block md:w-64 bg-white p-6 rounded-lg shadow-md h-fit`}
+            } md:block md:w-64 bg-white p-6 rounded-xl shadow-md h-fit`}
           >
-            <h3 className="font-bold text-lg mb-6 flex items-center gap-2">
-              <Sliders className="w-5 h-5" />
+            <h3 className="font-bold text-lg mb-6 flex items-center gap-2 text-navy-950">
+              <Sliders className="w-5 h-5 text-gold-500" />
               Filtros
             </h3>
 
-            {/* City Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Cidade
@@ -123,7 +123,6 @@ export default function ImoveisPage() {
               />
             </div>
 
-            {/* Type Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Tipo de Imóvel
@@ -137,44 +136,12 @@ export default function ImoveisPage() {
                 <option value="house">Casa</option>
                 <option value="apartment">Apartamento</option>
                 <option value="commercial">Comercial</option>
-                <option value="land">Terreno</option>
               </select>
             </div>
 
-            {/* Purpose Filter */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Finalidade
-              </label>
-              <select
-                value={filters.purpose}
-                onChange={(e) => handleFilterChange('purpose', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
-              >
-                <option value="">Todas</option>
-                <option value="sale">Venda</option>
-                <option value="rent">Aluguel</option>
-                <option value="temporary">Temporada</option>
-              </select>
-            </div>
-
-            {/* Price Range */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Preço Mínimo
-              </label>
-              <input
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Preço Máximo
+                Aluguel Máximo (mensal)
               </label>
               <input
                 type="number"
@@ -185,7 +152,6 @@ export default function ImoveisPage() {
               />
             </div>
 
-            {/* Bedrooms */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Mínimo de Quartos
@@ -204,16 +170,16 @@ export default function ImoveisPage() {
             </div>
 
             <button
-              onClick={() => setFilters({
-                city: '',
-                type: '',
-                purpose: '',
-                minPrice: '',
-                maxPrice: '',
-                bedrooms: '',
-                sortBy: 'newest',
-              })}
-              className="w-full px-4 py-2 bg-navy-900 text-white rounded-lg font-semibold hover:bg-navy-800 transition"
+              onClick={() =>
+                setFilters({
+                  city: '',
+                  type: '',
+                  bedrooms: '',
+                  maxPrice: '',
+                  sortBy: 'newest',
+                })
+              }
+              className="w-full px-4 py-2 bg-navy-900 text-white rounded-lg font-semibold hover:bg-navy-800 transition-colors"
             >
               Limpar Filtros
             </button>
@@ -221,7 +187,6 @@ export default function ImoveisPage() {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Sort Bar */}
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
@@ -236,13 +201,12 @@ export default function ImoveisPage() {
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               >
                 <option value="newest">Mais Recentes</option>
-                <option value="price_asc">Menor Preço</option>
-                <option value="price_desc">Maior Preço</option>
+                <option value="price_asc">Menor Aluguel</option>
+                <option value="price_desc">Maior Aluguel</option>
                 <option value="popular">Mais Populares</option>
               </select>
             </div>
 
-            {/* Properties Grid */}
             {filteredProperties.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filteredProperties.map((property) => (
@@ -250,9 +214,9 @@ export default function ImoveisPage() {
                 ))}
               </div>
             ) : (
-              <div className="bg-white p-12 rounded-lg text-center">
+              <div className="bg-white p-12 rounded-xl text-center">
                 <p className="text-xl text-gray-600">
-                  Nenhum imóvel encontrado com os filtros selecionados.
+                  Nenhum imóvel para aluguel encontrado com os filtros selecionados.
                 </p>
               </div>
             )}

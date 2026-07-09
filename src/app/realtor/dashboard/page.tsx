@@ -1,6 +1,6 @@
 'use client';
 
-import { TrendingUp, Home, Users, DollarSign } from 'lucide-react';
+import { TrendingUp, Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LogoutButton from '@/components/common/LogoutButton';
@@ -17,6 +17,7 @@ export default function RealtorDashboard() {
     activeLead: 7,
     totalEarnings: 125000,
     monthlyCommission: 15000,
+    propertiesForRent: 5,
   };
 
   // Mock sales data for chart
@@ -47,7 +48,7 @@ export default function RealtorDashboard() {
 
       <div className="container mx-auto px-4 py-10">
         {/* KPI Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
@@ -67,6 +68,19 @@ export default function RealtorDashboard() {
               <Home className="w-12 h-12 text-green-500" />
             </div>
           </div>
+
+          <Link
+            href="/realtor/properties?purpose=rent"
+            className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm">Para Alugar</p>
+                <p className="text-3xl font-bold text-gray-900">{realtorData.propertiesForRent}</p>
+              </div>
+              <Key className="w-12 h-12 text-gold-500" />
+            </div>
+          </Link>
 
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">

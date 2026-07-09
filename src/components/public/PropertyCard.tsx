@@ -91,6 +91,9 @@ export default function PropertyCard({
         {/* Price Badge */}
         <div className="absolute bottom-4 right-4 bg-gradient-to-r from-gold-400 to-gold-500 text-navy-950 px-4 py-2 rounded-lg font-bold shadow-[var(--shadow-gold)]">
           R$ {property.value.toLocaleString('pt-BR')}
+          {property.purpose === 'rent' && (
+            <span className="text-xs font-semibold">/mês</span>
+          )}
         </div>
       </div>
 

@@ -58,7 +58,7 @@ export interface Property {
   title: string;
   code: string;
   type: PropertyType;
-  purpose: 'sale' | 'rent' | 'temporary';
+  purpose: PropertyPurpose;
   value: number;
   address: string;
   city: string;
@@ -96,6 +96,8 @@ export type PropertyType =
   | 'garage'
   | 'farm'
   | 'other';
+
+export type PropertyPurpose = 'sale' | 'rent' | 'temporary';
 
 export type PropertyStatus =
   | 'available'
@@ -281,7 +283,7 @@ export interface PropertyTypeSalesStats {
 export interface PropertyFilters {
   search?: string;
   property_type?: PropertyType[];
-  purpose?: 'sale' | 'rent' | 'temporary';
+  purpose?: PropertyPurpose;
   price_min?: number;
   price_max?: number;
   city?: string;

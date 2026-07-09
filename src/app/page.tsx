@@ -97,6 +97,7 @@ const mockProperties = [
 export default function HomePage() {
   const [searchCity, setSearchCity] = useState('');
   const [searchPrice, setSearchPrice] = useState(0);
+  const [searchPurpose, setSearchPurpose] = useState<'sale' | 'rent'>('sale');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,7 +105,13 @@ export default function HomePage() {
     const params = new URLSearchParams();
     if (searchCity) params.append('city', searchCity);
     if (searchPrice) params.append('price_max', searchPrice.toString());
-    window.location.href = `/imoveis?${params.toString()}`;
+
+    if (searchPurpose === 'rent') {
+      window.location.href = `/alugar?${params.toString()}`;
+    } else {
+      params.append('purpose', 'sale');
+      window.location.href = `/imoveis?${params.toString()}`;
+    }
   };
 
   return (
@@ -141,6 +148,38 @@ export default function HomePage() {
               onSubmit={handleSearch}
               className="animate-fade-in-up bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 md:p-8 text-gray-900 [animation-delay:300ms]"
             >
+              {/* Finalidade Toggle */}
+              <div
+                className="inline-flex mb-6 p-1 rounded-lg bg-gray-100"
+                role="group"
+                aria-label="Finalidade da busca"
+              >
+                <button
+                  type="button"
+                  onClick={() => setSearchPurpose('sale')}
+                  aria-pressed={searchPurpose === 'sale'}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                    searchPurpose === 'sale'
+                      ? 'bg-navy-900 text-white'
+                      : 'text-gray-600 hover:text-navy-900'
+                  }`}
+                >
+                  Comprar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSearchPurpose('rent')}
+                  aria-pressed={searchPurpose === 'rent'}
+                  className={`px-5 py-2 rounded-md text-sm font-semibold transition-colors ${
+                    searchPurpose === 'rent'
+                      ? 'bg-navy-900 text-white'
+                      : 'text-gray-600 hover:text-navy-900'
+                  }`}
+                >
+                  Alugar
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div className="relative text-left">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -173,11 +212,11 @@ export default function HomePage() {
 
                 <div className="text-left">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Preço Máximo
+                    {searchPurpose === 'rent' ? 'Aluguel Máximo' : 'Preço Máximo'}
                   </label>
                   <input
                     type="number"
-                    placeholder="R$ 1.000.000"
+                    placeholder={searchPurpose === 'rent' ? 'R$ 5.000' : 'R$ 1.000.000'}
                     value={searchPrice || ''}
                     onChange={(e) => setSearchPrice(Number(e.target.value))}
                     className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-3 text-gray-900 focus:border-gold-500 outline-none transition-colors"
@@ -199,7 +238,7 @@ export default function HomePage() {
                 <Link href="/imoveis?purpose=sale" className="hover:text-gold-600 transition-colors">
                   🏠 Comprar
                 </Link>
-                <Link href="/imoveis?purpose=rent" className="hover:text-gold-600 transition-colors">
+                <Link href="/alugar" className="hover:text-gold-600 transition-colors">
                   📋 Alugar
                 </Link>
                 <Link href="/imoveis?is_opportunity=true" className="hover:text-gold-600 transition-colors">

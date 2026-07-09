@@ -53,6 +53,9 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
             <Link href="/imoveis" className={navLinkClass}>
               Imóveis
             </Link>
+            <Link href="/alugar" className={navLinkClass}>
+              Alugar
+            </Link>
             <Link href="/sobre" className={navLinkClass}>
               Sobre
             </Link>
@@ -126,6 +129,9 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
             </Link>
             <Link href="/imoveis" className="block text-navy-100 hover:text-white transition">
               Imóveis
+            </Link>
+            <Link href="/alugar" className="block text-navy-100 hover:text-white transition">
+              Alugar
             </Link>
             <Link href="/sobre" className="block text-navy-100 hover:text-white transition">
               Sobre

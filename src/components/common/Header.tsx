@@ -83,7 +83,7 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
                   className="flex items-center gap-2 px-4 py-2 text-navy-950 bg-white rounded-lg hover:bg-navy-100 transition-colors font-medium"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  Área Restrita
+                  Área do Corretor
                 </Link>
                 <button
                   onClick={() => startTransition(() => logoutAction())}
@@ -100,7 +100,7 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
                 className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition-colors font-medium shadow-[var(--shadow-gold)]"
               >
                 <LogIn className="w-4 h-4" />
-                Área Restrita
+                Área do Corretor
               </Link>
             )}
           </div>
@@ -146,7 +146,7 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
                   href="/admin/dashboard"
                   className="flex-1 text-center px-4 py-2 bg-white text-navy-950 rounded-lg hover:bg-navy-100 font-medium"
                 >
-                  Área Restrita
+                  Área do Corretor
                 </Link>
                 <button
                   onClick={() => startTransition(() => logoutAction())}
@@ -161,7 +161,7 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
                 href="/login"
                 className="block text-center px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 font-medium"
               >
-                Área Restrita
+                Área do Corretor
               </Link>
             )}
           </div>

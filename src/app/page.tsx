@@ -356,59 +356,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 bg-white">
-        <div className="container mx-auto px-4">
-          <Reveal>
-            <h2 className="font-display text-4xl font-bold text-center mb-12 text-navy-950">
-              O que nossos clientes dizem
-            </h2>
-          </Reveal>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                name: 'João Silva',
-                role: 'Comprador',
-                text: 'Excelente atendimento! Encontrei o imóvel perfeito com a ajuda da equipe SBS.',
-                stars: 5,
-              },
-              {
-                name: 'Maria Santos',
-                role: 'Vendedora',
-                text: 'Processo rápido e transparente. Recomendo para todos que querem vender!',
-                stars: 5,
-              },
-              {
-                name: 'Pedro Oliveira',
-                role: 'Investidor',
-                text: 'Plataforma confiável com ótimas oportunidades de investimento.',
-                stars: 5,
-              },
-            ].map((testimonial, index) => (
-              <Reveal key={index} delay={index * 120}>
-                <div className="card-premium bg-gray-50 p-8 rounded-xl border border-transparent hover:border-gold-300 h-full">
-                  <div className="flex gap-1 mb-4" aria-label={`${testimonial.stars} de 5 estrelas`}>
-                    {Array(testimonial.stars)
-                      .fill(0)
-                      .map((_, i) => (
-                        <span key={i} className="text-gold-500 text-xl" aria-hidden="true">
-                          ★
-                        </span>
-                      ))}
-                  </div>
-                  <p className="text-gray-700 mb-4 italic">"{testimonial.text}"</p>
-                  <div>
-                    <p className="font-bold text-navy-950">{testimonial.name}</p>
-                    <p className="text-sm text-gray-600">{testimonial.role}</p>
-                  </div>
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="relative overflow-hidden bg-noise-navy text-white py-20">
         <div

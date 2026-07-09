@@ -38,27 +38,27 @@ export default function RealtorDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-blue-900 text-white py-8">
+      <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-2">Dashboard do Corretor</h1>
-          <p className="text-blue-100">Bem-vindo, {realtorData.name}!</p>
+          <p className="text-navy-100">Bem-vindo, {realtorData.name}!</p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-10">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Imóveis Cadastrados</p>
                 <p className="text-3xl font-bold text-gray-900">{realtorData.totalProperties}</p>
               </div>
-              <Home className="w-12 h-12 text-blue-500" />
+              <Home className="w-12 h-12 text-navy-500" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Imóveis Disponíveis</p>
@@ -68,7 +68,7 @@ export default function RealtorDashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Leads Ativos</p>
@@ -78,7 +78,7 @@ export default function RealtorDashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Ganhos Este Mês</p>
@@ -94,7 +94,7 @@ export default function RealtorDashboard() {
         {/* Charts Row */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           {/* Sales Chart */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+          <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas por Mês</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={salesData}>
@@ -114,7 +114,7 @@ export default function RealtorDashboard() {
           </div>
 
           {/* Lead Status */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Status dos Leads</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -143,18 +143,18 @@ export default function RealtorDashboard() {
           {/* Left Column - Main Actions */}
           <div className="lg:col-span-2 space-y-6">
             {/* Quick Actions */}
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Link
                   href="/realtor/properties/new"
-                  className="px-4 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition text-center font-semibold"
+                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
                 >
                   + Novo Imóvel
                 </Link>
                 <Link
                   href="/realtor/properties"
-                  className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center font-semibold"
+                  className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
                 >
                   Meus Imóveis
                 </Link>
@@ -186,7 +186,7 @@ export default function RealtorDashboard() {
             </div>
 
             {/* Recent Sales */}
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Vendas Recentes</h2>
               <div className="space-y-4">
                 {[
@@ -212,7 +212,7 @@ export default function RealtorDashboard() {
                     date: '2024-01-08',
                   },
                 ].map((sale) => (
-                  <div key={sale.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition">
+                  <div key={sale.id} className="border border-gray-200 rounded-lg p-4 hover:border-navy-500 transition">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-semibold text-gray-900">{sale.property}</h3>
                       <span className="text-xs text-gray-500">
@@ -236,7 +236,7 @@ export default function RealtorDashboard() {
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
             {/* Profile Card */}
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Meu Perfil</h3>
               <div className="space-y-3">
                 <div>
@@ -256,14 +256,14 @@ export default function RealtorDashboard() {
               </div>
               <Link
                 href="/realtor/profile"
-                className="mt-4 w-full py-2 bg-blue-100 text-blue-900 rounded-lg hover:bg-blue-200 transition text-center font-semibold text-sm"
+                className="mt-4 w-full py-2 bg-navy-100 text-navy-900 rounded-lg hover:bg-navy-100 transition text-center font-semibold text-sm"
               >
                 Editar Perfil
               </Link>
             </div>
 
             {/* Performance */}
-            <div className="bg-white p-6 rounded-lg shadow">
+            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h3 className="text-xl font-bold text-gray-900 mb-4">Performance</h3>
               <div className="space-y-3">
                 <div>
@@ -276,7 +276,7 @@ export default function RealtorDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Leads Convertidos</p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '60%' }}></div>
+                    <div className="bg-navy-500 h-2 rounded-full" style={{ width: '60%' }}></div>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">60% de conversão</p>
                 </div>

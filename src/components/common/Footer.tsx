@@ -3,30 +3,33 @@ import { Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-blue-900 text-white py-12">
+    <footer className="bg-navy-950 text-white py-12 relative">
+      <div className="h-px w-full bg-gradient-to-r from-transparent via-gold-400/60 to-transparent absolute top-0 left-0" />
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           {/* Company Info */}
           <div>
-            <h3 className="font-bold text-lg mb-4">SBS Imóveis</h3>
-            <p className="text-blue-100 text-sm mb-4">
+            <h3 className="font-display font-semibold text-xl mb-4 text-gradient-gold">
+              SBS Imóveis
+            </h3>
+            <p className="text-navy-100 text-sm mb-4">
               Plataforma profissional para compra, venda e aluguel de imóveis.
             </p>
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 text-gold-400" />
                 <a href="tel:551133334444" className="hover:text-white">
                   (11) 3333-4444
                 </a>
               </div>
               <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 text-gold-400" />
                 <a href="mailto:contato@sbsimoveis.com" className="hover:text-white">
                   contato@sbsimoveis.com
                 </a>
               </div>
               <div className="flex items-start gap-2">
-                <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
+                <MapPin className="w-4 h-4 mt-1 flex-shrink-0 text-gold-400" />
                 <p>São Paulo - SP</p>
               </div>
             </div>
@@ -34,8 +37,8 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-bold mb-4">Navegação</h4>
-            <ul className="space-y-2 text-sm text-blue-100">
+            <h4 className="font-semibold mb-4 text-gold-400">Navegação</h4>
+            <ul className="space-y-2 text-sm text-navy-100">
               <li>
                 <Link href="/" className="hover:text-white transition">
                   Início
@@ -61,8 +64,8 @@ export default function Footer() {
 
           {/* For Clients */}
           <div>
-            <h4 className="font-bold mb-4">Clientes</h4>
-            <ul className="space-y-2 text-sm text-blue-100">
+            <h4 className="font-semibold mb-4 text-gold-400">Clientes</h4>
+            <ul className="space-y-2 text-sm text-navy-100">
               <li>
                 <Link href="/client/dashboard" className="hover:text-white transition">
                   Minha Conta
@@ -88,8 +91,8 @@ export default function Footer() {
 
           {/* For Realtors */}
           <div>
-            <h4 className="font-bold mb-4">Corretores</h4>
-            <ul className="space-y-2 text-sm text-blue-100">
+            <h4 className="font-semibold mb-4 text-gold-400">Corretores</h4>
+            <ul className="space-y-2 text-sm text-navy-100">
               <li>
                 <Link href="/realtor/dashboard" className="hover:text-white transition">
                   Dashboard
@@ -115,13 +118,13 @@ export default function Footer() {
         </div>
 
         {/* Social Media */}
-        <div className="border-t border-blue-800 pt-8 flex justify-between items-center flex-col md:flex-row gap-4">
+        <div className="border-t border-white/10 pt-8 flex justify-between items-center flex-col md:flex-row gap-4">
           <div className="flex gap-4">
             <a
               href="https://facebook.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-blue-800 rounded-full hover:bg-blue-700 transition"
+              className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
               aria-label="Facebook"
             >
               <ExternalLink className="w-5 h-5" />
@@ -130,7 +133,7 @@ export default function Footer() {
               href="https://instagram.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-blue-800 rounded-full hover:bg-blue-700 transition"
+              className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
               aria-label="Instagram"
             >
               <ExternalLink className="w-5 h-5" />
@@ -139,16 +142,16 @@ export default function Footer() {
               href="https://linkedin.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-blue-800 rounded-full hover:bg-blue-700 transition"
+              className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
               aria-label="LinkedIn"
             >
               <ExternalLink className="w-5 h-5" />
             </a>
           </div>
 
-          <div className="text-sm text-blue-100">
+          <div className="text-sm text-navy-100">
             <p>
-              © 2024 SBS Imóveis. Todos os direitos reservados. |{' '}
+              © {new Date().getFullYear()} SBS Imóveis. Todos os direitos reservados. |{' '}
               <Link href="/privacy" className="hover:text-white">
                 Política de Privacidade
               </Link>

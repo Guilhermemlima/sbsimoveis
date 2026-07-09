@@ -161,7 +161,7 @@ export const VALIDATION = {
 
 // Colors for themes
 export const COLORS = {
-  primary: '#1e40af', // blue-900
+  primary: '#1e40af', // navy-900
   secondary: '#10b981', // green-600
   success: '#10b981',
   warning: '#f97316',

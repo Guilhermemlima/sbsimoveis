@@ -31,28 +31,41 @@ function LoginForm() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 to-blue-700 flex items-center justify-center py-10 px-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-xl p-8">
+    <div className="relative min-h-screen overflow-hidden bg-noise-navy flex items-center justify-center py-10 px-4">
+      <div
+        className="pointer-events-none absolute -top-20 -right-20 h-72 w-72 rounded-full bg-gold-500/20 blur-3xl animate-float"
+        aria-hidden="true"
+      />
+      <div className="w-full max-w-md animate-scale-in relative">
+        <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">SBS Imóveis</h1>
+            <span className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-gold-300 via-gold-500 to-gold-600 text-navy-950 font-display font-bold text-xl shadow-[var(--shadow-gold)]">
+              S
+            </span>
+            <h1 className="font-display text-3xl font-bold text-navy-950 mb-2">
+              SBS Imóveis
+            </h1>
             <p className="text-gray-600">Acesso à área restrita</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+              <div
+                className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+                role="alert"
+              >
                 {error}
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
                 Senha de Acesso
               </label>
-              <div className="flex items-center bg-gray-100 rounded-lg px-4 py-3 border-2 border-transparent focus-within:border-blue-500">
+              <div className="flex items-center bg-gray-100 rounded-lg px-4 py-3 border-2 border-transparent focus-within:border-gold-500 transition-colors">
                 <Lock className="w-5 h-5 text-gray-400 mr-3" />
                 <input
+                  id="password"
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -67,7 +80,7 @@ function LoginForm() {
             <button
               type="submit"
               disabled={isPending}
-              className="w-full py-3 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 bg-navy-900 text-white font-bold rounded-lg hover:bg-navy-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <LogIn className="w-5 h-5" />
               {isPending ? 'Entrando...' : 'Entrar'}
@@ -75,7 +88,7 @@ function LoginForm() {
           </form>
         </div>
 
-        <div className="mt-6 text-center text-white text-sm">
+        <div className="mt-6 text-center text-navy-100 text-sm">
           <p>Acesso restrito a administradores e corretores.</p>
         </div>
       </div>

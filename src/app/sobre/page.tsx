@@ -1,13 +1,16 @@
 import { Award, Users, Target, Rocket } from 'lucide-react';
+import Reveal from '@/components/common/Reveal';
 
 export default function SobrePage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <section className="bg-blue-900 text-white py-16 md:py-24">
-        <div className="container mx-auto px-4 max-w-4xl">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6">Sobre a SBS Imóveis</h1>
-          <p className="text-xl text-blue-100">
+      <section className="bg-noise-navy text-white py-16 md:py-24">
+        <div className="container mx-auto px-4 max-w-4xl animate-fade-in-up">
+          <h1 className="font-display text-4xl md:text-5xl font-bold mb-6">
+            Sobre a <span className="text-gradient-gold">SBS Imóveis</span>
+          </h1>
+          <p className="text-xl text-navy-100">
             Somos uma plataforma moderna de gestão imobiliária, dedicada a conectar
             corretores, clientes e oportunidades de negócio.
           </p>
@@ -18,27 +21,33 @@ export default function SobrePage() {
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <Target className="w-12 h-12 text-blue-900 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Missão</h3>
+            <div className="card-premium bg-white p-8 rounded-xl shadow-md text-center border border-transparent hover:border-gold-300">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gold-100 to-gold-50 mx-auto mb-4">
+                <Target className="w-8 h-8 text-navy-900" />
+              </div>
+              <h3 className="text-2xl font-bold text-navy-950 mb-3">Missão</h3>
               <p className="text-gray-600">
                 Facilitar e modernizar o processo de compra, venda e aluguel de imóveis
                 através de tecnologia segura e transparente.
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <Rocket className="w-12 h-12 text-blue-900 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Visão</h3>
+            <div className="card-premium bg-white p-8 rounded-xl shadow-md text-center border border-transparent hover:border-gold-300">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gold-100 to-gold-50 mx-auto mb-4">
+                <Rocket className="w-8 h-8 text-navy-900" />
+              </div>
+              <h3 className="text-2xl font-bold text-navy-950 mb-3">Visão</h3>
               <p className="text-gray-600">
                 Ser a plataforma imobiliária mais confiável, inovadora e utilizada do
                 Brasil.
               </p>
             </div>
 
-            <div className="bg-white p-8 rounded-lg shadow-md text-center">
-              <Award className="w-12 h-12 text-blue-900 mx-auto mb-4" />
-              <h3 className="text-2xl font-bold text-gray-900 mb-3">Valores</h3>
+            <div className="card-premium bg-white p-8 rounded-xl shadow-md text-center border border-transparent hover:border-gold-300">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-gold-100 to-gold-50 mx-auto mb-4">
+                <Award className="w-8 h-8 text-navy-900" />
+              </div>
+              <h3 className="text-2xl font-bold text-navy-950 mb-3">Valores</h3>
               <p className="text-gray-600">
                 Transparência, segurança, inovação e foco no cliente são nossos pilares.
               </p>
@@ -50,7 +59,7 @@ export default function SobrePage() {
       {/* History */}
       <section className="py-16">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10">Nossa História</h2>
+          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10">Nossa História</h2>
           <div className="space-y-6 text-gray-700 text-lg leading-relaxed">
             <p>
               A SBS Imóveis foi fundada com a visão de revolucionar o mercado imobiliário
@@ -72,24 +81,24 @@ export default function SobrePage() {
       {/* Stats */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
+          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10 text-center">
             Nossos Números
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
             <div className="text-center">
-              <p className="text-4xl font-bold text-blue-900 mb-2">156+</p>
+              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">156+</p>
               <p className="text-gray-600">Imóveis Cadastrados</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-blue-900 mb-2">342+</p>
+              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">342+</p>
               <p className="text-gray-600">Clientes Ativos</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-blue-900 mb-2">12+</p>
+              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">12+</p>
               <p className="text-gray-600">Corretores Profissionais</p>
             </div>
             <div className="text-center">
-              <p className="text-4xl font-bold text-blue-900 mb-2">48+</p>
+              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">48+</p>
               <p className="text-gray-600">Vendas Realizadas</p>
             </div>
           </div>
@@ -99,7 +108,7 @@ export default function SobrePage() {
       {/* Team */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
+          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10 text-center">
             Nossa Equipe
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
@@ -120,31 +129,33 @@ export default function SobrePage() {
                 bio: 'Líder da equipe de corretores e vendas',
               },
             ].map((member, index) => (
-              <div key={index} className="text-center">
-                <div className="w-24 h-24 bg-blue-900 rounded-full mx-auto mb-4"></div>
-                <h3 className="text-xl font-bold text-gray-900">{member.name}</h3>
-                <p className="text-sm text-blue-600 font-semibold mb-2">{member.role}</p>
+              <Reveal key={index} delay={index * 120} className="text-center">
+                <div className="w-24 h-24 bg-gradient-to-br from-navy-800 to-navy-950 rounded-full mx-auto mb-4 border-2 border-gold-400/40" />
+                <h3 className="text-xl font-bold text-navy-950">{member.name}</h3>
+                <p className="text-sm text-gold-600 font-semibold mb-2">{member.role}</p>
                 <p className="text-gray-600 text-sm">{member.bio}</p>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
       {/* CTA */}
-      <section className="py-16 bg-blue-900 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-6">Quer fazer parte da SBS Imóveis?</h2>
-          <p className="text-lg text-blue-100 mb-8">
+      <section className="py-16 bg-noise-navy text-white">
+        <Reveal className="container mx-auto px-4 text-center" as="section">
+          <h2 className="font-display text-3xl font-bold mb-6">
+            Quer fazer parte da SBS Imóveis?
+          </h2>
+          <p className="text-lg text-navy-100 mb-8">
             Junte-se a nossa equipe de corretores profissionais
           </p>
           <a
             href="https://wa.me/551133334444"
-            className="inline-block px-8 py-3 bg-white text-blue-900 font-bold rounded-lg hover:bg-gray-100 transition"
+            className="inline-block px-8 py-3 bg-gold-500 text-navy-950 font-bold rounded-lg hover:bg-gold-400 transition-colors shadow-[var(--shadow-gold)]"
           >
             Converse Conosco
           </a>
-        </div>
+        </Reveal>
       </section>
     </div>
   );

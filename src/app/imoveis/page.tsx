@@ -120,7 +120,7 @@ export default function ImoveisPage() {
       <div className="container mx-auto px-4">
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="font-display text-4xl font-bold text-navy-950 mb-2">
             Encontre seu imóvel
           </h1>
           <p className="text-gray-600">
@@ -150,7 +150,7 @@ export default function ImoveisPage() {
                 value={filters.city}
                 onChange={(e) => handleFilterChange('city', e.target.value)}
                 placeholder="Digite a cidade"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               />
             </div>
 
@@ -162,7 +162,7 @@ export default function ImoveisPage() {
               <select
                 value={filters.type}
                 onChange={(e) => handleFilterChange('type', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               >
                 <option value="">Todos</option>
                 <option value="house">Casa</option>
@@ -180,7 +180,7 @@ export default function ImoveisPage() {
               <select
                 value={filters.purpose}
                 onChange={(e) => handleFilterChange('purpose', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               >
                 <option value="">Todas</option>
                 <option value="sale">Venda</option>
@@ -199,7 +199,7 @@ export default function ImoveisPage() {
                 value={filters.minPrice}
                 onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                 placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               />
             </div>
 
@@ -212,7 +212,7 @@ export default function ImoveisPage() {
                 value={filters.maxPrice}
                 onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                 placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               />
             </div>
 
@@ -224,7 +224,7 @@ export default function ImoveisPage() {
               <select
                 value={filters.bedrooms}
                 onChange={(e) => handleFilterChange('bedrooms', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               >
                 <option value="">Qualquer</option>
                 <option value="1">1+</option>
@@ -244,7 +244,7 @@ export default function ImoveisPage() {
                 bedrooms: '',
                 sortBy: 'newest',
               })}
-              className="w-full px-4 py-2 bg-blue-900 text-white rounded-lg font-semibold hover:bg-blue-800 transition"
+              className="w-full px-4 py-2 bg-navy-900 text-white rounded-lg font-semibold hover:bg-navy-800 transition"
             >
               Limpar Filtros
             </button>
@@ -256,7 +256,7 @@ export default function ImoveisPage() {
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="md:hidden px-4 py-2 bg-blue-900 text-white rounded-lg"
+                className="md:hidden px-4 py-2 bg-navy-900 text-white rounded-lg"
               >
                 {showFilters ? 'Fechar Filtros' : 'Mostrar Filtros'}
               </button>
@@ -264,7 +264,7 @@ export default function ImoveisPage() {
               <select
                 value={filters.sortBy}
                 onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                className="px-4 py-2 border border-gray-300 rounded-lg"
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
               >
                 <option value="newest">Mais Recentes</option>
                 <option value="price_asc">Menor Preço</option>

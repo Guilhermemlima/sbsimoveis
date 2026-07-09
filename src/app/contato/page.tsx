@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import Reveal from '@/components/common/Reveal';
 
 export default function ContatoPage() {
   const [formData, setFormData] = useState({
@@ -49,10 +50,12 @@ export default function ContatoPage() {
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
-      <section className="bg-blue-900 text-white py-16">
-        <div className="container mx-auto px-4">
-          <h1 className="text-4xl font-bold mb-4">Entre em Contato</h1>
-          <p className="text-xl text-blue-100">
+      <section className="bg-noise-navy text-white py-16">
+        <div className="container mx-auto px-4 animate-fade-in-up">
+          <h1 className="font-display text-4xl font-bold mb-4">
+            Entre em <span className="text-gradient-gold">Contato</span>
+          </h1>
+          <p className="text-xl text-navy-100">
             Estamos prontos para ajudar. Fale conosco!
           </p>
         </div>
@@ -64,17 +67,17 @@ export default function ContatoPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 max-w-5xl mx-auto">
             {/* Contact Information */}
             <div className="space-y-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">
+              <h2 className="font-display text-3xl font-bold text-navy-950 mb-8">
                 Informações de Contato
               </h2>
 
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <Phone className="w-6 h-6 text-blue-900 mt-1" />
+                  <Phone className="w-6 h-6 text-gold-600 mt-1" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Telefone</h3>
-                  <a href="tel:551133334444" className="text-blue-600 hover:underline">
+                  <a href="tel:551133334444" className="text-gold-600 hover:underline">
                     (11) 3333-4444
                   </a>
                 </div>
@@ -82,11 +85,11 @@ export default function ContatoPage() {
 
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <Mail className="w-6 h-6 text-blue-900 mt-1" />
+                  <Mail className="w-6 h-6 text-gold-600 mt-1" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                  <a href="mailto:contato@sbsimoveis.com" className="text-blue-600 hover:underline">
+                  <a href="mailto:contato@sbsimoveis.com" className="text-gold-600 hover:underline">
                     contato@sbsimoveis.com
                   </a>
                 </div>
@@ -94,7 +97,7 @@ export default function ContatoPage() {
 
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-blue-900 mt-1" />
+                  <MapPin className="w-6 h-6 text-gold-600 mt-1" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Endereço</h3>
@@ -131,7 +134,7 @@ export default function ContatoPage() {
 
             {/* Contact Form */}
             <div className="bg-gray-50 p-8 rounded-lg">
-              <h2 className="text-3xl font-bold text-gray-900 mb-8">Envie sua Mensagem</h2>
+              <h2 className="font-display text-3xl font-bold text-navy-950 mb-8">Envie sua Mensagem</h2>
 
               {submitSuccess && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
@@ -151,7 +154,7 @@ export default function ContatoPage() {
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="Seu nome"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                     required
                   />
                 </div>
@@ -167,7 +170,7 @@ export default function ContatoPage() {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="seu@email.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                     required
                   />
                 </div>
@@ -183,7 +186,7 @@ export default function ContatoPage() {
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="(11) 99999-9999"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                   />
                 </div>
 
@@ -196,7 +199,7 @@ export default function ContatoPage() {
                     name="subject"
                     value={formData.subject}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                     required
                   >
                     <option value="">Selecione um assunto</option>
@@ -219,7 +222,7 @@ export default function ContatoPage() {
                     onChange={handleChange}
                     placeholder="Escreva sua mensagem aqui..."
                     rows={5}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                     required
                   ></textarea>
                 </div>
@@ -228,7 +231,7 @@ export default function ContatoPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-3 bg-blue-900 text-white font-bold rounded-lg hover:bg-blue-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
+                  className="w-full py-3 bg-navy-900 text-white font-bold rounded-lg hover:bg-navy-800 transition disabled:opacity-50 flex items-center justify-center gap-2"
                 >
                   <Send className="w-4 h-4" />
                   {isSubmitting ? 'Enviando...' : 'Enviar Mensagem'}
@@ -242,7 +245,7 @@ export default function ContatoPage() {
       {/* FAQ */}
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4 max-w-3xl">
-          <h2 className="text-3xl font-bold text-gray-900 mb-10 text-center">
+          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10 text-center">
             Perguntas Frequentes
           </h2>
 
@@ -265,10 +268,12 @@ export default function ContatoPage() {
                 a: 'Aceitamos transferência bancária, Pix e cartão de crédito.',
               },
             ].map((faq, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg border border-gray-200">
-                <h3 className="font-bold text-gray-900 mb-3">{faq.q}</h3>
-                <p className="text-gray-600">{faq.a}</p>
-              </div>
+              <Reveal key={index} delay={index * 80}>
+                <div className="card-premium bg-white p-6 rounded-xl border border-gray-200 hover:border-gold-300">
+                  <h3 className="font-bold text-navy-950 mb-3">{faq.q}</h3>
+                  <p className="text-gray-600">{faq.a}</p>
+                </div>
+              </Reveal>
             ))}
           </div>
         </div>

@@ -56,27 +56,27 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-blue-900 text-white py-8">
+      <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
           <h1 className="text-3xl font-bold mb-2">Dashboard Administrativo</h1>
-          <p className="text-blue-100">Visão geral da operação - SBS Imóveis</p>
+          <p className="text-navy-100">Visão geral da operação - SBS Imóveis</p>
         </div>
       </div>
 
       <div className="container mx-auto px-4 py-10">
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Total de Imóveis</p>
                 <p className="text-3xl font-bold text-gray-900">{stats.totalProperties}</p>
               </div>
-              <Home className="w-12 h-12 text-blue-500" />
+              <Home className="w-12 h-12 text-navy-500" />
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Total de Clientes</p>
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Lucro Líquido</p>
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Taxa de Conversão</p>
@@ -111,13 +111,13 @@ export default function AdminDashboard() {
 
         {/* Additional Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-sm text-gray-600 mb-2">Total de Vendas</h3>
             <p className="text-3xl font-bold text-gray-900">{stats.totalSales}</p>
             <p className="text-xs text-green-600 mt-2">Referência ao período</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-sm text-gray-600 mb-2">Lucro Bruto</h3>
             <p className="text-3xl font-bold text-gray-900">
               R$ {(stats.grossProfit / 1000000).toFixed(1)}M
@@ -125,19 +125,19 @@ export default function AdminDashboard() {
             <p className="text-xs text-green-600 mt-2">Sem descontos</p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-sm text-gray-600 mb-2">Total de Comissões</h3>
             <p className="text-3xl font-bold text-gray-900">
               R$ {(stats.totalCommissions / 1000).toFixed(0)}K
             </p>
-            <p className="text-xs text-blue-600 mt-2">Pago aos corretores</p>
+            <p className="text-xs text-navy-600 mt-2">Pago aos corretores</p>
           </div>
         </div>
 
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
           {/* Monthly Sales */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas Mensais</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={monthlySalesData}>
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Realtor Performance */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Top Corretores</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={realtorPerformance}>
@@ -168,7 +168,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Lead Conversion Funnel */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Funil de Conversão</h3>
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* Sales by Property Type */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas por Tipo</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={propertyTypeSales}>
@@ -209,18 +209,18 @@ export default function AdminDashboard() {
         {/* Management Sections */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           {/* Quick Actions */}
-          <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow">
+          <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações de Gestão</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <Link
                 href="/admin/properties"
-                className="px-4 py-3 bg-blue-900 text-white rounded-lg hover:bg-blue-800 transition text-center font-semibold text-sm"
+                className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold text-sm"
               >
                 Imóveis
               </Link>
               <Link
                 href="/admin/realtors"
-                className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center font-semibold text-sm"
+                className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold text-sm"
               >
                 Corretores
               </Link>
@@ -256,7 +256,7 @@ export default function AdminDashboard() {
               </Link>
               <Link
                 href="/admin/users"
-                className="px-4 py-3 bg-blue-400 text-white rounded-lg hover:bg-blue-500 transition text-center font-semibold text-sm"
+                className="px-4 py-3 bg-navy-400 text-white rounded-lg hover:bg-navy-500 transition text-center font-semibold text-sm"
               >
                 Usuários
               </Link>
@@ -264,7 +264,7 @@ export default function AdminDashboard() {
           </div>
 
           {/* System Status */}
-          <div className="bg-white p-6 rounded-lg shadow">
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-4">Status do Sistema</h3>
             <div className="space-y-3">
               <div className="flex justify-between items-center">
@@ -299,7 +299,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Activity */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Atividades Recentes</h2>
           <div className="space-y-4">
             {[
@@ -309,7 +309,7 @@ export default function AdminDashboard() {
               { action: 'Novo lead recebido', detail: 'Interesse em comercial', time: 'há 8h', user: 'Website' },
               { action: 'Relatório gerado', detail: 'Vendas mensais', time: 'há 1d', user: 'Admin' },
             ].map((activity, index) => (
-              <div key={index} className="border-l-4 border-blue-500 pl-4 py-2">
+              <div key={index} className="border-l-4 border-navy-500 pl-4 py-2">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="font-semibold text-gray-900">{activity.action}</p>

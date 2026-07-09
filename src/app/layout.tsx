@@ -1,12 +1,17 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Geist_Mono, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { isAuthenticated } from '@/lib/auth/session';
 
-const geist = Geist({
-  variable: '--font-geist-sans',
+const jakarta = Plus_Jakarta_Sans({
+  variable: '--font-jakarta',
+  subsets: ['latin'],
+});
+
+const playfair = Playfair_Display({
+  variable: '--font-playfair',
   subsets: ['latin'],
 });
 
@@ -54,10 +59,15 @@ export default async function RootLayout({
   return (
     <html lang="pt-BR">
       <body
-        className={`${geist.variable} ${geistMono.variable} antialiased bg-white`}
+        className={`${jakarta.variable} ${playfair.variable} ${geistMono.variable} antialiased bg-white`}
       >
+        <a href="#conteudo-principal" className="skip-link">
+          Pular para o conteúdo principal
+        </a>
         <Header isAuthenticated={authed} />
-        <main className="min-h-screen">{children}</main>
+        <main id="conteudo-principal" className="min-h-screen">
+          {children}
+        </main>
         <Footer />
       </body>
     </html>

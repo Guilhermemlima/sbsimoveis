@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Key, Sliders } from 'lucide-react';
 import PropertyCard from '@/components/public/PropertyCard';
@@ -10,7 +10,6 @@ import type { Property } from '@/types';
 export default function AlugarPage() {
   const searchParams = useSearchParams();
   const [rentalProperties, setRentalProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export default function AlugarPage() {
     sortBy: 'newest',
   });
 
-  useEffect(() => {
+  const filteredProperties = useMemo(() => {
     let result = [...rentalProperties];
 
     if (filters.city) {
@@ -64,7 +63,7 @@ export default function AlugarPage() {
         );
     }
 
-    setFilteredProperties(result);
+    return result;
   }, [filters, rentalProperties]);
 
   const handleFilterChange = (key: string, value: string) => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Sliders } from 'lucide-react';
 import PropertyCard from '@/components/public/PropertyCard';
@@ -9,7 +9,6 @@ import type { Property } from '@/types';
 export default function ImoveisPage() {
   const searchParams = useSearchParams();
   const [allProperties, setAllProperties] = useState<Property[]>([]);
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -30,7 +29,7 @@ export default function ImoveisPage() {
   });
 
   // Apply filters
-  useEffect(() => {
+  const filteredProperties = useMemo(() => {
     let result = [...allProperties];
 
     if (filters.city) {
@@ -78,7 +77,7 @@ export default function ImoveisPage() {
         );
     }
 
-    setFilteredProperties(result);
+    return result;
   }, [filters, allProperties]);
 
   const handleFilterChange = (key: string, value: string) => {

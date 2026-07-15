@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Reveal from '@/components/common/Reveal';
+import { APP_CONFIG } from '@/lib/constants';
 
 export default function ContatoPage() {
   const [formData, setFormData] = useState({
@@ -14,6 +15,7 @@ export default function ContatoPage() {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -28,11 +30,21 @@ export default function ContatoPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setSubmitError('');
 
     try {
-      // TODO: Integrar com backend para enviar email
-      console.log('Form submitted:', formData);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setSubmitError(data.error || 'Não foi possível enviar sua mensagem. Tente novamente.');
+        return;
+      }
+
       setSubmitSuccess(true);
       setFormData({
         name: '',
@@ -77,8 +89,8 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Telefone</h3>
-                  <a href="tel:551133334444" className="text-gold-600 hover:underline">
-                    (11) 3333-4444
+                  <a href={`tel:+${APP_CONFIG.whatsapp}`} className="text-gold-600 hover:underline">
+                    {APP_CONFIG.phone}
                   </a>
                 </div>
               </div>
@@ -89,8 +101,8 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                  <a href="mailto:contato@sbsimoveis.com" className="text-gold-600 hover:underline">
-                    contato@sbsimoveis.com
+                  <a href={`mailto:${APP_CONFIG.email}`} className="text-gold-600 hover:underline">
+                    {APP_CONFIG.email}
                   </a>
                 </div>
               </div>
@@ -101,13 +113,13 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Endereço</h3>
-                  <p className="text-gray-600">São Paulo - SP</p>
+                  <p className="text-gray-600">{APP_CONFIG.address}</p>
                 </div>
               </div>
 
               {/* WhatsApp Button */}
               <a
-                href="https://wa.me/551133334444"
+                href={`https://wa.me/${APP_CONFIG.whatsapp}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"
@@ -139,6 +151,11 @@ export default function ContatoPage() {
               {submitSuccess && (
                 <div className="mb-6 p-4 bg-green-50 border border-green-200 text-green-700 rounded-lg">
                   ✅ Mensagem enviada com sucesso! Entraremos em contato em breve.
+                </div>
+              )}
+              {submitError && (
+                <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-lg">
+                  {submitError}
                 </div>
               )}
 

@@ -47,7 +47,6 @@ export default function MyPropertiesPage() {
   const [loading, setLoading] = useState(true);
 
   const loadProperties = () => {
-    setLoading(true);
     fetch('/api/realtor/properties')
       .then((res) => res.json())
       .then((data) => setProperties(Array.isArray(data) ? data : []))

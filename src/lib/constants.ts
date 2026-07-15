@@ -3,14 +3,13 @@
 export const APP_CONFIG = {
   name: 'SBS Imóveis',
   url: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-  phone: '(11) 3333-4444',
+  phone: '(42) 98444-7987',
   email: 'contato@sbsimoveis.com',
-  address: 'São Paulo, SP',
-  whatsapp: '551133334444',
+  address: 'Guarapuava, PR',
+  whatsapp: '5542984447987',
   socialMedia: {
-    instagram: 'https://instagram.com',
-    facebook: 'https://facebook.com',
-    linkedin: 'https://linkedin.com',
+    instagram: 'https://www.instagram.com/sbsimobiliaria/',
+    facebook: 'https://www.facebook.com/profile.php?id=61591639603178',
   },
 };
 

@@ -4,12 +4,28 @@ import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 import { Menu, X, Phone, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/auth/actions';
+import { APP_CONFIG } from '@/lib/constants';
+import type { UserRole } from '@/types';
 
 interface HeaderProps {
-  isAuthenticated?: boolean;
+  userRole?: UserRole | null;
 }
 
-export default function Header({ isAuthenticated = false }: HeaderProps) {
+function dashboardHrefFor(role?: UserRole | null): string {
+  if (role === 'admin') return '/admin/dashboard';
+  if (role === 'realtor') return '/realtor/dashboard';
+  if (role === 'client') return '/client/dashboard';
+  return '/login';
+}
+
+function dashboardLabelFor(role?: UserRole | null): string {
+  return role === 'client' ? 'Minha Conta' : 'Área do Corretor';
+}
+
+export default function Header({ userRole = null }: HeaderProps) {
+  const isAuthenticated = !!userRole;
+  const dashboardHref = dashboardHrefFor(userRole);
+  const dashboardLabel = dashboardLabelFor(userRole);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -67,7 +83,7 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
           {/* CTA Buttons */}
           <div className="hidden md:flex gap-3 items-center">
             <a
-              href="https://wa.me/551133334444"
+              href={`https://wa.me/${APP_CONFIG.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
@@ -79,11 +95,11 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
             {isAuthenticated ? (
               <>
                 <Link
-                  href="/admin/dashboard"
+                  href={dashboardHref}
                   className="flex items-center gap-2 px-4 py-2 text-navy-950 bg-white rounded-lg hover:bg-navy-100 transition-colors font-medium"
                 >
                   <LayoutDashboard className="w-4 h-4" />
-                  Área do Corretor
+                  {dashboardLabel}
                 </Link>
                 <button
                   onClick={() => startTransition(() => logoutAction())}
@@ -143,10 +159,10 @@ export default function Header({ isAuthenticated = false }: HeaderProps) {
             {isAuthenticated ? (
               <div className="flex gap-2 pt-4">
                 <Link
-                  href="/admin/dashboard"
+                  href={dashboardHref}
                   className="flex-1 text-center px-4 py-2 bg-white text-navy-950 rounded-lg hover:bg-navy-100 font-medium"
                 >
-                  Área do Corretor
+                  {dashboardLabel}
                 </Link>
                 <button
                   onClick={() => startTransition(() => logoutAction())}

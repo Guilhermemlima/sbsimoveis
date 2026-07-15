@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Property } from '@/types';
 import PropertyCard from './PropertyCard';
 import { ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
@@ -144,12 +145,12 @@ export default function OpportunitiesCarousel({
 
         {/* View All Button */}
         <div className="text-center mt-12">
-          <a
+          <Link
             href="/imoveis"
             className="inline-block px-8 py-3 bg-gold-500 text-navy-950 rounded-lg font-bold hover:bg-gold-400 transition-colors shadow-[var(--shadow-gold)]"
           >
             Ver Todos os Imóveis →
-          </a>
+          </Link>
         </div>
       </div>
     </section>

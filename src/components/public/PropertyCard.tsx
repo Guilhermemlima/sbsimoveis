@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { Property } from '@/types';
 import { Heart, MapPin, Bed, Bath, Maximize2, Badge } from 'lucide-react';
 import { useState } from 'react';
+import { APP_CONFIG } from '@/lib/constants';
 
 interface PropertyCardProps {
   property: Property;
@@ -167,7 +168,7 @@ export default function PropertyCard({
             Ver Detalhes
           </Link>
           <a
-            href={`https://wa.me/551133334444?text=${encodeURIComponent(
+            href={`https://wa.me/${APP_CONFIG.whatsapp}?text=${encodeURIComponent(
               `Tenho interesse no imóvel: ${property.title}`
             )}`}
             target="_blank"

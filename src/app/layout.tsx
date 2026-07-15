@@ -3,7 +3,7 @@ import { Geist_Mono, Plus_Jakarta_Sans, Playfair_Display } from 'next/font/googl
 import './globals.css';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
-import { isAuthenticated } from '@/lib/auth/session';
+import { getCurrentUser } from '@/lib/auth/session';
 
 const jakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
@@ -54,7 +54,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const authed = await isAuthenticated();
+  const user = await getCurrentUser();
 
   return (
     <html lang="pt-BR">
@@ -64,7 +64,7 @@ export default async function RootLayout({
         <a href="#conteudo-principal" className="skip-link">
           Pular para o conteúdo principal
         </a>
-        <Header isAuthenticated={authed} />
+        <Header userRole={user?.role ?? null} />
         <main id="conteudo-principal" className="min-h-screen">
           {children}
         </main>

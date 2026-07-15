@@ -1,8 +1,8 @@
 'use client';
 
-import { TrendingUp, Home, Users, DollarSign, Key } from 'lucide-react';
+import { Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LogoutButton from '@/components/common/LogoutButton';
 
 export default function RealtorDashboard() {
@@ -10,7 +10,7 @@ export default function RealtorDashboard() {
   const realtorData = {
     name: 'Carlos Mendes',
     email: 'carlos@sbsimoveis.com',
-    creci: '123456/SP',
+    creci: '123456/PR',
     totalProperties: 12,
     availableProperties: 8,
     soldProperties: 4,
@@ -159,7 +159,7 @@ export default function RealtorDashboard() {
             {/* Quick Actions */}
             <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <Link
                   href="/realtor/properties/new"
                   className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
@@ -171,30 +171,6 @@ export default function RealtorDashboard() {
                   className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
                 >
                   Meus Imóveis
-                </Link>
-                <Link
-                  href="/realtor/leads"
-                  className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-semibold"
-                >
-                  Leads
-                </Link>
-                <Link
-                  href="/realtor/sales"
-                  className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-semibold"
-                >
-                  Vendas
-                </Link>
-                <Link
-                  href="/realtor/commissions"
-                  className="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-semibold"
-                >
-                  Comissões
-                </Link>
-                <Link
-                  href="/realtor/reports"
-                  className="px-4 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-center font-semibold"
-                >
-                  Relatórios
                 </Link>
               </div>
             </div>
@@ -268,12 +244,6 @@ export default function RealtorDashboard() {
                   </p>
                 </div>
               </div>
-              <Link
-                href="/realtor/profile"
-                className="mt-4 w-full py-2 bg-navy-100 text-navy-900 rounded-lg hover:bg-navy-100 transition text-center font-semibold text-sm"
-              >
-                Editar Perfil
-              </Link>
             </div>
 
             {/* Performance */}

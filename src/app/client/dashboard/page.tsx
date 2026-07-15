@@ -3,6 +3,7 @@
 import { Heart, FileText, MapPin, Phone } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
+import { APP_CONFIG } from '@/lib/constants';
 
 export default function ClientDashboard() {
   // Mock client data
@@ -59,10 +60,7 @@ export default function ClientDashboard() {
       <div className="container mx-auto px-4 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-10">
           {/* Stats Cards */}
-          <Link
-            href="/client/favorites"
-            className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300"
-          >
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Imóveis Favoritos</p>
@@ -70,12 +68,9 @@ export default function ClientDashboard() {
               </div>
               <Heart className="w-12 h-12 text-red-500" />
             </div>
-          </Link>
+          </div>
 
-          <Link
-            href="/client/proposals"
-            className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300"
-          >
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Propostas</p>
@@ -83,7 +78,7 @@ export default function ClientDashboard() {
               </div>
               <FileText className="w-12 h-12 text-navy-500" />
             </div>
-          </Link>
+          </div>
 
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <div className="flex items-center justify-between">
@@ -167,20 +162,8 @@ export default function ClientDashboard() {
                 >
                   Procurar Imóveis
                 </Link>
-                <Link
-                  href="/client/favorites"
-                  className="px-4 py-3 bg-red-500 text-white rounded-lg hover:bg-red-600 transition text-center font-semibold"
-                >
-                  Meus Favoritos
-                </Link>
-                <Link
-                  href="/client/profile"
-                  className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-semibold"
-                >
-                  Meu Perfil
-                </Link>
                 <a
-                  href="https://wa.me/551133334444"
+                  href={`https://wa.me/${APP_CONFIG.whatsapp}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center font-semibold"
@@ -209,37 +192,6 @@ export default function ClientDashboard() {
                   <p className="text-xs text-gray-500 uppercase font-semibold">Telefone</p>
                   <p className="text-gray-900 font-medium">{clientData.phone}</p>
                 </div>
-              </div>
-              <Link
-                href="/client/profile"
-                className="mt-4 w-full py-2 bg-navy-100 text-navy-900 rounded-lg hover:bg-navy-100 transition text-center font-semibold text-sm"
-              >
-                Editar Perfil
-              </Link>
-            </div>
-
-            {/* Account Settings */}
-            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Conta</h3>
-              <div className="space-y-2">
-                <Link
-                  href="/client/preferences"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded transition"
-                >
-                  Minhas Preferências
-                </Link>
-                <Link
-                  href="/client/security"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded transition"
-                >
-                  Segurança
-                </Link>
-                <Link
-                  href="/client/notifications"
-                  className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded transition"
-                >
-                  Notificações
-                </Link>
               </div>
             </div>
 

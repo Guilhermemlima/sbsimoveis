@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
+import { APP_CONFIG } from '@/lib/constants';
 
 export default function Footer() {
   return (
@@ -18,19 +19,19 @@ export default function Footer() {
             <div className="space-y-2 text-sm">
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-gold-400" />
-                <a href="tel:551133334444" className="hover:text-white">
-                  (11) 3333-4444
+                <a href={`tel:+${APP_CONFIG.whatsapp}`} className="hover:text-white">
+                  {APP_CONFIG.phone}
                 </a>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-gold-400" />
-                <a href="mailto:contato@sbsimoveis.com" className="hover:text-white">
-                  contato@sbsimoveis.com
+                <a href={`mailto:${APP_CONFIG.email}`} className="hover:text-white">
+                  {APP_CONFIG.email}
                 </a>
               </div>
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0 text-gold-400" />
-                <p>São Paulo - SP</p>
+                <p>{APP_CONFIG.address}</p>
               </div>
             </div>
           </div>
@@ -72,16 +73,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/client/favorites" className="hover:text-white transition">
-                  Favoritos
-                </Link>
-              </li>
-              <li>
-                <Link href="/client/proposals" className="hover:text-white transition">
-                  Propostas
-                </Link>
-              </li>
-              <li>
                 <Link href="/login" className="hover:text-white transition">
                   Login
                 </Link>
@@ -103,16 +94,6 @@ export default function Footer() {
                   Meus Imóveis
                 </Link>
               </li>
-              <li>
-                <Link href="/realtor/leads" className="hover:text-white transition">
-                  Leads
-                </Link>
-              </li>
-              <li>
-                <Link href="/realtor/sales" className="hover:text-white transition">
-                  Vendas
-                </Link>
-              </li>
             </ul>
           </div>
         </div>
@@ -121,7 +102,7 @@ export default function Footer() {
         <div className="border-t border-white/10 pt-8 flex justify-between items-center flex-col md:flex-row gap-4">
           <div className="flex gap-4">
             <a
-              href="https://facebook.com"
+              href={APP_CONFIG.socialMedia.facebook}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
@@ -130,7 +111,7 @@ export default function Footer() {
               <ExternalLink className="w-5 h-5" />
             </a>
             <a
-              href="https://instagram.com"
+              href={APP_CONFIG.socialMedia.instagram}
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
@@ -138,24 +119,10 @@ export default function Footer() {
             >
               <ExternalLink className="w-5 h-5" />
             </a>
-            <a
-              href="https://linkedin.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
-              aria-label="LinkedIn"
-            >
-              <ExternalLink className="w-5 h-5" />
-            </a>
           </div>
 
           <div className="text-sm text-navy-100">
-            <p>
-              © {new Date().getFullYear()} SBS Imóveis. Todos os direitos reservados. |{' '}
-              <Link href="/privacy" className="hover:text-white">
-                Política de Privacidade
-              </Link>
-            </p>
+            <p>© {new Date().getFullYear()} SBS Imóveis. Todos os direitos reservados.</p>
           </div>
         </div>
       </div>

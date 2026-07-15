@@ -220,48 +220,12 @@ export default function AdminDashboard() {
           {/* Quick Actions */}
           <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações de Gestão</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <Link
-                href="/admin/properties"
+                href="/realtor/properties"
                 className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold text-sm"
               >
                 Imóveis
-              </Link>
-              <Link
-                href="/admin/realtors"
-                className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold text-sm"
-              >
-                Corretores
-              </Link>
-              <Link
-                href="/admin/clients"
-                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-semibold text-sm"
-              >
-                Clientes
-              </Link>
-              <Link
-                href="/admin/sales"
-                className="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-semibold text-sm"
-              >
-                Vendas
-              </Link>
-              <Link
-                href="/admin/carousel"
-                className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-semibold text-sm"
-              >
-                Carrossel
-              </Link>
-              <Link
-                href="/admin/reports"
-                className="px-4 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-center font-semibold text-sm"
-              >
-                Relatórios
-              </Link>
-              <Link
-                href="/admin/settings"
-                className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-center font-semibold text-sm"
-              >
-                Configurações
               </Link>
               <Link
                 href="/admin/users"

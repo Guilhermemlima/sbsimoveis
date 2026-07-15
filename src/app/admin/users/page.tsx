@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, UserPlus, ShieldCheck, ShieldOff, Power } from 'lucide-react';
 
@@ -28,18 +28,18 @@ export default function AdminUsersPage() {
   const [password, setPassword] = useState('');
   const [accessLevel, setAccessLevel] = useState<'full' | 'limited'>('limited');
 
-  const loadUsers = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch('/api/admin/users');
-    if (res.ok) {
-      setUsers(await res.json());
-    }
-    setLoading(false);
-  }, []);
+  const loadUsers = () => {
+    fetch('/api/admin/users')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data) setUsers(data);
+      })
+      .finally(() => setLoading(false));
+  };
 
   useEffect(() => {
     loadUsers();
-  }, [loadUsers]);
+  }, []);
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();

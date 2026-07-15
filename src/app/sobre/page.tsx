@@ -1,5 +1,6 @@
-import { Award, Users, Target, Rocket } from 'lucide-react';
+import { Award, Target, Rocket } from 'lucide-react';
 import Reveal from '@/components/common/Reveal';
+import { APP_CONFIG } from '@/lib/constants';
 
 export default function SobrePage() {
   return (
@@ -150,7 +151,7 @@ export default function SobrePage() {
             Junte-se a nossa equipe de corretores profissionais
           </p>
           <a
-            href="https://wa.me/551133334444"
+            href={`https://wa.me/${APP_CONFIG.whatsapp}`}
             className="inline-block px-8 py-3 bg-gold-500 text-navy-950 font-bold rounded-lg hover:bg-gold-400 transition-colors shadow-[var(--shadow-gold)]"
           >
             Converse Conosco

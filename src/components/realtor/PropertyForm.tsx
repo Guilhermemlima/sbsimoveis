@@ -40,7 +40,7 @@ export default function PropertyForm({
     purpose: (initialData?.purpose ?? 'sale') as PropertyPurpose,
     value: initialData?.value?.toString() ?? '',
     address: initialData?.address ?? '',
-    city: initialData?.city ?? 'São Paulo',
+    city: initialData?.city ?? 'Guarapuava',
     neighborhood: initialData?.neighborhood ?? '',
     total_area: initialData?.total_area?.toString() ?? '',
     built_area: initialData?.built_area?.toString() ?? '',

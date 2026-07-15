@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Search, MapPin, TrendingUp, Users, Shield } from 'lucide-react';
 import OpportunitiesCarousel from '@/components/public/OpportunitiesCarousel';
 import Reveal from '@/components/common/Reveal';
+import { APP_CONFIG } from '@/lib/constants';
 import type { Property } from '@/types';
 
 export default function HomePage() {
@@ -109,7 +110,7 @@ export default function HomePage() {
                     <MapPin className="w-5 h-5 text-gray-400 mr-2" />
                     <input
                       type="text"
-                      placeholder="Ex: São Paulo"
+                      placeholder="Ex: Guarapuava"
                       value={searchCity}
                       onChange={(e) => setSearchCity(e.target.value)}
                       className="bg-gray-100 w-full outline-none text-gray-900"
@@ -295,7 +296,7 @@ export default function HomePage() {
               Ver Imóveis
             </Link>
             <a
-              href="https://wa.me/551133334444"
+              href={`https://wa.me/${APP_CONFIG.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-colors"

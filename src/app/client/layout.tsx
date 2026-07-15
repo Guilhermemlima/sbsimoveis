@@ -1,12 +1,13 @@
 import { redirect } from 'next/navigation';
-import { isAuthenticated } from '@/lib/auth/session';
+import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function ClientAreaLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  if (!(await isAuthenticated())) {
+  const user = await getCurrentUser();
+  if (!user || user.role !== 'client') {
     redirect('/login');
   }
 

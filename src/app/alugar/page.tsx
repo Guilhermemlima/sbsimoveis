@@ -5,16 +5,21 @@ import { useSearchParams } from 'next/navigation';
 import { Key, Sliders } from 'lucide-react';
 import PropertyCard from '@/components/public/PropertyCard';
 import Reveal from '@/components/common/Reveal';
-import { mockProperties } from '@/lib/mockProperties';
 import type { Property } from '@/types';
-
-const rentalProperties = mockProperties.filter((p) => p.purpose === 'rent');
 
 export default function AlugarPage() {
   const searchParams = useSearchParams();
-  const [filteredProperties, setFilteredProperties] =
-    useState<Property[]>(rentalProperties);
+  const [rentalProperties, setRentalProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/properties')
+      .then((res) => res.json())
+      .then((data: Property[]) =>
+        setRentalProperties(data.filter((p) => p.purpose === 'rent'))
+      );
+  }, []);
 
   const [filters, setFilters] = useState({
     city: searchParams.get('city') || '',
@@ -60,7 +65,7 @@ export default function AlugarPage() {
     }
 
     setFilteredProperties(result);
-  }, [filters]);
+  }, [filters, rentalProperties]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({ ...prev, [key]: value }));

@@ -4,15 +4,19 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Sliders } from 'lucide-react';
 import PropertyCard from '@/components/public/PropertyCard';
-import { mockProperties } from '@/lib/mockProperties';
 import type { Property } from '@/types';
 
 export default function ImoveisPage() {
   const searchParams = useSearchParams();
-  const [filteredProperties, setFilteredProperties] = useState<Property[]>(
-    mockProperties
-  );
+  const [allProperties, setAllProperties] = useState<Property[]>([]);
+  const [filteredProperties, setFilteredProperties] = useState<Property[]>([]);
   const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/properties')
+      .then((res) => res.json())
+      .then((data: Property[]) => setAllProperties(data));
+  }, []);
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -27,7 +31,7 @@ export default function ImoveisPage() {
 
   // Apply filters
   useEffect(() => {
-    let result = [...mockProperties];
+    let result = [...allProperties];
 
     if (filters.city) {
       result = result.filter((p) =>
@@ -75,7 +79,7 @@ export default function ImoveisPage() {
     }
 
     setFilteredProperties(result);
-  }, [filters]);
+  }, [filters, allProperties]);
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters((prev) => ({

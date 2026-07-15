@@ -19,6 +19,10 @@ export default function PropertyCard({
 }: PropertyCardProps) {
   const [isImageLoading, setIsImageLoading] = useState(true);
 
+  const images = property.property_images ?? [];
+  const coverImageUrl =
+    images.find((img) => img.is_main)?.image_url ?? images[0]?.image_url ?? '/placeholder.jpg';
+
   const propertyTypeLabel: Record<string, string> = {
     house: 'Casa',
     apartment: 'Apartamento',
@@ -40,9 +44,10 @@ export default function PropertyCard({
       {/* Image Container */}
       <div className="relative w-full h-48 bg-gray-200 overflow-hidden group">
         <Image
-          src="/placeholder.jpg"
+          src={coverImageUrl}
           alt={property.title}
           fill
+          unoptimized={coverImageUrl !== '/placeholder.jpg'}
           className={`object-cover w-full h-full transition-transform duration-500 group-hover:scale-110 ${
             isImageLoading ? 'blur-sm' : 'blur-0'
           }`}

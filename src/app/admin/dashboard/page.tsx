@@ -57,9 +57,18 @@ export default function AdminDashboard() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-noise-navy text-white py-8">
-        <div className="container mx-auto px-4">
-          <h1 className="text-3xl font-bold mb-2">Dashboard Administrativo</h1>
-          <p className="text-navy-100">Visão geral da operação - SBS Imóveis</p>
+        <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Dashboard Administrativo</h1>
+            <p className="text-navy-100">Visão geral da operação - SBS Imóveis</p>
+          </div>
+          <Link
+            href="/admin/users"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-gold-500 text-navy-950 rounded-lg font-bold hover:bg-gold-400 transition-colors"
+          >
+            <Users className="w-5 h-5" />
+            Gerenciar Usuários
+          </Link>
         </div>
       </div>
 

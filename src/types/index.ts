@@ -86,6 +86,7 @@ export interface Property {
   created_at: string;
   updated_at: string;
   deleted_at?: string;
+  property_images?: PropertyImage[];
 }
 
 export type PropertyType =

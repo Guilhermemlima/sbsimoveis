@@ -1,8 +1,7 @@
-// Senha única de acesso às áreas restritas (admin/corretor/cliente).
-// Defina SITE_PASSWORD no .env.local em produção — este valor é só o
-// fallback para rodar localmente sem configurar nada.
-export const SITE_PASSWORD = process.env.SITE_PASSWORD || 'sbs2024';
-
 export const AUTH_COOKIE_NAME = 'sbs_session';
 
 export const PROTECTED_PREFIXES = ['/admin', '/realtor', '/client'];
+
+// Secret used to sign the session cookie so it can't be forged client-side.
+// Set SESSION_SECRET in .env.local in production.
+export const SESSION_SECRET = process.env.SESSION_SECRET || 'dev-only-insecure-secret';

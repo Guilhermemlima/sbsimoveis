@@ -1,103 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, MapPin, TrendingUp, Users, Shield } from 'lucide-react';
 import OpportunitiesCarousel from '@/components/public/OpportunitiesCarousel';
 import Reveal from '@/components/common/Reveal';
-
-// Mock data - será substituído por dados reais do banco
-const mockProperties = [
-  {
-    id: '1',
-    realtor_id: 'realtor1',
-    title: 'Apartamento Moderno em Pinheiros',
-    code: 'APT-001',
-    type: 'apartment' as const,
-    purpose: 'sale' as const,
-    value: 850000,
-    address: 'Rua Exemplo, 123',
-    city: 'São Paulo',
-    neighborhood: 'Pinheiros',
-    latitude: -23.56,
-    longitude: -46.67,
-    total_area: 120,
-    built_area: 100,
-    bedrooms: 3,
-    bathrooms: 2,
-    parking_spaces: 1,
-    description: 'Apartamento com acabamento de luxo, vista para a cidade',
-    amenities: ['Piscina', 'Academia', 'Churrasqueira'],
-    status: 'available' as const,
-    is_opportunity: true,
-    is_featured: true,
-    is_exclusive: false,
-    views_count: 245,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '2',
-    realtor_id: 'realtor1',
-    title: 'Casa com Terreno em Alphaville',
-    code: 'CASA-002',
-    type: 'house' as const,
-    purpose: 'sale' as const,
-    value: 1200000,
-    address: 'Rua das Flores, 456',
-    city: 'São Paulo',
-    neighborhood: 'Alphaville',
-    latitude: -23.61,
-    longitude: -46.85,
-    total_area: 500,
-    built_area: 300,
-    bedrooms: 4,
-    bathrooms: 3,
-    parking_spaces: 3,
-    description: 'Casa espaçosa com piscina e área verde',
-    amenities: ['Piscina', 'Churrasqueira', 'Quadra de Tênis'],
-    status: 'available' as const,
-    is_opportunity: true,
-    is_featured: true,
-    is_exclusive: true,
-    views_count: 412,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: '3',
-    realtor_id: 'realtor2',
-    title: 'Comercial Loja Centro',
-    code: 'COM-003',
-    type: 'commercial' as const,
-    purpose: 'rent' as const,
-    value: 8000,
-    address: 'Av. Paulista, 789',
-    city: 'São Paulo',
-    neighborhood: 'Centro',
-    latitude: -23.56,
-    longitude: -46.66,
-    total_area: 80,
-    built_area: 80,
-    bedrooms: 0,
-    bathrooms: 1,
-    parking_spaces: 2,
-    description: 'Loja comercial em localização privilegiada',
-    amenities: ['Ar Condicionado', 'Segurança 24h'],
-    status: 'available' as const,
-    is_opportunity: true,
-    is_featured: false,
-    is_exclusive: false,
-    views_count: 156,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
+import type { Property } from '@/types';
 
 export default function HomePage() {
+  const [opportunities, setOpportunities] = useState<Property[]>([]);
   const [searchCity, setSearchCity] = useState('');
   const [searchPrice, setSearchPrice] = useState(0);
   const [searchPurpose, setSearchPurpose] = useState<'sale' | 'rent'>('sale');
+
+  useEffect(() => {
+    fetch('/api/properties')
+      .then((res) => res.json())
+      .then((data: Property[]) => setOpportunities(data.filter((p) => p.is_opportunity)));
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -251,7 +171,7 @@ export default function HomePage() {
       </section>
 
       {/* Opportunities Carousel */}
-      <OpportunitiesCarousel properties={mockProperties} maxItems={5} />
+      <OpportunitiesCarousel properties={opportunities} maxItems={5} />
 
       {/* Why Choose Us */}
       <section className="py-20 bg-white">

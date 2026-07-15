@@ -1,13 +1,13 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { Home, Key, Plus } from 'lucide-react';
-import { generateMockProperties } from '@/lib/mockProperties';
-import type { PropertyPurpose } from '@/types';
+import Image from 'next/image';
+import { Home, Key, Plus, Pencil, Trash2 } from 'lucide-react';
+import type { Property, PropertyImage, PropertyPurpose } from '@/types';
 
-const myProperties = generateMockProperties(9, 'realtor1');
+type PropertyWithImages = Property & { property_images?: PropertyImage[] };
 
 const PURPOSE_LABEL: Record<PropertyPurpose, string> = {
   sale: 'Venda',
@@ -33,13 +33,36 @@ const STATUS_COLOR: Record<string, string> = {
 
 type Tab = 'all' | 'sale' | 'rent';
 
+function coverImage(property: PropertyWithImages): string | null {
+  const images = property.property_images ?? [];
+  return images.find((img) => img.is_main)?.image_url ?? images[0]?.image_url ?? null;
+}
+
 export default function MyPropertiesPage() {
   const searchParams = useSearchParams();
   const initialTab = searchParams.get('purpose') === 'rent' ? 'rent' : 'all';
 
   const [activeTab, setActiveTab] = useState<Tab>(initialTab);
-  const [properties, setProperties] = useState(myProperties);
-  const [isPending, startTransition] = useTransition();
+  const [properties, setProperties] = useState<PropertyWithImages[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const loadProperties = () => {
+    setLoading(true);
+    fetch('/api/realtor/properties')
+      .then((res) => res.json())
+      .then((data) => setProperties(Array.isArray(data) ? data : []))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadProperties();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Remover este imóvel do site? Ele deixará de aparecer nas buscas.')) return;
+    setProperties((prev) => prev.filter((p) => p.id !== id));
+    await fetch(`/api/realtor/properties/${id}`, { method: 'DELETE' });
+  };
 
   const filtered = useMemo(() => {
     if (activeTab === 'all') return properties;
@@ -54,22 +77,6 @@ export default function MyPropertiesPage() {
     }),
     [properties]
   );
-
-  const togglePurpose = (id: string) => {
-    startTransition(() => {
-      setProperties((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? {
-                ...p,
-                purpose: p.purpose === 'rent' ? 'sale' : 'rent',
-                status: 'available',
-              }
-            : p
-        )
-      );
-    });
-  };
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'all', label: `Todos (${counts.all})`, icon: <Home className="w-4 h-4" /> },
@@ -134,10 +141,29 @@ export default function MyPropertiesPage() {
                 {filtered.map((property) => (
                   <tr key={property.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <p className="font-semibold text-navy-950">{property.title}</p>
-                      <p className="text-xs text-gray-500">
-                        Código: {property.code} · {property.neighborhood}, {property.city}
-                      </p>
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                          {coverImage(property) ? (
+                            <Image
+                              src={coverImage(property) as string}
+                              alt=""
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                              <Home className="w-5 h-5" />
+                            </div>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-navy-950">{property.title}</p>
+                          <p className="text-xs text-gray-500">
+                            Código: {property.code} · {property.neighborhood}, {property.city}
+                          </p>
+                        </div>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <span
@@ -164,15 +190,22 @@ export default function MyPropertiesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4">
-                      <button
-                        onClick={() => togglePurpose(property.id)}
-                        disabled={isPending}
-                        className="text-sm font-semibold text-gold-600 hover:text-gold-700 disabled:opacity-50 transition-colors"
-                      >
-                        {property.purpose === 'rent'
-                          ? 'Mover para venda'
-                          : 'Disponibilizar para aluguel'}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <Link
+                          href={`/realtor/properties/${property.id}/edit`}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-navy-900 hover:text-gold-600 transition-colors"
+                        >
+                          <Pencil className="w-4 h-4" />
+                          Editar
+                        </Link>
+                        <button
+                          onClick={() => handleDelete(property.id)}
+                          className="inline-flex items-center gap-1 text-sm font-semibold text-red-600 hover:text-red-700 transition-colors"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          Remover
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -180,11 +213,12 @@ export default function MyPropertiesPage() {
             </table>
           </div>
 
-          {filtered.length === 0 && (
+          {!loading && filtered.length === 0 && (
             <div className="p-12 text-center text-gray-600">
               Nenhum imóvel encontrado nesta categoria.
             </div>
           )}
+          {loading && <div className="p-12 text-center text-gray-600">Carregando...</div>}
         </div>
       </div>
     </div>

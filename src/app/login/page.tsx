@@ -2,13 +2,14 @@
 
 import { useState, useTransition, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { Lock, LogIn } from 'lucide-react';
+import { Mail, Lock, LogIn } from 'lucide-react';
 import { loginAction } from '@/lib/auth/actions';
 
 function LoginForm() {
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '/admin/dashboard';
+  const redirectTo = searchParams.get('redirectTo') || '';
 
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isPending, startTransition] = useTransition();
@@ -18,6 +19,7 @@ function LoginForm() {
     setError('');
 
     const formData = new FormData();
+    formData.set('email', email);
     formData.set('password', password);
     formData.set('redirectTo', redirectTo);
 
@@ -59,8 +61,25 @@ function LoginForm() {
             )}
 
             <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+                E-mail
+              </label>
+              <div className="flex items-center bg-gray-100 rounded-lg px-4 py-3 border-2 border-transparent focus-within:border-gold-500 transition-colors mb-6">
+                <Mail className="w-5 h-5 text-gray-400 mr-3" />
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="voce@sbsimoveis.com.br"
+                  className="bg-gray-100 w-full outline-none text-gray-900"
+                  autoFocus
+                  required
+                />
+              </div>
+
               <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
-                Senha de Acesso
+                Senha
               </label>
               <div className="flex items-center bg-gray-100 rounded-lg px-4 py-3 border-2 border-transparent focus-within:border-gold-500 transition-colors">
                 <Lock className="w-5 h-5 text-gray-400 mr-3" />
@@ -71,7 +90,6 @@ function LoginForm() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="bg-gray-100 w-full outline-none text-gray-900"
-                  autoFocus
                   required
                 />
               </div>

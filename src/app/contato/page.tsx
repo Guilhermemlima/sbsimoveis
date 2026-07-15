@@ -202,7 +202,7 @@ export default function ContatoPage() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
-                    placeholder="(11) 99999-9999"
+                    placeholder="(42) 99999-9999"
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
                   />
                 </div>

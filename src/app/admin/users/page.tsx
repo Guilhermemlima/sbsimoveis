@@ -158,7 +158,7 @@ export default function AdminUsersPage() {
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                placeholder="(11) 99999-9999"
+                placeholder="(42) 99999-9999"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
               />
             </div>

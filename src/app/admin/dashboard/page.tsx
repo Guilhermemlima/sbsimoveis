@@ -1,57 +1,58 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Home, Users, DollarSign } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
 
+interface DashboardStats {
+  totalProperties: number;
+  availableProperties: number;
+  soldProperties: number;
+  rentedProperties: number;
+  totalRealtors: number;
+  totalClients: number;
+  totalSales: number;
+  grossProfit: number;
+  netProfit: number;
+  totalCommissions: number;
+  conversionRate: number;
+}
+
+interface DashboardData {
+  stats: DashboardStats;
+  monthlySales: { month: string; sales: number; value: number; profit: number }[];
+  realtorPerformance: { name: string; sales: number; value: number }[];
+  conversionData: { name: string; value: number }[];
+  propertyTypeSales: { type: string; sales: number; value: number }[];
+  recentLeads: { id: string; name: string; status: string; source: string; created_at: string }[];
+}
+
+const PIE_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280', '#14b8a6'];
+
 export default function AdminDashboard() {
-  // Mock admin data
-  const stats = {
-    totalProperties: 156,
-    totalClients: 342,
-    totalRealtors: 12,
-    totalSales: 48,
-    grossProfit: 1850000,
-    netProfit: 1250000,
-    totalCommissions: 450000,
-    conversionRate: 45,
-  };
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Sales by month
-  const monthlySalesData = [
-    { month: 'Jan', sales: 8, value: 3200000, profit: 400000 },
-    { month: 'Fev', sales: 6, value: 2400000, profit: 320000 },
-    { month: 'Mar', sales: 10, value: 4000000, profit: 600000 },
-    { month: 'Abr', sales: 7, value: 2800000, profit: 380000 },
-    { month: 'Mai', sales: 12, value: 4800000, profit: 720000 },
-    { month: 'Jun', sales: 5, value: 2000000, profit: 250000 },
-  ];
+  useEffect(() => {
+    fetch('/api/admin/dashboard-stats')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json) setData(json);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Realtor performance
-  const realtorPerformance = [
-    { name: 'Carlos Mendes', sales: 12, value: 4800000, color: '#1e40af' },
-    { name: 'Maria Silva', sales: 10, value: 4000000, color: '#2563eb' },
-    { name: 'João Santos', sales: 8, value: 3200000, color: '#3b82f6' },
-    { name: 'Ana Costa', sales: 6, value: 2400000, color: '#60a5fa' },
-    { name: 'Pedro Oliveira', sales: 12, value: 4800000, color: '#93c5fd' },
-  ];
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Carregando dashboard...</p>
+      </div>
+    );
+  }
 
-  // Lead conversion
-  const conversionData = [
-    { name: 'Novos Leads', value: 120, fill: '#3b82f6' },
-    { name: 'Em Negociação', value: 80, fill: '#f59e0b' },
-    { name: 'Convertidos', value: 48, fill: '#10b981' },
-  ];
-
-  // Sales by property type
-  const propertyTypeSales = [
-    { type: 'Apartamento', sales: 18, value: 7200000 },
-    { type: 'Casa', sales: 16, value: 6400000 },
-    { type: 'Comercial', sales: 8, value: 3200000 },
-    { type: 'Terreno', sales: 4, value: 1600000 },
-    { type: 'Outro', sales: 2, value: 800000 },
-  ];
+  const { stats, monthlySales, realtorPerformance, conversionData, propertyTypeSales, recentLeads } = data;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -123,7 +124,6 @@ export default function AdminDashboard() {
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-sm text-gray-600 mb-2">Total de Vendas</h3>
             <p className="text-3xl font-bold text-gray-900">{stats.totalSales}</p>
-            <p className="text-xs text-green-600 mt-2">Referência ao período</p>
           </div>
 
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
@@ -131,7 +131,6 @@ export default function AdminDashboard() {
             <p className="text-3xl font-bold text-gray-900">
               R$ {(stats.grossProfit / 1000000).toFixed(1)}M
             </p>
-            <p className="text-xs text-green-600 mt-2">Sem descontos</p>
           </div>
 
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
@@ -149,7 +148,7 @@ export default function AdminDashboard() {
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas Mensais</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={monthlySalesData}>
+              <LineChart data={monthlySales}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis yAxisId="left" />
@@ -165,53 +164,71 @@ export default function AdminDashboard() {
           {/* Realtor Performance */}
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Top Corretores</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={realtorPerformance}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="sales" fill="#1e40af" name="Vendas" />
-              </BarChart>
-            </ResponsiveContainer>
+            {realtorPerformance.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={realtorPerformance}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="sales" fill="#1e40af" name="Vendas" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+                Nenhuma venda registrada ainda.
+              </div>
+            )}
           </div>
 
           {/* Lead Conversion Funnel */}
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Funil de Conversão</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={conversionData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {conversionData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {conversionData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={conversionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {conversionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+                Nenhum lead recebido ainda.
+              </div>
+            )}
           </div>
 
           {/* Sales by Property Type */}
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas por Tipo</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={propertyTypeSales}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="type" />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="sales" fill="#f59e0b" name="Quantidade" />
-              </BarChart>
-            </ResponsiveContainer>
+            {propertyTypeSales.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={propertyTypeSales}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="type" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="sales" fill="#f59e0b" name="Quantidade" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+                Nenhuma venda registrada ainda.
+              </div>
+            )}
           </div>
         </div>
 
@@ -236,64 +253,35 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* System Status */}
-          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Status do Sistema</h3>
-            <div className="space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Banco de Dados</span>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                  Online
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">API</span>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                  Online
-                </span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-gray-600">Armazenamento</span>
-                <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">
-                  Online
-                </span>
-              </div>
-              <div className="border-t pt-3 mt-3">
-                <p className="text-xs text-gray-500">
-                  Última atualização: há 2 minutos
-                </p>
-              </div>
-            </div>
-          </div>
-
           <div className="lg:col-span-3">
             <LogoutButton />
           </div>
         </div>
 
-        {/* Recent Activity */}
+        {/* Recent Leads */}
         <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Atividades Recentes</h2>
-          <div className="space-y-4">
-            {[
-              { action: 'Nova venda registrada', detail: 'Apartamento em Pinheiros', time: 'há 2h', user: 'Carlos Mendes' },
-              { action: 'Novo cliente cadastrado', detail: 'João Silva', time: 'há 4h', user: 'Sistema' },
-              { action: 'Imóvel marcado como vendido', detail: 'Casa em Alphaville', time: 'há 6h', user: 'Maria Silva' },
-              { action: 'Novo lead recebido', detail: 'Interesse em comercial', time: 'há 8h', user: 'Website' },
-              { action: 'Relatório gerado', detail: 'Vendas mensais', time: 'há 1d', user: 'Admin' },
-            ].map((activity, index) => (
-              <div key={index} className="border-l-4 border-navy-500 pl-4 py-2">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-semibold text-gray-900">{activity.action}</p>
-                    <p className="text-sm text-gray-600">{activity.detail}</p>
-                    <p className="text-xs text-gray-500 mt-1">Por: {activity.user}</p>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Leads Recentes</h2>
+          {recentLeads.length > 0 ? (
+            <div className="space-y-4">
+              {recentLeads.map((lead) => (
+                <div key={lead.id} className="border-l-4 border-navy-500 pl-4 py-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-semibold text-gray-900">{lead.name}</p>
+                      <p className="text-sm text-gray-600 capitalize">
+                        Origem: {lead.source} · Status: {lead.status}
+                      </p>
+                    </div>
+                    <span className="text-xs text-gray-500">
+                      {new Date(lead.created_at).toLocaleDateString('pt-BR')}
+                    </span>
                   </div>
-                  <span className="text-xs text-gray-500">{activity.time}</span>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-sm">Nenhum lead recebido ainda.</p>
+          )}
         </div>
       </div>
     </div>

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useTransition, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useTransition } from 'react';
 import { Mail, Lock, LogIn } from 'lucide-react';
 import { loginAction } from '@/lib/auth/actions';
 
-function LoginForm() {
-  const searchParams = useSearchParams();
-  const redirectTo = searchParams.get('redirectTo') || '';
+function getRedirectTo(): string {
+  if (typeof window === 'undefined') return '';
+  return new URLSearchParams(window.location.search).get('redirectTo') || '';
+}
 
+export default function LoginPage() {
+  const [redirectTo] = useState(getRedirectTo);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -111,13 +113,5 @@ function LoginForm() {
         </div>
       </div>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
   );
 }

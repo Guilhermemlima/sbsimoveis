@@ -1,40 +1,69 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LogoutButton from '@/components/common/LogoutButton';
 
+interface RealtorData {
+  name: string;
+  email: string;
+  creci: string;
+  totalProperties: number;
+  availableProperties: number;
+  soldProperties: number;
+  propertiesForRent: number;
+  activeLeads: number;
+  totalLeads: number;
+  convertedLeads: number;
+  totalEarnings: number;
+  monthlyCommission: number;
+}
+
+interface DashboardData {
+  realtorData: RealtorData;
+  salesData: { month: string; sales: number; value: number }[];
+  leadStatusData: { name: string; value: number; color: string }[];
+  recentSales: {
+    id: string;
+    propertyTitle: string;
+    sale_value: number;
+    commission_value: number;
+    sale_date: string;
+  }[];
+}
+
 export default function RealtorDashboard() {
-  // Mock realtor data
-  const realtorData = {
-    name: 'Carlos Mendes',
-    email: 'carlos@sbsimoveis.com',
-    creci: '123456/PR',
-    totalProperties: 12,
-    availableProperties: 8,
-    soldProperties: 4,
-    activeLead: 7,
-    totalEarnings: 125000,
-    monthlyCommission: 15000,
-    propertiesForRent: 5,
-  };
+  const [data, setData] = useState<DashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Mock sales data for chart
-  const salesData = [
-    { month: 'Jan', sales: 2, value: 500000 },
-    { month: 'Fev', sales: 3, value: 750000 },
-    { month: 'Mar', sales: 1, value: 400000 },
-    { month: 'Abr', sales: 2, value: 600000 },
-    { month: 'Mai', sales: 4, value: 1200000 },
-    { month: 'Jun', sales: 3, value: 900000 },
-  ];
+  useEffect(() => {
+    fetch('/api/realtor/dashboard-stats')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (json) setData(json);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
-  const leadStatusData = [
-    { name: 'Novos', value: 2, color: '#3b82f6' },
-    { name: 'Em Negociação', value: 3, color: '#f59e0b' },
-    { name: 'Perdidos', value: 2, color: '#ef4444' },
-  ];
+  if (loading || !data) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Carregando dashboard...</p>
+      </div>
+    );
+  }
+
+  const { realtorData, salesData, leadStatusData, recentSales } = data;
+  const soldPct =
+    realtorData.totalProperties > 0
+      ? Math.round((realtorData.soldProperties / realtorData.totalProperties) * 100)
+      : 0;
+  const conversionPct =
+    realtorData.totalLeads > 0
+      ? Math.round((realtorData.convertedLeads / realtorData.totalLeads) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -86,7 +115,7 @@ export default function RealtorDashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm">Leads Ativos</p>
-                <p className="text-3xl font-bold text-gray-900">{realtorData.activeLead}</p>
+                <p className="text-3xl font-bold text-gray-900">{realtorData.activeLeads}</p>
               </div>
               <Users className="w-12 h-12 text-orange-500" />
             </div>
@@ -130,25 +159,31 @@ export default function RealtorDashboard() {
           {/* Lead Status */}
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
             <h3 className="text-xl font-bold text-gray-900 mb-6">Status dos Leads</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={leadStatusData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  label={({ name, value }) => `${name}: ${value}`}
-                  outerRadius={80}
-                  fill="#8884d8"
-                  dataKey="value"
-                >
-                  {leadStatusData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
+            {leadStatusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={leadStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {leadStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+                Nenhum lead recebido ainda.
+              </div>
+            )}
           </div>
         </div>
 
@@ -178,48 +213,30 @@ export default function RealtorDashboard() {
             {/* Recent Sales */}
             <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Vendas Recentes</h2>
-              <div className="space-y-4">
-                {[
-                  {
-                    id: 1,
-                    property: 'Apartamento Pinheiros',
-                    value: 850000,
-                    commission: 42500,
-                    date: '2024-01-15',
-                  },
-                  {
-                    id: 2,
-                    property: 'Casa Alphaville',
-                    value: 1200000,
-                    commission: 60000,
-                    date: '2024-01-10',
-                  },
-                  {
-                    id: 3,
-                    property: 'Loja Centro',
-                    value: 500000,
-                    commission: 25000,
-                    date: '2024-01-08',
-                  },
-                ].map((sale) => (
-                  <div key={sale.id} className="border border-gray-200 rounded-lg p-4 hover:border-navy-500 transition">
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="font-semibold text-gray-900">{sale.property}</h3>
-                      <span className="text-xs text-gray-500">
-                        {new Date(sale.date).toLocaleDateString('pt-BR')}
-                      </span>
+              {recentSales.length > 0 ? (
+                <div className="space-y-4">
+                  {recentSales.map((sale) => (
+                    <div key={sale.id} className="border border-gray-200 rounded-lg p-4 hover:border-navy-500 transition">
+                      <div className="flex justify-between items-start mb-2">
+                        <h3 className="font-semibold text-gray-900">{sale.propertyTitle}</h3>
+                        <span className="text-xs text-gray-500">
+                          {new Date(sale.sale_date).toLocaleDateString('pt-BR')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">
+                          Valor: R$ {Number(sale.sale_value).toLocaleString('pt-BR')}
+                        </span>
+                        <span className="font-bold text-green-600">
+                          Comissão: R$ {Number(sale.commission_value).toLocaleString('pt-BR')}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">
-                        Valor: R$ {sale.value.toLocaleString('pt-BR')}
-                      </span>
-                      <span className="font-bold text-green-600">
-                        Comissão: R$ {sale.commission.toLocaleString('pt-BR')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Nenhuma venda registrada ainda.</p>
+              )}
             </div>
           </div>
 
@@ -253,16 +270,16 @@ export default function RealtorDashboard() {
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Imóveis Vendidos</p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '80%' }}></div>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: `${soldPct}%` }}></div>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">{realtorData.soldProperties} vendas</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-1">Leads Convertidos</p>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-navy-500 h-2 rounded-full" style={{ width: '60%' }}></div>
+                    <div className="bg-navy-500 h-2 rounded-full" style={{ width: `${conversionPct}%` }}></div>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">60% de conversão</p>
+                  <p className="text-xs text-gray-500 mt-1">{conversionPct}% de conversão</p>
                 </div>
               </div>
             </div>

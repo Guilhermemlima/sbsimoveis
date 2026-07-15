@@ -72,71 +72,10 @@ export default function SobrePage() {
               e clientes, resultando em um sistema intuitivo, seguro e poderoso.
             </p>
             <p>
-              Hoje, conectamos centenas de imóveis, dezenas de corretores profissionais e
-              milhares de clientes em busca das melhores oportunidades do mercado.
+              Estamos construindo essa jornada agora, com foco em Guarapuava e região,
+              conectando corretores profissionais a clientes em busca das melhores
+              oportunidades do mercado.
             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Stats */}
-      <section className="py-16 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10 text-center">
-            Nossos Números
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-            <div className="text-center">
-              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">156+</p>
-              <p className="text-gray-600">Imóveis Cadastrados</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">342+</p>
-              <p className="text-gray-600">Clientes Ativos</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">12+</p>
-              <p className="text-gray-600">Corretores Profissionais</p>
-            </div>
-            <div className="text-center">
-              <p className="text-4xl font-display font-bold text-gradient-gold mb-2">48+</p>
-              <p className="text-gray-600">Vendas Realizadas</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Team */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <h2 className="font-display text-3xl font-bold text-navy-950 mb-10 text-center">
-            Nossa Equipe
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">
-            {[
-              {
-                name: 'Antonio Silva',
-                role: 'Fundador e CEO',
-                bio: 'Mais de 20 anos de experiência no mercado imobiliário',
-              },
-              {
-                name: 'Beatriz Costa',
-                role: 'Diretora de Operações',
-                bio: 'Especialista em gestão e processos imobiliários',
-              },
-              {
-                name: 'Carlos Mendes',
-                role: 'Diretor Comercial',
-                bio: 'Líder da equipe de corretores e vendas',
-              },
-            ].map((member, index) => (
-              <Reveal key={index} delay={index * 120} className="text-center">
-                <div className="w-24 h-24 bg-gradient-to-br from-navy-800 to-navy-950 rounded-full mx-auto mb-4 border-2 border-gold-400/40" />
-                <h3 className="text-xl font-bold text-navy-950">{member.name}</h3>
-                <p className="text-sm text-gold-600 font-semibold mb-2">{member.role}</p>
-                <p className="text-gray-600 text-sm">{member.bio}</p>
-              </Reveal>
-            ))}
           </div>
         </div>
       </section>

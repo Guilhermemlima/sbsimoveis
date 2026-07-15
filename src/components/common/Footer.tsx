@@ -1,6 +1,7 @@
 import Link from 'next/link';
-import { Phone, Mail, MapPin, ExternalLink } from 'lucide-react';
+import { Phone, Mail, MapPin } from 'lucide-react';
 import { APP_CONFIG } from '@/lib/constants';
+import { FacebookIcon, InstagramIcon, WhatsAppIcon } from '@/components/common/SocialIcons';
 
 export default function Footer() {
   return (
@@ -108,7 +109,7 @@ export default function Footer() {
               className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
               aria-label="Facebook"
             >
-              <ExternalLink className="w-5 h-5" />
+              <FacebookIcon className="w-5 h-5" />
             </a>
             <a
               href={APP_CONFIG.socialMedia.instagram}
@@ -117,7 +118,16 @@ export default function Footer() {
               className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
               aria-label="Instagram"
             >
-              <ExternalLink className="w-5 h-5" />
+              <InstagramIcon className="w-5 h-5" />
+            </a>
+            <a
+              href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 bg-white/5 border border-white/10 rounded-full hover:bg-gold-500 hover:text-navy-950 hover:border-gold-500 transition-colors"
+              aria-label="WhatsApp"
+            >
+              <WhatsAppIcon className="w-5 h-5" />
             </a>
           </div>
 

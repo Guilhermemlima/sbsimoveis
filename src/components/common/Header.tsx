@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
-import { Menu, X, Phone, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
+import { Menu, X, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/auth/actions';
 import { APP_CONFIG } from '@/lib/constants';
+import { WhatsAppIcon } from '@/components/common/SocialIcons';
 import type { UserRole } from '@/types';
 
 interface HeaderProps {
@@ -88,7 +89,7 @@ export default function Header({ userRole = null }: HeaderProps) {
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
             >
-              <Phone className="w-4 h-4" />
+              <WhatsAppIcon className="w-4 h-4" />
               WhatsApp
             </a>
 

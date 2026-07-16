@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Upload, X, Star, Loader2 } from 'lucide-react';
+import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property, PropertyImage, PropertyType, PropertyPurpose, PropertyStatus } from '@/types';
 
 interface RealtorOption {
@@ -299,14 +300,11 @@ export default function PropertyForm({
           <label className={labelClass}>
             {form.purpose === 'rent' ? 'Valor do aluguel (mensal)' : 'Valor'}
           </label>
-          <input
+          <CurrencyInput
             required
-            type="number"
-            min="1"
             value={form.value}
-            onChange={(e) => set('value', e.target.value)}
-            className={inputClass}
-            placeholder="R$"
+            onChange={(digits) => set('value', digits)}
+            placeholder="0"
           />
         </div>
 
@@ -370,13 +368,7 @@ export default function PropertyForm({
                 <label className={labelClass}>
                   Valor final {form.status === 'sold' ? 'da venda' : 'do aluguel'}
                 </label>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.sale_value}
-                  onChange={(e) => set('sale_value', e.target.value)}
-                  className={inputClass}
-                />
+                <CurrencyInput value={form.sale_value} onChange={(digits) => set('sale_value', digits)} />
               </div>
 
               {canAssignRealtor && realtorOptions.length > 0 ? (

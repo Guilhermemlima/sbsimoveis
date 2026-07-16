@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Plus, X, Loader2 } from 'lucide-react';
+import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property } from '@/types';
 
 interface Sale {
@@ -237,14 +238,7 @@ export default function AdminSalesPage() {
 
             <div>
               <label className={labelClass}>Valor da venda</label>
-              <input
-                required
-                type="number"
-                min="1"
-                value={form.sale_value}
-                onChange={(e) => set('sale_value', e.target.value)}
-                className={inputClass}
-              />
+              <CurrencyInput required value={form.sale_value} onChange={(digits) => set('sale_value', digits)} />
             </div>
 
             <div>
@@ -263,46 +257,28 @@ export default function AdminSalesPage() {
 
             <div>
               <label className={labelClass}>Custos gerais</label>
-              <input
-                type="number"
-                min="0"
-                value={form.costs}
-                onChange={(e) => set('costs', e.target.value)}
-                className={inputClass}
-              />
+              <CurrencyInput value={form.costs} onChange={(digits) => set('costs', digits)} />
             </div>
 
             <div>
               <label className={labelClass}>Custos com publicidade</label>
-              <input
-                type="number"
-                min="0"
+              <CurrencyInput
                 value={form.advertising_costs}
-                onChange={(e) => set('advertising_costs', e.target.value)}
-                className={inputClass}
+                onChange={(digits) => set('advertising_costs', digits)}
               />
             </div>
 
             <div>
               <label className={labelClass}>Custos operacionais</label>
-              <input
-                type="number"
-                min="0"
+              <CurrencyInput
                 value={form.operational_costs}
-                onChange={(e) => set('operational_costs', e.target.value)}
-                className={inputClass}
+                onChange={(digits) => set('operational_costs', digits)}
               />
             </div>
 
             <div>
               <label className={labelClass}>Impostos</label>
-              <input
-                type="number"
-                min="0"
-                value={form.taxes}
-                onChange={(e) => set('taxes', e.target.value)}
-                className={inputClass}
-              />
+              <CurrencyInput value={form.taxes} onChange={(digits) => set('taxes', digits)} />
             </div>
 
             <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 flex flex-wrap gap-6 text-sm">

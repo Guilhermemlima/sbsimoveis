@@ -274,10 +274,6 @@ export default function ContatoPage() {
                 a: 'Para cadastrar um imóvel, você precisa ser um corretor cadastrado na plataforma. Acesse sua área de corretor e clique em "Novo Imóvel".',
               },
               {
-                q: 'Qual é a comissão padrão?',
-                a: 'A comissão padrão é de 5% sobre o valor da venda. Valores personalizados podem ser negociados.',
-              },
-              {
                 q: 'Como faço para ser um corretor na SBS?',
                 a: 'Entre em contato conosco através do WhatsApp ou email com seu CRECI em mãos. Nossa equipe analisará seu perfil.',
               },

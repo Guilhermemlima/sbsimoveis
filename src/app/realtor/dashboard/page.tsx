@@ -194,7 +194,7 @@ export default function RealtorDashboard() {
             {/* Quick Actions */}
             <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Link
                   href="/realtor/properties/new"
                   className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
@@ -206,6 +206,12 @@ export default function RealtorDashboard() {
                   className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
                 >
                   Meus Imóveis
+                </Link>
+                <Link
+                  href="/realtor/documents"
+                  className="px-4 py-3 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition text-center font-semibold"
+                >
+                  Documentos
                 </Link>
               </div>
             </div>

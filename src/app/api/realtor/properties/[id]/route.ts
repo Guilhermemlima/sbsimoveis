@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, type SessionUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { recordSaleForProperty } from '@/lib/sales';
 
 const UPDATABLE_FIELDS = [
   'title',
@@ -23,7 +24,10 @@ const UPDATABLE_FIELDS = [
   'is_opportunity',
   'is_featured',
   'is_exclusive',
+  'commission_rate',
 ];
+
+const SOLD_STATUSES = ['sold', 'rented'];
 
 async function loadOwnedProperty(id: string, user: SessionUser) {
   const supabase = createServiceRoleClient();
@@ -97,6 +101,23 @@ export async function PUT(
   if (error) {
     const message = error.code === '23505' ? 'Já existe um imóvel com esse código.' : error.message;
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  const enteringSold = SOLD_STATUSES.includes(data.status) && !SOLD_STATUSES.includes(property.status);
+  if (enteringSold && body.record_sale) {
+    const { error: saleError } = await recordSaleForProperty({
+      supabase,
+      propertyId: data.id,
+      realtorId: body.sale_realtor_id || data.realtor_id,
+      saleValue: Number(body.sale_value) || Number(data.value),
+      commissionRate: Number(data.commission_rate) || 0,
+      purpose: data.purpose,
+    });
+    if (saleError) {
+      return NextResponse.json(
+        { ...data, saleWarning: 'Imóvel atualizado, mas não foi possível registrar a venda: ' + saleError.message },
+      );
+    }
   }
 
   return NextResponse.json(data);

@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { getActiveRealtorOptions } from '@/lib/realtors';
+import { getAppSettings } from '@/lib/settings';
 import PropertyForm from '@/components/realtor/PropertyForm';
 
 export default async function EditPropertyPage({
@@ -33,7 +34,10 @@ export default async function EditPropertyPage({
     .eq('property_id', id)
     .order('order', { ascending: true });
 
-  const realtorOptions = canAssign ? await getActiveRealtorOptions() : [];
+  const [realtorOptions, settings] = await Promise.all([
+    canAssign ? getActiveRealtorOptions() : Promise.resolve([]),
+    getAppSettings(),
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -45,6 +49,7 @@ export default async function EditPropertyPage({
           initialImages={images ?? []}
           canAssignRealtor={canAssign}
           realtorOptions={realtorOptions}
+          defaultCommissionRate={settings.default_commission_rate}
         />
       </div>
     </div>

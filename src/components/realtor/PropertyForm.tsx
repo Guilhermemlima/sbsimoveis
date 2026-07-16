@@ -17,7 +17,10 @@ interface PropertyFormProps {
   initialImages?: PropertyImage[];
   canAssignRealtor?: boolean;
   realtorOptions?: RealtorOption[];
+  defaultCommissionRate?: number;
 }
+
+const SOLD_STATUSES: PropertyStatus[] = ['sold', 'rented'];
 
 const inputClass =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors';
@@ -29,9 +32,11 @@ export default function PropertyForm({
   initialImages = [],
   canAssignRealtor = false,
   realtorOptions = [],
+  defaultCommissionRate = 5,
 }: PropertyFormProps) {
   const router = useRouter();
   const isEdit = !!propertyId;
+  const initialStatus = (initialData?.status ?? 'available') as PropertyStatus;
 
   const [form, setForm] = useState({
     title: initialData?.title ?? '',
@@ -49,12 +54,18 @@ export default function PropertyForm({
     parking_spaces: initialData?.parking_spaces?.toString() ?? '0',
     description: initialData?.description ?? '',
     amenities: (initialData?.amenities ?? []).join(', '),
-    status: (initialData?.status ?? 'available') as PropertyStatus,
+    status: initialStatus,
     is_opportunity: initialData?.is_opportunity ?? false,
     is_featured: initialData?.is_featured ?? false,
     is_exclusive: initialData?.is_exclusive ?? false,
     realtor_id: initialData?.realtor_id ?? realtorOptions[0]?.id ?? '',
+    commission_rate: initialData?.commission_rate?.toString() ?? String(defaultCommissionRate),
+    sale_value: initialData?.value?.toString() ?? '',
+    sale_realtor_id: initialData?.realtor_id ?? '',
   });
+
+  const justMarkedSoldOrRented =
+    SOLD_STATUSES.includes(form.status) && !SOLD_STATUSES.includes(initialStatus);
 
   const [images, setImages] = useState<PropertyImage[]>(initialImages);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
@@ -120,10 +131,17 @@ export default function PropertyForm({
       is_opportunity: form.is_opportunity,
       is_featured: form.is_featured,
       is_exclusive: form.is_exclusive,
+      commission_rate: Number(form.commission_rate) || 0,
     };
 
     if (canAssignRealtor && form.realtor_id) {
       payload.realtor_id = form.realtor_id;
+    }
+
+    if (justMarkedSoldOrRented) {
+      payload.record_sale = true;
+      payload.sale_value = Number(form.sale_value) || Number(form.value);
+      payload.sale_realtor_id = form.sale_realtor_id || form.realtor_id;
     }
 
     const url = isEdit ? `/api/realtor/properties/${propertyId}` : '/api/realtor/properties';
@@ -307,6 +325,22 @@ export default function PropertyForm({
           </select>
         </div>
 
+        <div>
+          <label className={labelClass}>Comissão (%)</label>
+          <input
+            type="number"
+            min="0"
+            max="100"
+            step="0.5"
+            value={form.commission_rate}
+            onChange={(e) => set('commission_rate', e.target.value)}
+            className={inputClass}
+          />
+          <p className="text-xs text-gray-500 mt-1">
+            Percentual que a imobiliária recebe sobre o valor deste imóvel
+          </p>
+        </div>
+
         {canAssignRealtor && realtorOptions.length > 0 && (
           <div className="md:col-span-2">
             <label className={labelClass}>Corretor responsável</label>
@@ -321,6 +355,52 @@ export default function PropertyForm({
                 </option>
               ))}
             </select>
+          </div>
+        )}
+
+        {justMarkedSoldOrRented && (
+          <div className="md:col-span-2 bg-gold-50 border border-gold-300 rounded-lg p-4 space-y-4">
+            <p className="text-sm font-semibold text-navy-950">
+              Este imóvel será marcado como {form.status === 'sold' ? 'vendido' : 'alugado'}. A
+              venda é registrada automaticamente — não é preciso cadastrá-la de novo em Vendas.
+            </p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className={labelClass}>
+                  Valor final {form.status === 'sold' ? 'da venda' : 'do aluguel'}
+                </label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.sale_value}
+                  onChange={(e) => set('sale_value', e.target.value)}
+                  className={inputClass}
+                />
+              </div>
+
+              {canAssignRealtor && realtorOptions.length > 0 ? (
+                <div>
+                  <label className={labelClass}>Corretor que fechou</label>
+                  <select
+                    value={form.sale_realtor_id || form.realtor_id}
+                    onChange={(e) => set('sale_realtor_id', e.target.value)}
+                    className={inputClass}
+                  >
+                    {realtorOptions.map((r) => (
+                      <option key={r.id} value={r.id}>
+                        {r.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className={labelClass}>Comissão aplicada</label>
+                  <p className="text-gray-700 py-2">{form.commission_rate}%</p>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>

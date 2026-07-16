@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { recordSaleForProperty } from '@/lib/sales';
+
+const SOLD_STATUSES = ['sold', 'rented'];
 
 const REQUIRED_FIELDS = [
   'title',
@@ -92,6 +95,7 @@ export async function POST(request: NextRequest) {
       is_opportunity: !!body.is_opportunity,
       is_featured: !!body.is_featured,
       is_exclusive: !!body.is_exclusive,
+      commission_rate: Number(body.commission_rate) || 0,
     })
     .select()
     .single();
@@ -99,6 +103,17 @@ export async function POST(request: NextRequest) {
   if (error) {
     const message = error.code === '23505' ? 'Já existe um imóvel com esse código.' : error.message;
     return NextResponse.json({ error: message }, { status: 400 });
+  }
+
+  if (SOLD_STATUSES.includes(data.status) && body.record_sale) {
+    await recordSaleForProperty({
+      supabase,
+      propertyId: data.id,
+      realtorId: body.sale_realtor_id || data.realtor_id,
+      saleValue: Number(body.sale_value) || Number(data.value),
+      commissionRate: Number(data.commission_rate) || 0,
+      purpose: data.purpose,
+    });
   }
 
   return NextResponse.json(data, { status: 201 });

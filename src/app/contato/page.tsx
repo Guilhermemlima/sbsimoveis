@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Reveal from '@/components/common/Reveal';
-import { APP_CONFIG } from '@/lib/constants';
+import { useAppSettings } from '@/lib/settings-context';
 
 export default function ContatoPage() {
+  const settings = useAppSettings();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -89,8 +90,8 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Telefone</h3>
-                  <a href={`tel:+${APP_CONFIG.whatsapp}`} className="text-gold-600 hover:underline">
-                    {APP_CONFIG.phone}
+                  <a href={`tel:+${settings.whatsapp_number}`} className="text-gold-600 hover:underline">
+                    {settings.company_phone}
                   </a>
                 </div>
               </div>
@@ -101,8 +102,8 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Email</h3>
-                  <a href={`mailto:${APP_CONFIG.email}`} className="text-gold-600 hover:underline">
-                    {APP_CONFIG.email}
+                  <a href={`mailto:${settings.company_email}`} className="text-gold-600 hover:underline">
+                    {settings.company_email}
                   </a>
                 </div>
               </div>
@@ -113,13 +114,13 @@ export default function ContatoPage() {
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Endereço</h3>
-                  <p className="text-gray-600">{APP_CONFIG.address}</p>
+                  <p className="text-gray-600">{settings.company_address}</p>
                 </div>
               </div>
 
               {/* WhatsApp Button */}
               <a
-                href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+                href={`https://wa.me/${settings.whatsapp_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block px-6 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition"

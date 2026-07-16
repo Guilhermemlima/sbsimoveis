@@ -5,10 +5,11 @@ import Link from 'next/link';
 import { Search, MapPin, TrendingUp, Users, Shield } from 'lucide-react';
 import OpportunitiesCarousel from '@/components/public/OpportunitiesCarousel';
 import Reveal from '@/components/common/Reveal';
-import { APP_CONFIG } from '@/lib/constants';
+import { useAppSettings } from '@/lib/settings-context';
 import type { Property } from '@/types';
 
 export default function HomePage() {
+  const settings = useAppSettings();
   const [opportunities, setOpportunities] = useState<Property[]>([]);
   const [searchCity, setSearchCity] = useState('');
   const [searchPrice, setSearchPrice] = useState(0);
@@ -172,7 +173,7 @@ export default function HomePage() {
       </section>
 
       {/* Opportunities Carousel */}
-      <OpportunitiesCarousel properties={opportunities} maxItems={5} />
+      <OpportunitiesCarousel properties={opportunities} maxItems={settings.max_opportunities_carousel} />
 
       {/* Why Choose Us */}
       <section className="py-20 bg-white">
@@ -296,7 +297,7 @@ export default function HomePage() {
               Ver Imóveis
             </Link>
             <a
-              href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+              href={`https://wa.me/${settings.whatsapp_number}`}
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-3 bg-green-500 text-white rounded-lg font-bold hover:bg-green-600 transition-colors"

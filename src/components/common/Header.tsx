@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState, useTransition } from 'react';
 import { Menu, X, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/auth/actions';
-import { APP_CONFIG } from '@/lib/constants';
+import { useAppSettings } from '@/lib/settings-context';
 import { WhatsAppIcon } from '@/components/common/SocialIcons';
 import type { UserRole } from '@/types';
 
@@ -24,6 +24,7 @@ function dashboardLabelFor(role?: UserRole | null): string {
 }
 
 export default function Header({ userRole = null }: HeaderProps) {
+  const settings = useAppSettings();
   const isAuthenticated = !!userRole;
   const dashboardHref = dashboardHrefFor(userRole);
   const dashboardLabel = dashboardLabelFor(userRole);
@@ -84,7 +85,7 @@ export default function Header({ userRole = null }: HeaderProps) {
           {/* CTA Buttons */}
           <div className="hidden md:flex gap-3 items-center">
             <a
-              href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+              href={`https://wa.me/${settings.whatsapp_number}`}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Property } from '@/types';
 import { Heart, MapPin, Bed, Bath, Maximize2, Badge } from 'lucide-react';
 import { useState } from 'react';
-import { APP_CONFIG } from '@/lib/constants';
+import { useAppSettings } from '@/lib/settings-context';
 
 interface PropertyCardProps {
   property: Property;
@@ -18,6 +18,7 @@ export default function PropertyCard({
   isFavorited = false,
   onFavoritToggle,
 }: PropertyCardProps) {
+  const settings = useAppSettings();
   const [isImageLoading, setIsImageLoading] = useState(true);
 
   const images = property.property_images ?? [];
@@ -168,7 +169,7 @@ export default function PropertyCard({
             Ver Detalhes
           </Link>
           <a
-            href={`https://wa.me/${APP_CONFIG.whatsapp}?text=${encodeURIComponent(
+            href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(
               `Tenho interesse no imóvel: ${property.title}`
             )}`}
             target="_blank"

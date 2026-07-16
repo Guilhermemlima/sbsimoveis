@@ -1,11 +1,11 @@
 import { Heart, FileText, MapPin } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
-import { APP_CONFIG } from '@/lib/constants';
+import { getAppSettings } from '@/lib/settings';
 import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function ClientDashboard() {
-  const user = await getCurrentUser();
+  const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -74,7 +74,7 @@ export default async function ClientDashboard() {
                   Procurar Imóveis
                 </Link>
                 <a
-                  href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+                  href={`https://wa.me/${settings.whatsapp_number}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center font-semibold"

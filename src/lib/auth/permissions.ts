@@ -4,6 +4,10 @@ export function canManageAllProperties(user: { role: UserRole; permissions: stri
   return user.role === 'admin' || user.permissions.includes('manage_all_properties');
 }
 
+export function canManageSales(user: { role: UserRole; permissions: string[] }): boolean {
+  return user.role === 'admin' || user.permissions.includes('manage_sales');
+}
+
 export type AccessLevel = 'full' | 'limited';
 
 export const FULL_ACCESS_PERMISSIONS: RealtorPermission[] = [

@@ -4,6 +4,8 @@ import './globals.css';
 import Header from '@/components/common/Header';
 import Footer from '@/components/common/Footer';
 import { getCurrentUser } from '@/lib/auth/session';
+import { getAppSettings } from '@/lib/settings';
+import { SettingsProvider } from '@/lib/settings-context';
 
 const jakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
@@ -54,21 +56,23 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const user = await getCurrentUser();
+  const [user, settings] = await Promise.all([getCurrentUser(), getAppSettings()]);
 
   return (
     <html lang="pt-BR">
       <body
         className={`${jakarta.variable} ${playfair.variable} ${geistMono.variable} antialiased bg-white`}
       >
-        <a href="#conteudo-principal" className="skip-link">
-          Pular para o conteúdo principal
-        </a>
-        <Header userRole={user?.role ?? null} />
-        <main id="conteudo-principal" className="min-h-screen">
-          {children}
-        </main>
-        <Footer />
+        <SettingsProvider settings={settings}>
+          <a href="#conteudo-principal" className="skip-link">
+            Pular para o conteúdo principal
+          </a>
+          <Header userRole={user?.role ?? null} />
+          <main id="conteudo-principal" className="min-h-screen">
+            {children}
+          </main>
+          <Footer />
+        </SettingsProvider>
       </body>
     </html>
   );

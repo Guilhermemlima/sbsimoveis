@@ -1,8 +1,9 @@
 import { Award, Target, Rocket } from 'lucide-react';
 import Reveal from '@/components/common/Reveal';
-import { APP_CONFIG } from '@/lib/constants';
+import { getAppSettings } from '@/lib/settings';
 
-export default function SobrePage() {
+export default async function SobrePage() {
+  const settings = await getAppSettings();
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -90,7 +91,7 @@ export default function SobrePage() {
             Junte-se a nossa equipe de corretores profissionais
           </p>
           <a
-            href={`https://wa.me/${APP_CONFIG.whatsapp}`}
+            href={`https://wa.me/${settings.whatsapp_number}`}
             className="inline-block px-8 py-3 bg-gold-500 text-navy-950 font-bold rounded-lg hover:bg-gold-400 transition-colors shadow-[var(--shadow-gold)]"
           >
             Converse Conosco

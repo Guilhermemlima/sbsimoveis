@@ -3,7 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Bed, Bath, Maximize2, Car } from 'lucide-react';
 import { createServiceRoleClient } from '@/lib/supabase';
-import { APP_CONFIG } from '@/lib/constants';
+import { getAppSettings } from '@/lib/settings';
 
 const TYPE_LABEL: Record<string, string> = {
   house: 'Casa',
@@ -28,6 +28,7 @@ export default async function PropertyDetailPage({
 }) {
   const { id } = await params;
   const supabase = createServiceRoleClient();
+  const settings = await getAppSettings();
 
   const { data: property } = await supabase
     .from('properties')
@@ -168,7 +169,7 @@ export default async function PropertyDetailPage({
               </p>
               <p className="text-sm text-gray-500 mb-6">{TYPE_LABEL[property.type]}</p>
               <a
-                href={`https://wa.me/${APP_CONFIG.whatsapp}?text=${encodeURIComponent(
+                href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(
                   `Tenho interesse no imóvel: ${property.title} (código ${property.code})`
                 )}`}
                 target="_blank"

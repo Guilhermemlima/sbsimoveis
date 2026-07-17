@@ -76,6 +76,31 @@ export default function RealtorDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-10">
+        {/* Quick Actions */}
+        <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300 mb-10">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <Link
+              href="/realtor/properties/new"
+              className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+            >
+              + Novo Imóvel
+            </Link>
+            <Link
+              href="/realtor/properties"
+              className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
+            >
+              Meus Imóveis
+            </Link>
+            <Link
+              href="/realtor/documents"
+              className="px-4 py-3 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition text-center font-semibold"
+            >
+              Documentos
+            </Link>
+          </div>
+        </div>
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
@@ -134,89 +159,10 @@ export default function RealtorDashboard() {
           </div>
         </div>
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          {/* Sales Chart */}
-          <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas por Mês</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={salesData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip />
-                <Line
-                  type="monotone"
-                  dataKey="sales"
-                  stroke="#1e40af"
-                  strokeWidth={2}
-                  dot={{ r: 4 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Lead Status */}
-          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-            <h3 className="text-xl font-bold text-gray-900 mb-6">Status dos Leads</h3>
-            {leadStatusData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={leadStatusData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                  >
-                    {leadStatusData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
-                Nenhum lead recebido ainda.
-              </div>
-            )}
-          </div>
-        </div>
-
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Actions */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Quick Actions */}
-            <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <Link
-                  href="/realtor/properties/new"
-                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  + Novo Imóvel
-                </Link>
-                <Link
-                  href="/realtor/properties"
-                  className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
-                >
-                  Meus Imóveis
-                </Link>
-                <Link
-                  href="/realtor/documents"
-                  className="px-4 py-3 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition text-center font-semibold"
-                >
-                  Documentos
-                </Link>
-              </div>
-            </div>
-
-            {/* Recent Sales */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
+          {/* Left Column - Recent Sales */}
+          <div className="lg:col-span-2">
             <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Vendas Recentes</h2>
               {recentSales.length > 0 ? (
@@ -292,6 +238,59 @@ export default function RealtorDashboard() {
 
             {/* Logout */}
             <LogoutButton />
+          </div>
+        </div>
+
+        {/* Charts Row (Relatórios) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Sales Chart */}
+          <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Vendas por Mês</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="sales"
+                  stroke="#1e40af"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Lead Status */}
+          <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
+            <h3 className="text-xl font-bold text-gray-900 mb-6">Status dos Leads</h3>
+            {leadStatusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={leadStatusData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, value }) => `${name}: ${value}`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {leadStatusData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-gray-400 text-sm">
+                Nenhum lead recebido ainda.
+              </div>
+            )}
           </div>
         </div>
       </div>

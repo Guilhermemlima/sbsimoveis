@@ -22,8 +22,6 @@ export default function ImoveisPage() {
     city: searchParams.get('city') || '',
     type: searchParams.get('type') || '',
     purpose: searchParams.get('purpose') || '',
-    minPrice: searchParams.get('price_min') || '',
-    maxPrice: searchParams.get('price_max') || '',
     bedrooms: searchParams.get('bedrooms') || '',
     sortBy: 'newest',
   });
@@ -44,14 +42,6 @@ export default function ImoveisPage() {
 
     if (filters.purpose) {
       result = result.filter((p) => p.purpose === filters.purpose);
-    }
-
-    if (filters.minPrice) {
-      result = result.filter((p) => p.value >= Number(filters.minPrice));
-    }
-
-    if (filters.maxPrice) {
-      result = result.filter((p) => p.value <= Number(filters.maxPrice));
     }
 
     if (filters.bedrooms) {
@@ -161,33 +151,6 @@ export default function ImoveisPage() {
               </select>
             </div>
 
-            {/* Price Range */}
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Preço Mínimo
-              </label>
-              <input
-                type="number"
-                value={filters.minPrice}
-                onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Preço Máximo
-              </label>
-              <input
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
-              />
-            </div>
-
             {/* Bedrooms */}
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -211,8 +174,6 @@ export default function ImoveisPage() {
                 city: '',
                 type: '',
                 purpose: '',
-                minPrice: '',
-                maxPrice: '',
                 bedrooms: '',
                 sortBy: 'newest',
               })}

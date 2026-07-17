@@ -24,7 +24,6 @@ export default function AlugarPage() {
     city: searchParams.get('city') || '',
     type: '',
     bedrooms: '',
-    maxPrice: searchParams.get('price_max') || '',
     sortBy: 'newest',
   });
 
@@ -41,9 +40,6 @@ export default function AlugarPage() {
     }
     if (filters.bedrooms) {
       result = result.filter((p) => p.bedrooms >= Number(filters.bedrooms));
-    }
-    if (filters.maxPrice) {
-      result = result.filter((p) => p.value <= Number(filters.maxPrice));
     }
 
     switch (filters.sortBy) {
@@ -145,19 +141,6 @@ export default function AlugarPage() {
 
             <div className="mb-6">
               <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Aluguel Máximo (mensal)
-              </label>
-              <input
-                type="number"
-                value={filters.maxPrice}
-                onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                placeholder="R$"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors"
-              />
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
                 Mínimo de Quartos
               </label>
               <select
@@ -179,7 +162,6 @@ export default function AlugarPage() {
                   city: '',
                   type: '',
                   bedrooms: '',
-                  maxPrice: '',
                   sortBy: 'newest',
                 })
               }

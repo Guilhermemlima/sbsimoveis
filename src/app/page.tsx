@@ -12,7 +12,6 @@ export default function HomePage() {
   const settings = useAppSettings();
   const [opportunities, setOpportunities] = useState<Property[]>([]);
   const [searchCity, setSearchCity] = useState('');
-  const [searchPrice, setSearchPrice] = useState(0);
   const [searchPurpose, setSearchPurpose] = useState<'sale' | 'rent'>('sale');
 
   useEffect(() => {
@@ -26,7 +25,6 @@ export default function HomePage() {
     // Redirecionar para página de busca com filtros
     const params = new URLSearchParams();
     if (searchCity) params.append('city', searchCity);
-    if (searchPrice) params.append('price_max', searchPrice.toString());
 
     if (searchPurpose === 'rent') {
       window.location.href = `/alugar?${params.toString()}`;
@@ -102,7 +100,7 @@ export default function HomePage() {
                 </button>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="relative text-left">
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Cidade
@@ -130,19 +128,6 @@ export default function HomePage() {
                     <option value="commercial">Comercial</option>
                     <option value="land">Terreno</option>
                   </select>
-                </div>
-
-                <div className="text-left">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    {searchPurpose === 'rent' ? 'Aluguel Máximo' : 'Preço Máximo'}
-                  </label>
-                  <input
-                    type="number"
-                    placeholder={searchPurpose === 'rent' ? 'R$ 5.000' : 'R$ 1.000.000'}
-                    value={searchPrice || ''}
-                    onChange={(e) => setSearchPrice(Number(e.target.value))}
-                    className="w-full bg-gray-100 border border-gray-300 rounded-lg px-3 py-3 text-gray-900 focus:border-gold-500 outline-none transition-colors"
-                  />
                 </div>
 
                 <div className="flex items-end">

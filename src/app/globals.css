@@ -207,3 +207,13 @@ textarea:focus-visible,
 html {
   scroll-behavior: smooth;
 }
+
+/* Impressão / exportação em PDF: some cabeçalho, rodapé e controles,
+   deixando só o conteúdo do relatório. */
+@media print {
+  header,
+  footer,
+  .no-print {
+    display: none !important;
+  }
+}

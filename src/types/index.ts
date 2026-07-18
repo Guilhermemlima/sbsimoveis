@@ -1,5 +1,5 @@
 // User Types
-export type UserRole = 'admin' | 'realtor' | 'client' | 'visitor';
+export type UserRole = 'admin' | 'realtor' | 'client' | 'visitor' | 'tenant';
 
 export interface User {
   id: string;
@@ -332,6 +332,42 @@ export interface LeaseContract {
   condo_responsible: BillingResponsible;
   deposit_value: number;
   status: ContractStatus;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type TransactionStatus =
+  | 'predicted'
+  | 'pending'
+  | 'awaiting_approval'
+  | 'scheduled'
+  | 'paid'
+  | 'partially_paid'
+  | 'overdue'
+  | 'cancelled'
+  | 'disputed'
+  | 'refunded';
+
+export interface FinancialTransaction {
+  id: string;
+  type: FinancialType;
+  center: FinancialCenter;
+  category_id?: string | null;
+  property_id?: string | null;
+  lease_contract_id?: string | null;
+  owner_id?: string | null;
+  tenant_id?: string | null;
+  sale_id?: string | null;
+  created_by?: string | null;
+  description: string;
+  amount: number;
+  competence_date: string;
+  due_date: string;
+  paid_date?: string | null;
+  payment_method?: string | null;
+  status: TransactionStatus;
+  receipt_url?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;

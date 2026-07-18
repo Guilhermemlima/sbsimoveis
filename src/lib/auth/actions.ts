@@ -16,6 +16,7 @@ const ONE_WEEK = 60 * 60 * 24 * 7;
 function defaultRedirectFor(role: string): string {
   if (role === 'admin') return '/admin/dashboard';
   if (role === 'realtor') return '/realtor/dashboard';
+  if (role === 'tenant') return '/tenant/dashboard';
   return '/client/dashboard';
 }
 

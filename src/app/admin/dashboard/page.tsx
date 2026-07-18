@@ -304,6 +304,12 @@ export default function AdminDashboard() {
               >
                 Inquilinos
               </Link>
+              <Link
+                href="/admin/rent-charges"
+                className="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-center font-semibold text-sm"
+              >
+                Cobranças de Locação
+              </Link>
             </div>
           </div>
 

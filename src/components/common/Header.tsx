@@ -16,11 +16,14 @@ function dashboardHrefFor(role?: UserRole | null): string {
   if (role === 'admin') return '/admin/dashboard';
   if (role === 'realtor') return '/realtor/dashboard';
   if (role === 'client') return '/client/dashboard';
+  if (role === 'tenant') return '/tenant/dashboard';
   return '/login';
 }
 
 function dashboardLabelFor(role?: UserRole | null): string {
-  return role === 'client' ? 'Minha Conta' : 'Área do Corretor';
+  if (role === 'client') return 'Minha Conta';
+  if (role === 'tenant') return 'Meu Aluguel';
+  return 'Área do Corretor';
 }
 
 export default function Header({ userRole = null }: HeaderProps) {

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, X, Loader2 } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property } from '@/types';
+import { formatDateBR } from '@/lib/format';
 
 interface Sale {
   id: string;
@@ -346,7 +347,7 @@ export default function AdminSalesPage() {
                       R$ {Number(sale.commission_value).toLocaleString('pt-BR')}
                     </td>
                     <td className="px-6 py-4 text-gray-500 text-sm">
-                      {new Date(sale.sale_date).toLocaleDateString('pt-BR')}
+                      {formatDateBR(sale.sale_date)}
                     </td>
                   </tr>
                 ))}

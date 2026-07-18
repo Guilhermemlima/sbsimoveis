@@ -5,6 +5,7 @@ import { Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LogoutButton from '@/components/common/LogoutButton';
+import { formatDateBR } from '@/lib/format';
 
 interface RealtorData {
   name: string;
@@ -172,7 +173,7 @@ export default function RealtorDashboard() {
                       <div className="flex justify-between items-start mb-2">
                         <h3 className="font-semibold text-gray-900">{sale.propertyTitle}</h3>
                         <span className="text-xs text-gray-500">
-                          {new Date(sale.sale_date).toLocaleDateString('pt-BR')}
+                          {formatDateBR(sale.sale_date)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">

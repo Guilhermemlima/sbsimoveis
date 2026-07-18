@@ -328,6 +328,12 @@ export default function AdminDashboard() {
               >
                 Auditoria
               </Link>
+              <Link
+                href="/admin/schedule"
+                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold text-sm"
+              >
+                Cronograma Financeiro
+              </Link>
             </div>
           </div>
 

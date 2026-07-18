@@ -6,7 +6,7 @@ import { createServiceRoleClient } from '@/lib/supabase';
 const REQUIRED_FIELDS = ['property_id', 'owner_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function GET() {

@@ -4,7 +4,7 @@ import { createServiceRoleClient } from '@/lib/supabase';
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== 'admin' && user.role !== 'realtor')) {
+  if (!user || user.role !== 'admin') {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 

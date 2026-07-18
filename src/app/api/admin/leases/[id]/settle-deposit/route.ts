@@ -5,7 +5,7 @@ import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

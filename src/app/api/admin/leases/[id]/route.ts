@@ -21,7 +21,7 @@ const UPDATABLE_FIELDS = [
 const ENDED_STATUSES = ['terminated', 'cancelled', 'expired'];
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function PUT(

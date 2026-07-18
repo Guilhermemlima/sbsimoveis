@@ -5,7 +5,7 @@ import { createServiceRoleClient } from '@/lib/supabase';
 const UPDATABLE_FIELDS = ['name', 'email', 'phone', 'document_number', 'notes'];
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function PUT(

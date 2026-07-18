@@ -15,7 +15,7 @@ const UPDATABLE_FIELDS = [
 ];
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function PUT(

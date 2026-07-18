@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 function isAuthorized(user: { role: string } | null) {
-  return !!user && (user.role === 'admin' || user.role === 'realtor');
+  return !!user && user.role === 'admin';
 }
 
 export async function GET() {

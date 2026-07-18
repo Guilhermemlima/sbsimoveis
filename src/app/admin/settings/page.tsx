@@ -211,6 +211,28 @@ export default function AdminSettingsPage() {
             </div>
           </div>
 
+          <div className="bg-white rounded-xl shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <h2 className="md:col-span-2 text-lg font-bold text-navy-950">Locação — Uso do Lucro</h2>
+            <p className="md:col-span-2 text-sm text-gray-500 -mt-2">
+              Percentual da taxa de administração já recebida (o lucro real da imobiliária com aluguéis)
+              que pode ser usado para custear despesas administrativas. O dinheiro dos proprietários
+              nunca é afetado por essa regra. Deixe em 0% para desativar.
+            </p>
+
+            <div>
+              <label className={labelClass}>Limite de uso do lucro da locação (%)</label>
+              <input
+                type="number"
+                min={0}
+                max={100}
+                step={1}
+                value={settings.rental_profit_expense_rate}
+                onChange={(e) => set('rental_profit_expense_rate', Number(e.target.value))}
+                className={inputClass}
+              />
+            </div>
+          </div>
+
           <div className="flex justify-end">
             <button
               type="submit"

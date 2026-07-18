@@ -316,6 +316,12 @@ export default function AdminDashboard() {
               >
                 Repasses a Proprietários
               </Link>
+              <Link
+                href="/admin/expenses"
+                className="px-4 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition text-center font-semibold text-sm"
+              >
+                Despesas
+              </Link>
             </div>
           </div>
 

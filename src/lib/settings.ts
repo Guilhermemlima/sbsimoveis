@@ -11,6 +11,7 @@ export interface AppSettings {
   whatsapp_number: string;
   max_opportunities_carousel: number;
   default_commission_rate: number;
+  rental_profit_expense_rate: number;
   social_instagram: string | null;
   social_facebook: string | null;
   social_linkedin: string | null;
@@ -27,6 +28,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   whatsapp_number: '5542984447987',
   max_opportunities_carousel: 5,
   default_commission_rate: 5,
+  rental_profit_expense_rate: 0,
   social_instagram: 'https://www.instagram.com/sbsimobiliaria/',
   social_facebook: 'https://www.facebook.com/profile.php?id=61591639603178',
   social_linkedin: null,

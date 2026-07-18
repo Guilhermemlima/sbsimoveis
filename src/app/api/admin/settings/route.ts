@@ -12,6 +12,7 @@ const UPDATABLE_FIELDS = [
   'whatsapp_number',
   'max_opportunities_carousel',
   'default_commission_rate',
+  'rental_profit_expense_rate',
   'social_instagram',
   'social_facebook',
   'social_linkedin',

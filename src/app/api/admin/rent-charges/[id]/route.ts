@@ -95,6 +95,33 @@ export async function PATCH(
       net_amount: netAmount,
       status: 'pending',
     });
+
+    if (adminFeeAmount > 0) {
+      const { data: feeCategory } = await supabase
+        .from('financial_categories')
+        .select('id')
+        .eq('name', 'Taxa de Administração')
+        .eq('center', 'rental')
+        .maybeSingle();
+
+      if (feeCategory) {
+        await supabase.from('financial_transactions').insert({
+          type: 'revenue',
+          center: 'rental',
+          category_id: feeCategory.id,
+          property_id: charge.property_id,
+          lease_contract_id: charge.lease_contract_id,
+          created_by: user!.id,
+          description: 'Taxa de administração — aluguel',
+          amount: adminFeeAmount,
+          competence_date: charge.competence_date,
+          due_date: updates.paid_date as string,
+          paid_date: updates.paid_date as string,
+          payment_method: 'automatic',
+          status: 'paid',
+        });
+      }
+    }
   }
 
   return NextResponse.json(data);

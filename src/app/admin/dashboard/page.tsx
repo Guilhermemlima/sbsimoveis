@@ -286,6 +286,24 @@ export default function AdminDashboard() {
               >
                 Usuários
               </Link>
+              <Link
+                href="/admin/leases"
+                className="px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-center font-semibold text-sm"
+              >
+                Contratos de Locação
+              </Link>
+              <Link
+                href="/admin/owners"
+                className="px-4 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-center font-semibold text-sm"
+              >
+                Proprietários
+              </Link>
+              <Link
+                href="/admin/tenants"
+                className="px-4 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition text-center font-semibold text-sm"
+              >
+                Inquilinos
+              </Link>
             </div>
           </div>
 

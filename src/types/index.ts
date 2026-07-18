@@ -280,6 +280,63 @@ export interface PropertyTypeSalesStats {
   total_value: number;
 }
 
+// Rental Management (Fase 1)
+export type BillingResponsible = 'tenant' | 'owner' | 'agency' | 'split' | 'not_applicable';
+export type ContractStatus = 'draft' | 'active' | 'expiring_soon' | 'expired' | 'terminated' | 'cancelled';
+export type FinancialCenter = 'sales' | 'rental' | 'administrative' | 'maintenance' | 'owner_payouts';
+export type FinancialType = 'revenue' | 'expense';
+
+export interface PropertyOwner {
+  id: string;
+  user_id?: string | null;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  document_number?: string | null;
+  bank_name?: string | null;
+  bank_agency?: string | null;
+  bank_account?: string | null;
+  pix_key?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Tenant {
+  id: string;
+  user_id?: string | null;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  document_number?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LeaseContract {
+  id: string;
+  property_id: string;
+  owner_id: string;
+  tenant_id: string;
+  realtor_id?: string | null;
+  start_date: string;
+  end_date: string;
+  due_day: number;
+  rent_value: number;
+  admin_fee_percentage: number;
+  water_responsible: BillingResponsible;
+  energy_responsible: BillingResponsible;
+  iptu_responsible: BillingResponsible;
+  insurance_responsible: BillingResponsible;
+  condo_responsible: BillingResponsible;
+  deposit_value: number;
+  status: ContractStatus;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Filter Types
 export interface PropertyFilters {
   search?: string;

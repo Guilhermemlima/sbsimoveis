@@ -1,0 +1,415 @@
+'use client';
+
+import { useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
+import { ArrowLeft, Plus, X, Loader2, FileText } from 'lucide-react';
+import CurrencyInput from '@/components/common/CurrencyInput';
+import type { Property, PropertyOwner, Tenant, BillingResponsible } from '@/types';
+
+interface Lease {
+  id: string;
+  property_id: string;
+  owner_id: string;
+  tenant_id: string;
+  start_date: string;
+  end_date: string;
+  due_day: number;
+  rent_value: number;
+  admin_fee_percentage: number;
+  status: string;
+  ownerName: string;
+  tenantName: string;
+  properties?: { title: string; code: string; city: string; neighborhood: string };
+}
+
+const RESPONSIBLE_LABEL: Record<BillingResponsible, string> = {
+  tenant: 'Inquilino',
+  owner: 'Proprietário',
+  agency: 'Imobiliária',
+  split: 'Dividido',
+  not_applicable: 'Não se aplica',
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  draft: 'Rascunho',
+  active: 'Ativo',
+  expiring_soon: 'Vencendo em breve',
+  expired: 'Vencido',
+  terminated: 'Encerrado',
+  cancelled: 'Cancelado',
+};
+
+const STATUS_COLOR: Record<string, string> = {
+  draft: 'bg-gray-100 text-gray-700',
+  active: 'bg-green-100 text-green-800',
+  expiring_soon: 'bg-yellow-100 text-yellow-800',
+  expired: 'bg-red-100 text-red-800',
+  terminated: 'bg-gray-100 text-gray-500',
+  cancelled: 'bg-gray-100 text-gray-500',
+};
+
+const inputClass =
+  'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors';
+const labelClass = 'block text-sm font-semibold text-gray-700 mb-2';
+
+const responsibleFields: { key: string; label: string }[] = [
+  { key: 'water_responsible', label: 'Água' },
+  { key: 'energy_responsible', label: 'Energia' },
+  { key: 'iptu_responsible', label: 'IPTU' },
+  { key: 'insurance_responsible', label: 'Seguro' },
+  { key: 'condo_responsible', label: 'Condomínio' },
+];
+
+export default function LeasesPage() {
+  const [leases, setLeases] = useState<Lease[]>([]);
+  const [properties, setProperties] = useState<Property[]>([]);
+  const [owners, setOwners] = useState<PropertyOwner[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [formOpen, setFormOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+
+  const [form, setForm] = useState<Record<string, string>>({
+    property_id: '',
+    owner_id: '',
+    tenant_id: '',
+    start_date: new Date().toISOString().slice(0, 10),
+    end_date: '',
+    due_day: '10',
+    rent_value: '',
+    admin_fee_percentage: '10',
+    deposit_value: '0',
+    water_responsible: 'tenant',
+    energy_responsible: 'tenant',
+    iptu_responsible: 'owner',
+    insurance_responsible: 'tenant',
+    condo_responsible: 'tenant',
+    notes: '',
+  });
+
+  const loadLeases = () => {
+    fetch('/api/admin/leases')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setLeases(Array.isArray(data) ? data : []))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    loadLeases();
+    fetch('/api/realtor/properties')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setProperties(Array.isArray(data) ? data : []));
+    fetch('/api/admin/owners')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setOwners(Array.isArray(data) ? data : []));
+    fetch('/api/admin/tenants')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setTenants(Array.isArray(data) ? data : []));
+  }, []);
+
+  const availableProperties = useMemo(
+    () => properties.filter((p) => p.status === 'available' || p.status === 'reserved'),
+    [properties]
+  );
+
+  const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!form.property_id || !form.owner_id || !form.tenant_id || !form.end_date || !form.rent_value) {
+      setError('Preencha imóvel, proprietário, inquilino, valor do aluguel e data final.');
+      return;
+    }
+
+    setSubmitting(true);
+    const res = await fetch('/api/admin/leases', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        due_day: Number(form.due_day),
+        rent_value: Number(form.rent_value),
+        admin_fee_percentage: Number(form.admin_fee_percentage),
+        deposit_value: Number(form.deposit_value),
+      }),
+    });
+    setSubmitting(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error || 'Não foi possível criar o contrato.');
+      return;
+    }
+
+    setForm((f) => ({ ...f, property_id: '', owner_id: '', tenant_id: '', rent_value: '', end_date: '' }));
+    setFormOpen(false);
+    loadLeases();
+    fetch('/api/realtor/properties')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setProperties(Array.isArray(data) ? data : []));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-noise-navy text-white py-8">
+        <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <Link
+              href="/admin/dashboard"
+              className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Voltar ao Dashboard
+            </Link>
+            <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
+              <FileText className="w-7 h-7 text-gold-400" />
+              Contratos de Locação
+            </h1>
+            <p className="text-navy-100">
+              Vincule imóvel, proprietário e inquilino com os termos do aluguel
+            </p>
+          </div>
+          <button
+            onClick={() => setFormOpen((v) => !v)}
+            className="inline-flex items-center gap-2 px-5 py-3 bg-gold-500 text-navy-950 rounded-lg font-bold hover:bg-gold-400 transition-colors"
+          >
+            {formOpen ? <X className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+            {formOpen ? 'Cancelar' : 'Novo Contrato'}
+          </button>
+        </div>
+      </div>
+
+      <div className="container mx-auto px-4 py-10">
+        {(owners.length === 0 || tenants.length === 0) && !loading && (
+          <div className="bg-gold-50 border border-gold-300 rounded-lg p-4 mb-6 text-sm text-navy-950">
+            Antes de criar um contrato, cadastre pelo menos um{' '}
+            <Link href="/admin/owners" className="text-gold-700 font-semibold hover:underline">
+              proprietário
+            </Link>{' '}
+            e um{' '}
+            <Link href="/admin/tenants" className="text-gold-700 font-semibold hover:underline">
+              inquilino
+            </Link>
+            .
+          </div>
+        )}
+
+        {formOpen && (
+          <form
+            onSubmit={handleSubmit}
+            className="bg-white rounded-xl shadow-md p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            {error && (
+              <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+
+            <div className="md:col-span-2">
+              <label className={labelClass}>Imóvel</label>
+              <select
+                required
+                value={form.property_id}
+                onChange={(e) => set('property_id', e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecione um imóvel</option>
+                {availableProperties.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.title} · {p.code}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Proprietário</label>
+              <select
+                required
+                value={form.owner_id}
+                onChange={(e) => set('owner_id', e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecione</option>
+                {owners.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Inquilino</label>
+              <select
+                required
+                value={form.tenant_id}
+                onChange={(e) => set('tenant_id', e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Selecione</option>
+                {tenants.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className={labelClass}>Início do contrato</label>
+              <input
+                required
+                type="date"
+                value={form.start_date}
+                onChange={(e) => set('start_date', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Fim do contrato</label>
+              <input
+                required
+                type="date"
+                value={form.end_date}
+                onChange={(e) => set('end_date', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Valor do aluguel (mensal)</label>
+              <CurrencyInput required value={form.rent_value} onChange={(v) => set('rent_value', v)} />
+            </div>
+
+            <div>
+              <label className={labelClass}>Dia de vencimento</label>
+              <input
+                type="number"
+                min="1"
+                max="31"
+                value={form.due_day}
+                onChange={(e) => set('due_day', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Taxa de administração (%)</label>
+              <input
+                type="number"
+                min="0"
+                max="100"
+                step="0.5"
+                value={form.admin_fee_percentage}
+                onChange={(e) => set('admin_fee_percentage', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Caução</label>
+              <CurrencyInput value={form.deposit_value} onChange={(v) => set('deposit_value', v)} />
+            </div>
+
+            <div className="md:col-span-2 bg-gray-50 rounded-lg p-4">
+              <p className="text-sm font-semibold text-navy-950 mb-3">
+                Responsável por cada cobrança
+              </p>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {responsibleFields.map((field) => (
+                  <div key={field.key}>
+                    <label className="block text-xs font-semibold text-gray-600 mb-1">
+                      {field.label}
+                    </label>
+                    <select
+                      value={form[field.key]}
+                      onChange={(e) => set(field.key, e.target.value)}
+                      className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+                    >
+                      {Object.entries(RESPONSIBLE_LABEL).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className={labelClass}>Observações</label>
+              <textarea
+                value={form.notes}
+                onChange={(e) => set('notes', e.target.value)}
+                rows={3}
+                className={inputClass}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <button
+                type="submit"
+                disabled={submitting}
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gold-500 text-navy-950 rounded-lg font-bold hover:bg-gold-400 transition-colors disabled:opacity-50"
+              >
+                {submitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                {submitting ? 'Salvando...' : 'Criar Contrato'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-gray-50 text-gray-600 uppercase text-xs">
+                <tr>
+                  <th className="px-6 py-3">Imóvel</th>
+                  <th className="px-6 py-3">Proprietário</th>
+                  <th className="px-6 py-3">Inquilino</th>
+                  <th className="px-6 py-3">Aluguel</th>
+                  <th className="px-6 py-3">Vencimento</th>
+                  <th className="px-6 py-3">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {leases.map((lease) => (
+                  <tr key={lease.id} className="border-t border-gray-100">
+                    <td className="px-6 py-4">
+                      <p className="font-medium text-navy-950">{lease.properties?.title}</p>
+                      <p className="text-xs text-gray-500">{lease.properties?.code}</p>
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">{lease.ownerName}</td>
+                    <td className="px-6 py-4 text-gray-600">{lease.tenantName}</td>
+                    <td className="px-6 py-4 font-semibold text-navy-950">
+                      R$ {Number(lease.rent_value).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">Dia {lease.due_day}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLOR[lease.status]}`}
+                      >
+                        {STATUS_LABEL[lease.status]}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {!loading && leases.length === 0 && (
+            <div className="p-12 text-center text-gray-600">Nenhum contrato de locação ainda.</div>
+          )}
+          {loading && <div className="p-12 text-center text-gray-600">Carregando...</div>}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 const UPDATABLE_FIELDS = [
   'company_name',
@@ -27,7 +28,11 @@ export async function PUT(request: NextRequest) {
   const body = await request.json();
   const supabase = createServiceRoleClient();
 
-  const { data: existing } = await supabase.from('app_settings').select('id').limit(1).maybeSingle();
+  const { data: existing } = await supabase
+    .from('app_settings')
+    .select('id, rental_profit_expense_rate')
+    .limit(1)
+    .maybeSingle();
 
   const updates: Record<string, unknown> = {};
   for (const key of UPDATABLE_FIELDS) {
@@ -43,6 +48,21 @@ export async function PUT(request: NextRequest) {
       .select()
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+    if (
+      updates.rental_profit_expense_rate !== undefined &&
+      Number(updates.rental_profit_expense_rate) !== Number(existing.rental_profit_expense_rate)
+    ) {
+      await logAudit({
+        user,
+        action: 'update',
+        entityType: 'settings',
+        entityId: existing.id,
+        description: `Alterou o limite de uso do lucro da locação de ${existing.rental_profit_expense_rate}% para ${updates.rental_profit_expense_rate}%.`,
+        metadata: { from: existing.rental_profit_expense_rate, to: updates.rental_profit_expense_rate },
+      });
+    }
+
     return NextResponse.json(data);
   }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && (user.role === 'admin' || user.role === 'realtor');
@@ -57,5 +58,15 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  await logAudit({
+    user: user!,
+    action: 'settle_deposit',
+    entityType: 'lease_contract',
+    entityId: id,
+    description: `Finalizou a devolução da caução: R$ ${refundAmount.toFixed(2)} devolvido (R$ ${totalDeductions.toFixed(2)} em deduções).`,
+    metadata: { depositValue, totalDeductions, refundAmount },
+  });
+
   return NextResponse.json({ ...data, totalDeductions, refundAmount });
 }

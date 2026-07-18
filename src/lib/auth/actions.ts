@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import { AUTH_COOKIE_NAME } from '@/lib/auth/config';
 import { createSessionCookieValue } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 export interface ActionResult {
   error?: string;
@@ -31,7 +32,7 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
   const supabase = createServiceRoleClient();
   const { data: user } = await supabase
     .from('users')
-    .select('id, password_hash, is_active, role')
+    .select('id, name, password_hash, is_active, role')
     .eq('email', email)
     .single();
 
@@ -52,6 +53,16 @@ export async function loginAction(formData: FormData): Promise<ActionResult> {
     path: '/',
     maxAge: ONE_WEEK,
   });
+
+  if (user.role === 'admin' || user.role === 'realtor') {
+    await logAudit({
+      user: { id: user.id, name: user.name, role: user.role },
+      action: 'login',
+      entityType: 'session',
+      entityId: user.id,
+      description: `${user.name} entrou no sistema.`,
+    });
+  }
 
   const redirectTo = String(formData.get('redirectTo') ?? '');
   redirect(redirectTo || defaultRedirectFor(user.role));

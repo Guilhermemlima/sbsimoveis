@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAdmin(user: { role: string } | null) {
   return !!user && user.role === 'admin';
@@ -123,5 +124,15 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  await logAudit({
+    user: user!,
+    action: 'create',
+    entityType: 'expense',
+    entityId: data.id,
+    description: `Lançou a despesa "${data.description}" (R$ ${amount.toFixed(2)})${fundedByRentalProfit ? ' custeada pelo lucro da locação' : ''}.`,
+    metadata: { fundedByRentalProfit, center: body.center },
+  });
+
   return NextResponse.json(data, { status: 201 });
 }

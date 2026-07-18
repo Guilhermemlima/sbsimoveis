@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && (user.role === 'admin' || user.role === 'realtor');
@@ -59,5 +60,16 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (body.status === 'paid') {
+    await logAudit({
+      user: user!,
+      action: 'mark_paid',
+      entityType: 'owner_payout',
+      entityId: id,
+      description: `Confirmou o repasse de R$ ${Number(data.net_amount).toFixed(2)} ao proprietário.`,
+    });
+  }
+
   return NextResponse.json(data);
 }

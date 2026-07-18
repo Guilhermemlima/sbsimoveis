@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { permissionsForAccessLevel, type AccessLevel } from '@/lib/auth/permissions';
+import { logAudit } from '@/lib/audit';
 
 export async function GET() {
   const currentUser = await getCurrentUser();
@@ -99,6 +100,15 @@ export async function POST(request: NextRequest) {
   if (permError) {
     return NextResponse.json({ error: permError.message }, { status: 500 });
   }
+
+  await logAudit({
+    user: currentUser,
+    action: 'create',
+    entityType: 'user',
+    entityId: newUser.id,
+    description: `Criou o login de corretor "${newUser.name}" (${newUser.email}) com acesso ${accessLevel}.`,
+    metadata: { accessLevel },
+  });
 
   return NextResponse.json({ ...newUser, permissions }, { status: 201 });
 }

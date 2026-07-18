@@ -322,6 +322,12 @@ export default function AdminDashboard() {
               >
                 Despesas
               </Link>
+              <Link
+                href="/admin/audit-log"
+                className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold text-sm"
+              >
+                Auditoria
+              </Link>
             </div>
           </div>
 

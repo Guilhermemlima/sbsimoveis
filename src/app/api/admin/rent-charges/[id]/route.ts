@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && (user.role === 'admin' || user.role === 'realtor');
@@ -61,6 +62,16 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (body.status === 'paid') {
+    await logAudit({
+      user: user!,
+      action: 'mark_paid',
+      entityType: 'rent_charge',
+      entityId: id,
+      description: `Marcou a cobrança "${data.description}" (R$ ${Number(data.amount).toFixed(2)}) como paga.`,
+    });
+  }
 
   const categoryField = charge.financial_categories as unknown as { name: string }[] | { name: string } | null;
   const categoryName = Array.isArray(categoryField) ? categoryField[0]?.name : categoryField?.name;

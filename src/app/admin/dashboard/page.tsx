@@ -2,9 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Home, Users, DollarSign } from 'lucide-react';
+import { TrendingUp, Home, Users, DollarSign, BellRing } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
+
+interface ScheduleItem {
+  id: string;
+  kind: string;
+  date: string;
+}
+
+function toLocalDate(dateOnly: string): Date {
+  const [year, month, day] = dateOnly.split('-').map(Number);
+  return new Date(year, month - 1, day);
+}
 
 interface DashboardStats {
   totalProperties: number;
@@ -34,6 +45,7 @@ const PIE_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
 
   useEffect(() => {
     fetch('/api/admin/dashboard-stats')
@@ -42,7 +54,27 @@ export default function AdminDashboard() {
         if (json) setData(json);
       })
       .finally(() => setLoading(false));
+
+    fetch('/api/admin/schedule')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((items) => setScheduleItems(Array.isArray(items) ? items : []));
   }, []);
+
+  const notifications = (() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const weekFromNow = new Date(today);
+    weekFromNow.setDate(weekFromNow.getDate() + 7);
+
+    let overdue = 0;
+    let dueSoon = 0;
+    for (const item of scheduleItems) {
+      const date = toLocalDate(item.date);
+      if (date < today) overdue += 1;
+      else if (date <= weekFromNow) dueSoon += 1;
+    }
+    return { overdue, dueSoon, total: overdue + dueSoon };
+  })();
 
   if (loading || !data) {
     return (
@@ -74,6 +106,32 @@ export default function AdminDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-10">
+        {notifications.total > 0 && (
+          <Link
+            href="/admin/schedule"
+            className="flex items-center justify-between gap-4 mb-10 p-5 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
+                <BellRing className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <p className="font-bold text-navy-950">
+                  {notifications.overdue > 0 && (
+                    <span className="text-red-700">{notifications.overdue} vencido(s)</span>
+                  )}
+                  {notifications.overdue > 0 && notifications.dueSoon > 0 && ' · '}
+                  {notifications.dueSoon > 0 && `${notifications.dueSoon} vencendo nos próximos 7 dias`}
+                </p>
+                <p className="text-sm text-gray-600">
+                  Cobranças, despesas, repasses e contratos precisando de atenção
+                </p>
+              </div>
+            </div>
+            <span className="text-sm font-semibold text-navy-950 whitespace-nowrap">Ver cronograma →</span>
+          </Link>
+        )}
+
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">

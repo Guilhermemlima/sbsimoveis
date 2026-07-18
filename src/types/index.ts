@@ -331,7 +331,41 @@ export interface LeaseContract {
   insurance_responsible: BillingResponsible;
   condo_responsible: BillingResponsible;
   deposit_value: number;
+  deposit_status: DepositStatus;
+  deposit_received_date?: string | null;
+  deposit_returned_date?: string | null;
+  deposit_returned_amount?: number | null;
   status: ContractStatus;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type DepositStatus = 'held' | 'partially_refunded' | 'refunded' | 'forfeited';
+
+export interface DepositDeduction {
+  id: string;
+  lease_contract_id: string;
+  description: string;
+  amount: number;
+  created_by?: string | null;
+  created_at: string;
+}
+
+export interface OwnerPayout {
+  id: string;
+  owner_id: string;
+  property_id: string;
+  lease_contract_id: string;
+  rent_charge_id?: string | null;
+  competence_date: string;
+  rent_amount: number;
+  admin_fee_amount: number;
+  deductions_amount: number;
+  net_amount: number;
+  status: TransactionStatus;
+  paid_date?: string | null;
+  payment_method?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;

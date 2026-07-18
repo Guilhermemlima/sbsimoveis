@@ -310,6 +310,12 @@ export default function AdminDashboard() {
               >
                 Cobranças de Locação
               </Link>
+              <Link
+                href="/admin/payouts"
+                className="px-4 py-3 bg-lime-600 text-white rounded-lg hover:bg-lime-700 transition text-center font-semibold text-sm"
+              >
+                Repasses a Proprietários
+              </Link>
             </div>
           </div>
 

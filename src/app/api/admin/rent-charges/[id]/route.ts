@@ -21,7 +21,9 @@ export async function PATCH(
 
   const { data: charge } = await supabase
     .from('financial_transactions')
-    .select('id, property_id')
+    .select(
+      'id, type, property_id, lease_contract_id, owner_id, tenant_id, amount, competence_date, financial_categories(name)'
+    )
     .eq('id', id)
     .maybeSingle();
 
@@ -59,5 +61,41 @@ export async function PATCH(
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  const categoryField = charge.financial_categories as unknown as { name: string }[] | { name: string } | null;
+  const categoryName = Array.isArray(categoryField) ? categoryField[0]?.name : categoryField?.name;
+
+  const isRentRevenue =
+    body.status === 'paid' &&
+    charge.type === 'revenue' &&
+    categoryName === 'Aluguel Recebido' &&
+    charge.lease_contract_id &&
+    charge.owner_id;
+
+  if (isRentRevenue) {
+    const { data: lease } = await supabase
+      .from('lease_contracts')
+      .select('admin_fee_percentage')
+      .eq('id', charge.lease_contract_id)
+      .maybeSingle();
+
+    const rentAmount = Number(charge.amount);
+    const adminFeeAmount = lease ? rentAmount * (Number(lease.admin_fee_percentage) / 100) : 0;
+    const netAmount = rentAmount - adminFeeAmount;
+
+    await supabase.from('owner_payouts').insert({
+      owner_id: charge.owner_id,
+      property_id: charge.property_id,
+      lease_contract_id: charge.lease_contract_id,
+      rent_charge_id: charge.id,
+      competence_date: charge.competence_date,
+      rent_amount: rentAmount,
+      admin_fee_amount: adminFeeAmount,
+      deductions_amount: 0,
+      net_amount: netAmount,
+      status: 'pending',
+    });
+  }
+
   return NextResponse.json(data);
 }

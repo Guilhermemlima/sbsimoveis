@@ -2,9 +2,9 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Loader2, FileText } from 'lucide-react';
+import { ArrowLeft, Plus, X, Loader2, FileText, ShieldCheck } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
-import type { Property, PropertyOwner, Tenant, BillingResponsible } from '@/types';
+import type { Property, PropertyOwner, Tenant, BillingResponsible, DepositDeduction } from '@/types';
 
 interface Lease {
   id: string;
@@ -16,11 +16,28 @@ interface Lease {
   due_day: number;
   rent_value: number;
   admin_fee_percentage: number;
+  deposit_value: number;
+  deposit_status: string;
+  deposit_returned_amount?: number | null;
   status: string;
   ownerName: string;
   tenantName: string;
   properties?: { title: string; code: string; city: string; neighborhood: string };
 }
+
+const DEPOSIT_STATUS_LABEL: Record<string, string> = {
+  held: 'Retida',
+  partially_refunded: 'Devolvida parcialmente',
+  refunded: 'Devolvida',
+  forfeited: 'Retida integralmente',
+};
+
+const DEPOSIT_STATUS_COLOR: Record<string, string> = {
+  held: 'bg-blue-100 text-blue-800',
+  partially_refunded: 'bg-yellow-100 text-yellow-800',
+  refunded: 'bg-green-100 text-green-800',
+  forfeited: 'bg-red-100 text-red-800',
+};
 
 const RESPONSIBLE_LABEL: Record<BillingResponsible, string> = {
   tenant: 'Inquilino',
@@ -70,6 +87,14 @@ export default function LeasesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  const [depositLeaseId, setDepositLeaseId] = useState<string | null>(null);
+  const [deductions, setDeductions] = useState<DepositDeduction[]>([]);
+  const [deductionForm, setDeductionForm] = useState({ description: '', amount: '' });
+  const [settling, setSettling] = useState(false);
+  const [settleResult, setSettleResult] = useState<{ refundAmount: number; totalDeductions: number } | null>(
+    null
+  );
+
   const [form, setForm] = useState<Record<string, string>>({
     property_id: '',
     owner_id: '',
@@ -114,6 +139,48 @@ export default function LeasesPage() {
   );
 
   const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
+
+  const openDeposit = (leaseId: string) => {
+    setDepositLeaseId(leaseId);
+    setSettleResult(null);
+    setDeductionForm({ description: '', amount: '' });
+    fetch(`/api/admin/leases/${leaseId}/deductions`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setDeductions(Array.isArray(data) ? data : []));
+  };
+
+  const addDeduction = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!depositLeaseId || !deductionForm.description || !deductionForm.amount) return;
+
+    const res = await fetch(`/api/admin/leases/${depositLeaseId}/deductions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ description: deductionForm.description, amount: Number(deductionForm.amount) }),
+    });
+
+    if (res.ok) {
+      setDeductionForm({ description: '', amount: '' });
+      openDeposit(depositLeaseId);
+    }
+  };
+
+  const settleDeposit = async () => {
+    if (!depositLeaseId) return;
+    setSettling(true);
+    const res = await fetch(`/api/admin/leases/${depositLeaseId}/settle-deposit`, { method: 'POST' });
+    const data = await res.json();
+    setSettling(false);
+    if (res.ok) {
+      setSettleResult({ refundAmount: data.refundAmount, totalDeductions: data.totalDeductions });
+      loadLeases();
+    } else {
+      setError(data.error || 'Não foi possível finalizar a devolução.');
+    }
+  };
+
+  const depositLease = leases.find((l) => l.id === depositLeaseId);
+  const deductionsTotal = deductions.reduce((sum, d) => sum + Number(d.amount), 0);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -376,6 +443,7 @@ export default function LeasesPage() {
                   <th className="px-6 py-3">Aluguel</th>
                   <th className="px-6 py-3">Vencimento</th>
                   <th className="px-6 py-3">Status</th>
+                  <th className="px-6 py-3">Caução</th>
                 </tr>
               </thead>
               <tbody>
@@ -398,6 +466,20 @@ export default function LeasesPage() {
                         {STATUS_LABEL[lease.status]}
                       </span>
                     </td>
+                    <td className="px-6 py-4">
+                      {Number(lease.deposit_value) > 0 ? (
+                        <button
+                          onClick={() => openDeposit(lease.id)}
+                          className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs"
+                        >
+                          <ShieldCheck className="w-4 h-4" />
+                          R$ {Number(lease.deposit_value).toLocaleString('pt-BR')} ·{' '}
+                          {DEPOSIT_STATUS_LABEL[lease.deposit_status] ?? lease.deposit_status}
+                        </button>
+                      ) : (
+                        <span className="text-xs text-gray-400">Sem caução</span>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -409,6 +491,102 @@ export default function LeasesPage() {
           )}
           {loading && <div className="p-12 text-center text-gray-600">Carregando...</div>}
         </div>
+
+        {depositLease && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-navy-950 flex items-center gap-2">
+                    <ShieldCheck className="w-5 h-5 text-navy-600" />
+                    Caução — {depositLease.properties?.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Valor retido: R$ {Number(depositLease.deposit_value).toLocaleString('pt-BR')}
+                  </p>
+                </div>
+                <button onClick={() => setDepositLeaseId(null)} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <span
+                className={`inline-block px-3 py-1 rounded-full text-xs font-semibold mb-4 ${DEPOSIT_STATUS_COLOR[depositLease.deposit_status] ?? 'bg-gray-100 text-gray-700'}`}
+              >
+                {DEPOSIT_STATUS_LABEL[depositLease.deposit_status] ?? depositLease.deposit_status}
+              </span>
+
+              {depositLease.deposit_status !== 'held' ? (
+                <div className="bg-gray-50 rounded-lg p-4 text-sm text-navy-950">
+                  Devolução finalizada: R${' '}
+                  {Number(depositLease.deposit_returned_amount ?? 0).toLocaleString('pt-BR')}
+                </div>
+              ) : (
+                <>
+                  <div className="mb-4">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Deduções (vistoria de saída)</p>
+                    {deductions.length === 0 && (
+                      <p className="text-sm text-gray-400">Nenhuma dedução lançada.</p>
+                    )}
+                    <ul className="space-y-1">
+                      {deductions.map((d) => (
+                        <li key={d.id} className="flex justify-between text-sm border-b border-gray-100 py-1">
+                          <span className="text-gray-700">{d.description}</span>
+                          <span className="font-semibold text-navy-950">
+                            R$ {Number(d.amount).toLocaleString('pt-BR')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    {deductions.length > 0 && (
+                      <p className="text-right text-sm font-bold text-navy-950 mt-2">
+                        Total: R$ {deductionsTotal.toLocaleString('pt-BR')}
+                      </p>
+                    )}
+                  </div>
+
+                  <form onSubmit={addDeduction} className="flex gap-2 mb-6">
+                    <input
+                      placeholder="Descrição (ex: pintura, limpeza)"
+                      value={deductionForm.description}
+                      onChange={(e) => setDeductionForm((f) => ({ ...f, description: e.target.value }))}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                    />
+                    <div className="w-32">
+                      <CurrencyInput
+                        value={deductionForm.amount}
+                        onChange={(v) => setDeductionForm((f) => ({ ...f, amount: v }))}
+                      />
+                    </div>
+                    <button
+                      type="submit"
+                      className="px-3 py-2 bg-navy-100 text-navy-900 rounded-lg font-semibold text-sm hover:bg-navy-200"
+                    >
+                      <Plus className="w-4 h-4" />
+                    </button>
+                  </form>
+
+                  {settleResult ? (
+                    <div className="bg-green-50 border border-green-300 rounded-lg p-4 text-sm text-navy-950">
+                      Devolução finalizada. Valor devolvido ao inquilino: R${' '}
+                      {settleResult.refundAmount.toLocaleString('pt-BR')} (deduções: R${' '}
+                      {settleResult.totalDeductions.toLocaleString('pt-BR')})
+                    </div>
+                  ) : (
+                    <button
+                      onClick={settleDeposit}
+                      disabled={settling}
+                      className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 bg-navy-950 text-white rounded-lg font-bold hover:bg-navy-900 transition-colors disabled:opacity-50"
+                    >
+                      {settling && <Loader2 className="w-4 h-4 animate-spin" />}
+                      Finalizar devolução da caução
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

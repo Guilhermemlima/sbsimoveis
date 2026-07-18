@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 const REQUIRED_FIELDS = ['property_id', 'owner_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
 
@@ -123,6 +124,14 @@ export async function POST(request: NextRequest) {
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
   await supabase.from('properties').update({ status: 'rented' }).eq('id', body.property_id);
+
+  await logAudit({
+    user: user!,
+    action: 'create',
+    entityType: 'lease_contract',
+    entityId: data.id,
+    description: `Criou o contrato de locação do imóvel (R$ ${Number(data.rent_value).toFixed(2)}/mês).`,
+  });
 
   return NextResponse.json(data, { status: 201 });
 }

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 export async function POST(
   request: NextRequest,
@@ -75,6 +76,14 @@ export async function POST(
     await supabase.from('users').delete().eq('id', newUser.id);
     return NextResponse.json({ error: linkError.message }, { status: 500 });
   }
+
+  await logAudit({
+    user,
+    action: 'create',
+    entityType: 'user',
+    entityId: newUser.id,
+    description: `Criou o login do portal para o inquilino "${newUser.name}" (${newUser.email}).`,
+  });
 
   return NextResponse.json({ success: true, user: newUser });
 }

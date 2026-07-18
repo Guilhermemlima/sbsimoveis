@@ -23,7 +23,7 @@ export async function PATCH(
   const { data: charge } = await supabase
     .from('financial_transactions')
     .select(
-      'id, type, property_id, lease_contract_id, owner_id, tenant_id, amount, competence_date, financial_categories(name)'
+      'id, type, status, property_id, lease_contract_id, owner_id, tenant_id, amount, competence_date, financial_categories(name)'
     )
     .eq('id', id)
     .maybeSingle();
@@ -78,6 +78,7 @@ export async function PATCH(
 
   const isRentRevenue =
     body.status === 'paid' &&
+    charge.status !== 'paid' &&
     charge.type === 'revenue' &&
     categoryName === 'Aluguel Recebido' &&
     charge.lease_contract_id &&

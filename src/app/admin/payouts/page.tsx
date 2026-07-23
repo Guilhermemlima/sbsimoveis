@@ -11,6 +11,7 @@ interface Payout {
   rent_amount: number;
   admin_fee_amount: number;
   deductions_amount: number;
+  first_rent_retention_amount: number;
   net_amount: number;
   status: string;
   ownerName: string;
@@ -96,6 +97,7 @@ export default function PayoutsPage() {
                   <th className="px-6 py-3">Competência</th>
                   <th className="px-6 py-3">Aluguel</th>
                   <th className="px-6 py-3">Taxa Adm.</th>
+                  <th className="px-6 py-3">Retenção 1º Aluguel</th>
                   <th className="px-6 py-3">Deduções</th>
                   <th className="px-6 py-3">Líquido</th>
                   <th className="px-6 py-3">Status</th>
@@ -117,6 +119,11 @@ export default function PayoutsPage() {
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       - R$ {Number(payout.admin_fee_amount).toLocaleString('pt-BR')}
+                    </td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {Number(payout.first_rent_retention_amount) > 0
+                        ? `- R$ ${Number(payout.first_rent_retention_amount).toLocaleString('pt-BR')}`
+                        : '—'}
                     </td>
                     <td className="px-6 py-4 text-gray-600">
                       - R$ {Number(payout.deductions_amount).toLocaleString('pt-BR')}

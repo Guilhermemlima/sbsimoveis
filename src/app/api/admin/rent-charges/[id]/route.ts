@@ -87,13 +87,113 @@ export async function PATCH(
   if (isRentRevenue) {
     const { data: lease } = await supabase
       .from('lease_contracts')
-      .select('admin_fee_percentage')
+      .select(
+        'admin_fee_percentage, first_rent_retention_type, first_rent_retention_percentage, first_rent_retention_fixed_amount, first_rent_retention_basis, first_rent_retention_include_extra_fees, first_rent_retention_installments, first_rent_retention_installments_applied, first_rent_retention_total_amount'
+      )
       .eq('id', charge.lease_contract_id)
       .maybeSingle();
 
     const rentAmount = Number(charge.amount);
     const adminFeeAmount = lease ? rentAmount * (Number(lease.admin_fee_percentage) / 100) : 0;
-    const netAmount = rentAmount - adminFeeAmount;
+
+    let retentionInstallmentAmount = 0;
+    let retentionTotalAmount: number | null = lease?.first_rent_retention_total_amount
+      ? Number(lease.first_rent_retention_total_amount)
+      : null;
+
+    const retentionType = lease?.first_rent_retention_type ?? 'none';
+    const installments = lease?.first_rent_retention_installments ?? 1;
+    const installmentsApplied = lease?.first_rent_retention_installments_applied ?? 0;
+    const retentionPending = retentionType !== 'none' && installmentsApplied < installments;
+
+    if (retentionPending) {
+      if (retentionTotalAmount === null) {
+        let extraFeesSum = 0;
+        if (lease!.first_rent_retention_include_extra_fees) {
+          const { data: extraFees } = await supabase
+            .from('financial_transactions')
+            .select('amount')
+            .eq('lease_contract_id', charge.lease_contract_id)
+            .eq('center', 'rental')
+            .eq('type', 'expense')
+            .eq('competence_date', charge.competence_date);
+          extraFeesSum = (extraFees ?? []).reduce((sum, t) => sum + Number(t.amount), 0);
+        }
+
+        const base =
+          (lease!.first_rent_retention_basis === 'net' ? rentAmount - adminFeeAmount : rentAmount) +
+          extraFeesSum;
+
+        if (retentionType === 'custom_amount') {
+          retentionTotalAmount = Number(lease!.first_rent_retention_fixed_amount ?? 0);
+        } else {
+          const pct =
+            retentionType === 'fifty_percent'
+              ? 50
+              : retentionType === 'hundred_percent'
+                ? 100
+                : Number(lease!.first_rent_retention_percentage ?? 0);
+          retentionTotalAmount = base * (pct / 100);
+        }
+      }
+
+      const remainingInstallments = installments - installmentsApplied;
+      retentionInstallmentAmount =
+        remainingInstallments === 1
+          ? retentionTotalAmount - (retentionTotalAmount / installments) * (installments - 1)
+          : retentionTotalAmount / installments;
+      retentionInstallmentAmount = Math.round(retentionInstallmentAmount * 100) / 100;
+
+      await supabase
+        .from('lease_contracts')
+        .update({
+          first_rent_retention_total_amount: retentionTotalAmount,
+          first_rent_retention_installments_applied: installmentsApplied + 1,
+          first_rent_retention_applied_at:
+            installmentsApplied === 0 ? new Date().toISOString() : undefined,
+        })
+        .eq('id', charge.lease_contract_id);
+
+      if (retentionInstallmentAmount > 0) {
+        const { data: retentionCategory } = await supabase
+          .from('financial_categories')
+          .select('id')
+          .eq('name', 'Taxa do Primeiro Aluguel')
+          .eq('center', 'rental')
+          .maybeSingle();
+
+        if (retentionCategory) {
+          await supabase.from('financial_transactions').insert({
+            type: 'revenue',
+            center: 'rental',
+            category_id: retentionCategory.id,
+            property_id: charge.property_id,
+            lease_contract_id: charge.lease_contract_id,
+            created_by: user!.id,
+            description:
+              installments > 1
+                ? `Taxa do primeiro aluguel — parcela ${installmentsApplied + 1}/${installments}`
+                : 'Taxa do primeiro aluguel',
+            amount: retentionInstallmentAmount,
+            competence_date: charge.competence_date,
+            due_date: updates.paid_date as string,
+            paid_date: updates.paid_date as string,
+            payment_method: 'automatic',
+            status: 'paid',
+          });
+        }
+
+        await logAudit({
+          user: user!,
+          action: 'apply_retention',
+          entityType: 'lease_contract',
+          entityId: charge.lease_contract_id,
+          description: `Aplicou a retenção do primeiro aluguel: R$ ${retentionInstallmentAmount.toFixed(2)}${installments > 1 ? ` (parcela ${installmentsApplied + 1}/${installments})` : ''}.`,
+        });
+      }
+    }
+
+    const netAmount = rentAmount - adminFeeAmount - retentionInstallmentAmount;
 
     await supabase.from('owner_payouts').insert({
       owner_id: charge.owner_id,
@@ -104,6 +204,7 @@ export async function PATCH(
       rent_amount: rentAmount,
       admin_fee_amount: adminFeeAmount,
       deductions_amount: 0,
+      first_rent_retention_amount: retentionInstallmentAmount,
       net_amount: netAmount,
       status: 'pending',
     });

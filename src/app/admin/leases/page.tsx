@@ -19,6 +19,9 @@ interface Lease {
   deposit_value: number;
   deposit_status: string;
   deposit_returned_amount?: number | null;
+  first_rent_retention_type: string;
+  first_rent_retention_installments: number;
+  first_rent_retention_installments_applied: number;
   status: string;
   ownerName: string;
   tenantName: string;
@@ -69,6 +72,14 @@ const inputClass =
   'w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500 transition-colors';
 const labelClass = 'block text-sm font-semibold text-gray-700 mb-2';
 
+const RETENTION_TYPE_LABEL: Record<string, string> = {
+  none: 'Não reter o primeiro aluguel',
+  fifty_percent: 'Reter 50% do primeiro aluguel',
+  hundred_percent: 'Reter 100% do primeiro aluguel',
+  custom_percentage: 'Percentual personalizado',
+  custom_amount: 'Valor fixo personalizado',
+};
+
 const responsibleFields: { key: string; label: string }[] = [
   { key: 'water_responsible', label: 'Água' },
   { key: 'energy_responsible', label: 'Energia' },
@@ -111,6 +122,13 @@ export default function LeasesPage() {
     insurance_responsible: 'tenant',
     condo_responsible: 'tenant',
     notes: '',
+    first_rent_retention_type: 'none',
+    first_rent_retention_percentage: '',
+    first_rent_retention_fixed_amount: '',
+    first_rent_retention_basis: 'gross',
+    first_rent_retention_include_extra_fees: '',
+    first_rent_retention_installments: '1',
+    first_rent_retention_notes: '',
   });
 
   const loadLeases = () => {
@@ -137,6 +155,44 @@ export default function LeasesPage() {
     () => properties.filter((p) => p.status === 'available' || p.status === 'reserved'),
     [properties]
   );
+
+  const retentionPreview = useMemo(() => {
+    const rentValue = Number(form.rent_value) || 0;
+    const adminFeePct = Number(form.admin_fee_percentage) || 0;
+    const adminFeeAmount = rentValue * (adminFeePct / 100);
+    const type = form.first_rent_retention_type;
+
+    if (!rentValue || type === 'none') return null;
+
+    const base = form.first_rent_retention_basis === 'net' ? rentValue - adminFeeAmount : rentValue;
+
+    let retentionAmount = 0;
+    if (type === 'custom_amount') {
+      retentionAmount = Number(form.first_rent_retention_fixed_amount) || 0;
+    } else {
+      const pct =
+        type === 'fifty_percent'
+          ? 50
+          : type === 'hundred_percent'
+            ? 100
+            : Number(form.first_rent_retention_percentage) || 0;
+      retentionAmount = base * (pct / 100);
+    }
+
+    const installments = Number(form.first_rent_retention_installments) || 1;
+    const perInstallment = retentionAmount / installments;
+    const ownerNet = rentValue - adminFeeAmount - perInstallment;
+
+    return { rentValue, adminFeeAmount, retentionAmount, perInstallment, ownerNet, installments };
+  }, [
+    form.rent_value,
+    form.admin_fee_percentage,
+    form.first_rent_retention_type,
+    form.first_rent_retention_basis,
+    form.first_rent_retention_fixed_amount,
+    form.first_rent_retention_percentage,
+    form.first_rent_retention_installments,
+  ]);
 
   const set = (key: string, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -201,6 +257,8 @@ export default function LeasesPage() {
         rent_value: Number(form.rent_value),
         admin_fee_percentage: Number(form.admin_fee_percentage),
         deposit_value: Number(form.deposit_value),
+        first_rent_retention_installments: Number(form.first_rent_retention_installments) || 1,
+        first_rent_retention_include_extra_fees: form.first_rent_retention_include_extra_fees === 'true',
       }),
     });
     setSubmitting(false);
@@ -211,7 +269,20 @@ export default function LeasesPage() {
       return;
     }
 
-    setForm((f) => ({ ...f, property_id: '', owner_id: '', tenant_id: '', rent_value: '', end_date: '' }));
+    setForm((f) => ({
+      ...f,
+      property_id: '',
+      owner_id: '',
+      tenant_id: '',
+      rent_value: '',
+      end_date: '',
+      first_rent_retention_type: 'none',
+      first_rent_retention_percentage: '',
+      first_rent_retention_fixed_amount: '',
+      first_rent_retention_installments: '1',
+      first_rent_retention_include_extra_fees: '',
+      first_rent_retention_notes: '',
+    }));
     setFormOpen(false);
     loadLeases();
     fetch('/api/realtor/properties')
@@ -383,6 +454,136 @@ export default function LeasesPage() {
               <CurrencyInput value={form.deposit_value} onChange={(v) => set('deposit_value', v)} />
             </div>
 
+            <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 space-y-4">
+              <p className="text-sm font-semibold text-navy-950">
+                Taxa de administração do primeiro aluguel
+              </p>
+
+              <div>
+                <label className={labelClass}>Retenção</label>
+                <select
+                  value={form.first_rent_retention_type}
+                  onChange={(e) => set('first_rent_retention_type', e.target.value)}
+                  className={inputClass}
+                >
+                  {Object.entries(RETENTION_TYPE_LABEL).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {form.first_rent_retention_type !== 'none' && (
+                <>
+                  {form.first_rent_retention_type === 'custom_percentage' && (
+                    <div>
+                      <label className={labelClass}>Percentual retido (%)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        step="0.5"
+                        value={form.first_rent_retention_percentage}
+                        onChange={(e) => set('first_rent_retention_percentage', e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                  )}
+
+                  {form.first_rent_retention_type === 'custom_amount' && (
+                    <div>
+                      <label className={labelClass}>Valor fixo retido</label>
+                      <CurrencyInput
+                        value={form.first_rent_retention_fixed_amount}
+                        onChange={(v) => set('first_rent_retention_fixed_amount', v)}
+                      />
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {form.first_rent_retention_type !== 'custom_amount' && (
+                      <div>
+                        <label className={labelClass}>Base de cálculo</label>
+                        <select
+                          value={form.first_rent_retention_basis}
+                          onChange={(e) => set('first_rent_retention_basis', e.target.value)}
+                          className={inputClass}
+                        >
+                          <option value="gross">Valor bruto do aluguel</option>
+                          <option value="net">Valor líquido (após taxa de administração)</option>
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className={labelClass}>Dividir retenção em quantos meses</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={form.first_rent_retention_installments}
+                        onChange={(e) => set('first_rent_retention_installments', e.target.value)}
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+
+                  <label className="flex items-center gap-2 text-sm text-gray-700">
+                    <input
+                      type="checkbox"
+                      checked={form.first_rent_retention_include_extra_fees === 'true'}
+                      onChange={(e) =>
+                        set('first_rent_retention_include_extra_fees', e.target.checked ? 'true' : '')
+                      }
+                    />
+                    Incluir água, energia, IPTU, condomínio e seguro do primeiro mês no cálculo
+                  </label>
+
+                  <div>
+                    <label className={labelClass}>Observação interna (opcional)</label>
+                    <textarea
+                      value={form.first_rent_retention_notes}
+                      onChange={(e) => set('first_rent_retention_notes', e.target.value)}
+                      rows={2}
+                      className={inputClass}
+                      placeholder="Justificativa da retenção, combinado com o proprietário, etc."
+                    />
+                  </div>
+
+                  {retentionPreview && (
+                    <div className="bg-white border border-gold-300 rounded-lg p-4 text-sm space-y-1">
+                      <p className="font-semibold text-navy-950 mb-2">
+                        Prévia do cálculo (1ª parcela de {retentionPreview.installments})
+                      </p>
+                      <div className="flex justify-between text-gray-700">
+                        <span>Valor do primeiro aluguel</span>
+                        <span>R$ {retentionPreview.rentValue.toLocaleString('pt-BR')}</span>
+                      </div>
+                      <div className="flex justify-between text-gray-700">
+                        <span>Taxa de administração mensal</span>
+                        <span>- R$ {retentionPreview.adminFeeAmount.toLocaleString('pt-BR')}</span>
+                      </div>
+                      <div className="flex justify-between text-red-700 font-semibold">
+                        <span>Retido pela SBS Imóveis (nesta parcela)</span>
+                        <span>- R$ {retentionPreview.perInstallment.toLocaleString('pt-BR')}</span>
+                      </div>
+                      <div className="flex justify-between text-green-700 font-bold border-t border-gray-200 pt-1 mt-1">
+                        <span>Repasse líquido ao proprietário</span>
+                        <span>R$ {retentionPreview.ownerNet.toLocaleString('pt-BR')}</span>
+                      </div>
+                      {retentionPreview.installments > 1 && (
+                        <p className="text-xs text-gray-500 pt-1">
+                          Total retido ao longo de {retentionPreview.installments} meses: R${' '}
+                          {retentionPreview.retentionAmount.toLocaleString('pt-BR')}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
             <div className="md:col-span-2 bg-gray-50 rounded-lg p-4">
               <p className="text-sm font-semibold text-navy-950 mb-3">
                 Responsável por cada cobrança
@@ -444,6 +645,7 @@ export default function LeasesPage() {
                   <th className="px-6 py-3">Vencimento</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Caução</th>
+                  <th className="px-6 py-3">Retenção 1º Aluguel</th>
                 </tr>
               </thead>
               <tbody>
@@ -478,6 +680,22 @@ export default function LeasesPage() {
                         </button>
                       ) : (
                         <span className="text-xs text-gray-400">Sem caução</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 text-xs text-gray-600">
+                      {lease.first_rent_retention_type !== 'none' ? (
+                        <span>
+                          {RETENTION_TYPE_LABEL[lease.first_rent_retention_type] ?? lease.first_rent_retention_type}
+                          {lease.first_rent_retention_installments > 1 && (
+                            <>
+                              {' '}
+                              ({lease.first_rent_retention_installments_applied}/
+                              {lease.first_rent_retention_installments})
+                            </>
+                          )}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400">—</span>
                       )}
                     </td>
                   </tr>

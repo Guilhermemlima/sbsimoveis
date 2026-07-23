@@ -18,6 +18,16 @@ const UPDATABLE_FIELDS = [
   'notes',
 ];
 
+const RETENTION_FIELDS = [
+  'first_rent_retention_type',
+  'first_rent_retention_percentage',
+  'first_rent_retention_fixed_amount',
+  'first_rent_retention_basis',
+  'first_rent_retention_include_extra_fees',
+  'first_rent_retention_installments',
+  'first_rent_retention_notes',
+];
+
 const ENDED_STATUSES = ['terminated', 'cancelled', 'expired'];
 
 function isAuthorized(user: { role: string } | null) {
@@ -38,7 +48,7 @@ export async function PUT(
 
   const { data: existing } = await supabase
     .from('lease_contracts')
-    .select('id, property_id, realtor_id, status')
+    .select('id, property_id, realtor_id, status, first_rent_retention_installments_applied')
     .eq('id', id)
     .maybeSingle();
 
@@ -50,8 +60,17 @@ export async function PUT(
   }
 
   const body = await request.json();
+
+  const wantsRetentionChange = RETENTION_FIELDS.some((key) => body[key] !== undefined);
+  if (wantsRetentionChange && existing.first_rent_retention_installments_applied > 0) {
+    return NextResponse.json(
+      { error: 'A retenção do primeiro aluguel já foi aplicada e não pode mais ser alterada.' },
+      { status: 409 }
+    );
+  }
+
   const updates: Record<string, unknown> = {};
-  for (const key of UPDATABLE_FIELDS) {
+  for (const key of [...UPDATABLE_FIELDS, ...RETENTION_FIELDS]) {
     if (body[key] !== undefined) updates[key] = body[key];
   }
   updates.updated_at = new Date().toISOString();

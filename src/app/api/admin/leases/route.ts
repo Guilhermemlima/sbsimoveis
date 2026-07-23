@@ -115,6 +115,21 @@ export async function POST(request: NextRequest) {
       condo_responsible: body.condo_responsible || 'tenant',
       deposit_value: Number(body.deposit_value) || 0,
       deposit_received_date: Number(body.deposit_value) > 0 ? body.start_date : null,
+      first_rent_retention_type: body.first_rent_retention_type || 'none',
+      first_rent_retention_percentage:
+        body.first_rent_retention_type === 'custom_percentage'
+          ? Number(body.first_rent_retention_percentage) || 0
+          : null,
+      first_rent_retention_fixed_amount:
+        body.first_rent_retention_type === 'custom_amount'
+          ? Number(body.first_rent_retention_fixed_amount) || 0
+          : null,
+      first_rent_retention_basis: body.first_rent_retention_basis || 'gross',
+      first_rent_retention_include_extra_fees: !!body.first_rent_retention_include_extra_fees,
+      first_rent_retention_installments: Number(body.first_rent_retention_installments) || 1,
+      first_rent_retention_notes: body.first_rent_retention_notes || null,
+      first_rent_retention_configured_by:
+        body.first_rent_retention_type && body.first_rent_retention_type !== 'none' ? user!.id : null,
       status: 'active',
       notes: body.notes || null,
     })

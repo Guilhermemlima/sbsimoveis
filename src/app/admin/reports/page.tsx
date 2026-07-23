@@ -41,6 +41,7 @@ interface Payout {
 interface RentalSummary {
   rentCollected: number;
   adminFeeRevenue: number;
+  firstRentRetentionRevenue: number;
   rentalExpensesPaid: number;
   adminExpensesPaid: number;
   adminExpensesPending: number;
@@ -298,6 +299,12 @@ export default function AdminReportsPage() {
                 <p className="text-gray-600 text-sm mb-1">Taxa de administração (lucro)</p>
                 <p className="text-xl font-bold text-green-600">
                   R$ {rentalSummary.adminFeeRevenue.toLocaleString('pt-BR')}
+                </p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Receita — taxa do primeiro aluguel</p>
+                <p className="text-xl font-bold text-green-600">
+                  R$ {rentalSummary.firstRentRetentionRevenue.toLocaleString('pt-BR')}
                 </p>
               </div>
               <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">

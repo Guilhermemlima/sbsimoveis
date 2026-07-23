@@ -314,6 +314,15 @@ export interface Tenant {
   updated_at: string;
 }
 
+export type FirstRentRetentionType =
+  | 'none'
+  | 'fifty_percent'
+  | 'hundred_percent'
+  | 'custom_percentage'
+  | 'custom_amount';
+
+export type RetentionBasis = 'gross' | 'net';
+
 export interface LeaseContract {
   id: string;
   property_id: string;
@@ -335,6 +344,17 @@ export interface LeaseContract {
   deposit_received_date?: string | null;
   deposit_returned_date?: string | null;
   deposit_returned_amount?: number | null;
+  first_rent_retention_type: FirstRentRetentionType;
+  first_rent_retention_percentage?: number | null;
+  first_rent_retention_fixed_amount?: number | null;
+  first_rent_retention_basis: RetentionBasis;
+  first_rent_retention_include_extra_fees: boolean;
+  first_rent_retention_installments: number;
+  first_rent_retention_installments_applied: number;
+  first_rent_retention_total_amount?: number | null;
+  first_rent_retention_notes?: string | null;
+  first_rent_retention_configured_by?: string | null;
+  first_rent_retention_applied_at?: string | null;
   status: ContractStatus;
   notes?: string | null;
   created_at: string;
@@ -362,6 +382,7 @@ export interface OwnerPayout {
   rent_amount: number;
   admin_fee_amount: number;
   deductions_amount: number;
+  first_rent_retention_amount: number;
   net_amount: number;
   status: TransactionStatus;
   paid_date?: string | null;

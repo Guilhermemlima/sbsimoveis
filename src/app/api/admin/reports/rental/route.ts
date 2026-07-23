@@ -45,6 +45,10 @@ export async function GET() {
     .filter((t) => t.center === 'rental' && t.type === 'revenue' && t.categoryName === 'Taxa de Administração' && t.status === 'paid')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
+  const firstRentRetentionRevenue = rows
+    .filter((t) => t.center === 'rental' && t.type === 'revenue' && t.categoryName === 'Taxa do Primeiro Aluguel' && t.status === 'paid')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+
   const rentalExpensesPaid = rows
     .filter((t) => t.center === 'rental' && t.type === 'expense' && t.status === 'paid')
     .reduce((sum, t) => sum + Number(t.amount), 0);
@@ -63,12 +67,13 @@ export async function GET() {
   const summary = {
     rentCollected,
     adminFeeRevenue,
+    firstRentRetentionRevenue,
     rentalExpensesPaid,
     adminExpensesPaid,
     adminExpensesPending,
     payoutsPaid,
     payoutsPending,
-    agencyNetResult: adminFeeRevenue - adminExpensesPaid - rentalExpensesPaid,
+    agencyNetResult: adminFeeRevenue + firstRentRetentionRevenue - adminExpensesPaid - rentalExpensesPaid,
   };
 
   const enrichedPayouts = (payouts ?? []).map((p) => ({

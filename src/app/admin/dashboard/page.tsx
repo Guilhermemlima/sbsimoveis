@@ -214,6 +214,12 @@ export default function AdminDashboard() {
               >
                 Documentos
               </Link>
+              <Link
+                href="/admin/inspections"
+                className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold text-sm"
+              >
+                Vistorias
+              </Link>
             </div>
           </div>
 

@@ -428,6 +428,91 @@ export interface FinancialTransaction {
   updated_at: string;
 }
 
+// Inspections (Vistorias)
+export type InspectionType = 'entry' | 'exit' | 'periodic' | 'emergency' | 'maintenance' | 'custom';
+
+export type InspectionStatus =
+  | 'pending'
+  | 'scheduled'
+  | 'confirmed'
+  | 'in_progress'
+  | 'awaiting_signature'
+  | 'completed'
+  | 'cancelled'
+  | 'rescheduled'
+  | 'with_pending_issues';
+
+export type InspectionItemRating =
+  | 'new'
+  | 'excellent'
+  | 'good'
+  | 'regular'
+  | 'bad'
+  | 'damaged'
+  | 'not_applicable';
+
+export interface Inspection {
+  id: string;
+  property_id: string;
+  lease_contract_id?: string | null;
+  owner_id?: string | null;
+  tenant_id?: string | null;
+  type: InspectionType;
+  custom_type_label?: string | null;
+  status: InspectionStatus;
+  scheduled_date?: string | null;
+  scheduled_time?: string | null;
+  performed_date?: string | null;
+  performed_by?: string | null;
+  notes?: string | null;
+  final_report?: string | null;
+  inspector_signature_name?: string | null;
+  inspector_signed_at?: string | null;
+  tenant_signature_name?: string | null;
+  tenant_signed_at?: string | null;
+  owner_signature_name?: string | null;
+  owner_signed_at?: string | null;
+  is_locked: boolean;
+  version: number;
+  superseded_by?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InspectionEnvironment {
+  id: string;
+  inspection_id: string;
+  name: string;
+  order_index: number;
+  created_at: string;
+}
+
+export interface InspectionItem {
+  id: string;
+  environment_id: string;
+  item_type: string;
+  rating: InspectionItemRating;
+  comments?: string | null;
+  pre_existing_damage: boolean;
+  damage_during_lease: boolean;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface InspectionMedia {
+  id: string;
+  inspection_id: string;
+  environment_id?: string | null;
+  item_id?: string | null;
+  file_path: string;
+  file_type: string;
+  uploaded_by?: string | null;
+  created_at: string;
+}
+
 // Filter Types
 export interface PropertyFilters {
   search?: string;

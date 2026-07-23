@@ -220,6 +220,12 @@ export default function AdminDashboard() {
               >
                 Vistorias
               </Link>
+              <Link
+                href="/admin/maintenance"
+                className="px-4 py-3 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition text-center font-semibold text-sm"
+              >
+                Manutenção
+              </Link>
             </div>
           </div>
 

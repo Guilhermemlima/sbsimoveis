@@ -193,21 +193,51 @@ export async function PATCH(
       }
     }
 
-    const netAmount = rentAmount - adminFeeAmount - retentionInstallmentAmount;
+    const { data: pendingDeductions } = await supabase
+      .from('maintenance_owner_deductions')
+      .select('id, amount')
+      .eq('property_id', charge.property_id)
+      .eq('applied', false);
 
-    await supabase.from('owner_payouts').insert({
-      owner_id: charge.owner_id,
-      property_id: charge.property_id,
-      lease_contract_id: charge.lease_contract_id,
-      rent_charge_id: charge.id,
-      competence_date: charge.competence_date,
-      rent_amount: rentAmount,
-      admin_fee_amount: adminFeeAmount,
-      deductions_amount: 0,
-      first_rent_retention_amount: retentionInstallmentAmount,
-      net_amount: netAmount,
-      status: 'pending',
-    });
+    const deductionsAmount = (pendingDeductions ?? []).reduce((sum, d) => sum + Number(d.amount), 0);
+
+    const netAmount = rentAmount - adminFeeAmount - retentionInstallmentAmount - deductionsAmount;
+
+    const { data: newPayout } = await supabase
+      .from('owner_payouts')
+      .insert({
+        owner_id: charge.owner_id,
+        property_id: charge.property_id,
+        lease_contract_id: charge.lease_contract_id,
+        rent_charge_id: charge.id,
+        competence_date: charge.competence_date,
+        rent_amount: rentAmount,
+        admin_fee_amount: adminFeeAmount,
+        deductions_amount: deductionsAmount,
+        first_rent_retention_amount: retentionInstallmentAmount,
+        net_amount: netAmount,
+        status: 'pending',
+      })
+      .select('id')
+      .single();
+
+    if (newPayout && (pendingDeductions ?? []).length > 0) {
+      await supabase
+        .from('maintenance_owner_deductions')
+        .update({ applied: true, owner_payout_id: newPayout.id })
+        .in(
+          'id',
+          (pendingDeductions ?? []).map((d) => d.id)
+        );
+
+      await logAudit({
+        user: user!,
+        action: 'apply_maintenance_deduction',
+        entityType: 'owner_payout',
+        entityId: newPayout.id,
+        description: `Aplicou R$ ${deductionsAmount.toFixed(2)} em deduções de manutenção pendentes no repasse.`,
+      });
+    }
 
     if (adminFeeAmount > 0) {
       const { data: feeCategory } = await supabase

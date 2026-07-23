@@ -513,6 +513,79 @@ export interface InspectionMedia {
   created_at: string;
 }
 
+// Maintenance (Manutenção)
+export type MaintenanceCategory =
+  | 'plumbing'
+  | 'electrical'
+  | 'structural'
+  | 'appliance'
+  | 'hvac'
+  | 'pest_control'
+  | 'painting'
+  | 'locksmith'
+  | 'other';
+
+export type MaintenancePriority = 'low' | 'normal' | 'high' | 'urgent';
+
+export type MaintenanceStatus =
+  | 'requested'
+  | 'under_review'
+  | 'approved'
+  | 'rejected'
+  | 'in_progress'
+  | 'completed'
+  | 'cancelled';
+
+export type MaintenanceResponsibility = 'pending_definition' | 'owner' | 'tenant' | 'agency' | 'insurance' | 'shared';
+
+export type MaintenanceFinancialAction =
+  | 'none'
+  | 'owner_deduction'
+  | 'tenant_charge'
+  | 'agency_expense'
+  | 'insurance_claim'
+  | 'shared';
+
+export interface MaintenanceRequest {
+  id: string;
+  property_id: string;
+  lease_contract_id?: string | null;
+  inspection_id?: string | null;
+  owner_id?: string | null;
+  tenant_id?: string | null;
+  title: string;
+  description?: string | null;
+  category: MaintenanceCategory;
+  priority: MaintenancePriority;
+  status: MaintenanceStatus;
+  responsibility: MaintenanceResponsibility;
+  responsibility_notes?: string | null;
+  owner_share_percentage: number;
+  requested_by?: string | null;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  review_notes?: string | null;
+  estimated_cost?: number | null;
+  actual_cost?: number | null;
+  financial_action: MaintenanceFinancialAction;
+  financial_applied: boolean;
+  financial_applied_at?: string | null;
+  completed_at?: string | null;
+  completed_by?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MaintenanceMedia {
+  id: string;
+  maintenance_request_id: string;
+  file_path: string;
+  file_type: string;
+  uploaded_by?: string | null;
+  created_at: string;
+}
+
 // Filter Types
 export interface PropertyFilters {
   search?: string;

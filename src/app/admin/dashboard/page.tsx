@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { TrendingUp, Home, Users, DollarSign, BellRing } from 'lucide-react';
+import { TrendingUp, Home, Users, DollarSign, BellRing, AlertTriangle, Wrench, ClipboardCheck, FileEdit, Percent } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
 
@@ -42,10 +42,32 @@ interface DashboardData {
 
 const PIE_COLORS = ['#3b82f6', '#f59e0b', '#10b981', '#ef4444', '#8b5cf6', '#ec4899', '#6b7280', '#14b8a6'];
 
+interface OperationalAlerts {
+  contractsExpiringSoon: { lease_contract_id: string; property?: { title: string; code: string }; days_until_end: number }[];
+  rentAdjustmentOverdue: { lease_contract_id: string; property?: { title: string; code: string }; days_since_last_adjustment: number }[];
+  maintenanceAwaitingReview: { id: string; title: string; priority: string; properties?: { title: string; code: string } }[];
+  inspectionsPending: { id: string; type: string; status: string; properties?: { title: string; code: string } }[];
+  amendmentsPendingSignature: {
+    id: string;
+    title: string;
+    lease_contracts?: { properties?: { title: string; code: string } };
+  }[];
+  occupancy: { total: number; occupied: number };
+  counts: {
+    contractsExpiringSoon: number;
+    rentAdjustmentOverdue: number;
+    maintenanceAwaitingReview: number;
+    inspectionsPending: number;
+    amendmentsPendingSignature: number;
+    overdueRentCharges: number;
+  };
+}
+
 export default function AdminDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
   const [scheduleItems, setScheduleItems] = useState<ScheduleItem[]>([]);
+  const [alerts, setAlerts] = useState<OperationalAlerts | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/dashboard-stats')
@@ -58,6 +80,10 @@ export default function AdminDashboard() {
     fetch('/api/admin/schedule')
       .then((res) => (res.ok ? res.json() : []))
       .then((items) => setScheduleItems(Array.isArray(items) ? items : []));
+
+    fetch('/api/admin/alerts')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => setAlerts(json));
   }, []);
 
   const notifications = (() => {
@@ -264,6 +290,120 @@ export default function AdminDashboard() {
             </div>
             <span className="text-sm font-semibold text-navy-950 whitespace-nowrap">Ver cronograma →</span>
           </Link>
+        )}
+
+        {alerts && (
+          <div className="mb-10">
+            <h2 className="text-lg font-bold text-navy-950 mb-4">Painel Operacional de Locação</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-4">
+              <div className="bg-white p-4 rounded-xl shadow border border-transparent">
+                <div className="flex items-center justify-between mb-1">
+                  <Percent className="w-5 h-5 text-navy-500" />
+                </div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {alerts.occupancy.total > 0
+                    ? Math.round((alerts.occupancy.occupied / alerts.occupancy.total) * 100)
+                    : 0}
+                  %
+                </p>
+                <p className="text-xs text-gray-600">
+                  Ocupação ({alerts.occupancy.occupied}/{alerts.occupancy.total})
+                </p>
+              </div>
+
+              <Link
+                href="/admin/rent-charges"
+                className={`p-4 rounded-xl shadow border transition ${alerts.counts.overdueRentCharges > 0 ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-white border-transparent'}`}
+              >
+                <AlertTriangle className={`w-5 h-5 mb-1 ${alerts.counts.overdueRentCharges > 0 ? 'text-red-600' : 'text-gray-400'}`} />
+                <p className="text-2xl font-bold text-gray-900">{alerts.counts.overdueRentCharges}</p>
+                <p className="text-xs text-gray-600">Aluguéis em atraso</p>
+              </Link>
+
+              <Link
+                href="/admin/leases"
+                className={`p-4 rounded-xl shadow border transition ${alerts.counts.contractsExpiringSoon > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100' : 'bg-white border-transparent'}`}
+              >
+                <Home className={`w-5 h-5 mb-1 ${alerts.counts.contractsExpiringSoon > 0 ? 'text-amber-600' : 'text-gray-400'}`} />
+                <p className="text-2xl font-bold text-gray-900">{alerts.counts.contractsExpiringSoon}</p>
+                <p className="text-xs text-gray-600">Contratos vencendo em 60 dias</p>
+              </Link>
+
+              <Link
+                href="/admin/leases"
+                className={`p-4 rounded-xl shadow border transition ${alerts.counts.rentAdjustmentOverdue > 0 ? 'bg-amber-50 border-amber-200 hover:bg-amber-100' : 'bg-white border-transparent'}`}
+              >
+                <TrendingUp className={`w-5 h-5 mb-1 ${alerts.counts.rentAdjustmentOverdue > 0 ? 'text-amber-600' : 'text-gray-400'}`} />
+                <p className="text-2xl font-bold text-gray-900">{alerts.counts.rentAdjustmentOverdue}</p>
+                <p className="text-xs text-gray-600">Sem reajuste há 12+ meses</p>
+              </Link>
+
+              <Link
+                href="/admin/maintenance"
+                className={`p-4 rounded-xl shadow border transition ${alerts.counts.maintenanceAwaitingReview > 0 ? 'bg-orange-50 border-orange-200 hover:bg-orange-100' : 'bg-white border-transparent'}`}
+              >
+                <Wrench className={`w-5 h-5 mb-1 ${alerts.counts.maintenanceAwaitingReview > 0 ? 'text-orange-600' : 'text-gray-400'}`} />
+                <p className="text-2xl font-bold text-gray-900">{alerts.counts.maintenanceAwaitingReview}</p>
+                <p className="text-xs text-gray-600">Manutenções aguardando análise</p>
+              </Link>
+
+              <Link
+                href="/admin/inspections"
+                className={`p-4 rounded-xl shadow border transition ${alerts.counts.inspectionsPending > 0 ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100' : 'bg-white border-transparent'}`}
+              >
+                <ClipboardCheck className={`w-5 h-5 mb-1 ${alerts.counts.inspectionsPending > 0 ? 'text-emerald-600' : 'text-gray-400'}`} />
+                <p className="text-2xl font-bold text-gray-900">{alerts.counts.inspectionsPending}</p>
+                <p className="text-xs text-gray-600">Vistorias pendentes</p>
+              </Link>
+            </div>
+
+            {alerts.counts.amendmentsPendingSignature > 0 && (
+              <Link
+                href="/admin/amendments"
+                className="flex items-center gap-3 p-4 rounded-xl border border-cyan-200 bg-cyan-50 hover:bg-cyan-100 transition mb-4"
+              >
+                <FileEdit className="w-5 h-5 text-cyan-700" />
+                <p className="text-sm font-semibold text-navy-950">
+                  {alerts.counts.amendmentsPendingSignature} aditivo(s) aguardando assinatura
+                </p>
+              </Link>
+            )}
+
+            {(alerts.contractsExpiringSoon.length > 0 || alerts.rentAdjustmentOverdue.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {alerts.contractsExpiringSoon.length > 0 && (
+                  <div className="bg-white rounded-xl shadow border border-gray-100 p-4">
+                    <p className="text-sm font-bold text-navy-950 mb-2">Próximos vencimentos</p>
+                    <ul className="space-y-1">
+                      {alerts.contractsExpiringSoon.slice(0, 5).map((c) => (
+                        <li key={c.lease_contract_id} className="text-xs text-gray-600 flex justify-between">
+                          <span>
+                            {c.property?.title} · {c.property?.code}
+                          </span>
+                          <span className="font-semibold">{c.days_until_end} dia(s)</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {alerts.rentAdjustmentOverdue.length > 0 && (
+                  <div className="bg-white rounded-xl shadow border border-gray-100 p-4">
+                    <p className="text-sm font-bold text-navy-950 mb-2">Sem reajuste há mais tempo</p>
+                    <ul className="space-y-1">
+                      {alerts.rentAdjustmentOverdue.slice(0, 5).map((c) => (
+                        <li key={c.lease_contract_id} className="text-xs text-gray-600 flex justify-between">
+                          <span>
+                            {c.property?.title} · {c.property?.code}
+                          </span>
+                          <span className="font-semibold">{Math.round(c.days_since_last_adjustment / 30)} mês(es)</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {/* KPI Cards */}

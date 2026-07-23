@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && user.role === 'admin';
@@ -68,6 +69,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     .select();
 
   if (itemsError) return NextResponse.json({ error: itemsError.message }, { status: 400 });
+
+  await logAudit({
+    user: user!,
+    action: 'update',
+    entityType: 'inspection',
+    entityId: id,
+    description: `Adicionou o ambiente "${name}" à vistoria.`,
+  });
 
   return NextResponse.json({ environment, items }, { status: 201 });
 }

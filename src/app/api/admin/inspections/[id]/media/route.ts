@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && user.role === 'admin';
@@ -72,6 +73,14 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   }
 
   const { data: signed } = await supabase.storage.from(BUCKET).createSignedUrl(path, 3600);
+
+  await logAudit({
+    user: user!,
+    action: 'update',
+    entityType: 'inspection',
+    entityId: id,
+    description: `Anexou uma foto à vistoria.`,
+  });
 
   return NextResponse.json({ ...media, url: signed?.signedUrl ?? null }, { status: 201 });
 }

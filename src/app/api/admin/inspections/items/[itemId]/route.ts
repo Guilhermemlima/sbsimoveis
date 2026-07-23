@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { logAudit } from '@/lib/audit';
 
 function isAuthorized(user: { role: string } | null) {
   return !!user && user.role === 'admin';
@@ -17,15 +18,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
 
   const { data: item } = await supabase
     .from('inspection_items')
-    .select('id, environment_id, inspection_environments(inspection_id, inspections(is_locked))')
+    .select('id, environment_id, item_type, inspection_environments(inspection_id, inspections(is_locked))')
     .eq('id', itemId)
     .maybeSingle();
 
   if (!item) return NextResponse.json({ error: 'Item não encontrado.' }, { status: 404 });
 
   const envField = item.inspection_environments as unknown as
-    | { inspections: { is_locked: boolean } | { is_locked: boolean }[] }
-    | { inspections: { is_locked: boolean } | { is_locked: boolean }[] }[]
+    | { inspection_id: string; inspections: { is_locked: boolean } | { is_locked: boolean }[] }
+    | { inspection_id: string; inspections: { is_locked: boolean } | { is_locked: boolean }[] }[]
     | null;
   const env = Array.isArray(envField) ? envField[0] : envField;
   const inspectionField = env?.inspections;
@@ -55,5 +56,16 @@ export async function PATCH(request: NextRequest, { params }: { params: Promise<
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  if (updates.rating !== undefined) {
+    await logAudit({
+      user: user!,
+      action: 'update',
+      entityType: 'inspection',
+      entityId: env?.inspection_id,
+      description: `Avaliou o item "${item.item_type}" como "${updates.rating}"${updates.damage_during_lease ? ' (dano na locação)' : ''}.`,
+    });
+  }
+
   return NextResponse.json(data);
 }

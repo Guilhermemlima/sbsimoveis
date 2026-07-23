@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/auth/session';
 import { createServiceRoleClient } from '@/lib/supabase';
-import { permissionsForAccessLevel, type AccessLevel } from '@/lib/auth/permissions';
+import { permissionsForAccessLevel, STAFF_ROLES, type AccessLevel } from '@/lib/auth/permissions';
 import { logAudit } from '@/lib/audit';
+import type { UserRole } from '@/types';
 
 export async function GET() {
   const currentUser = await getCurrentUser();
@@ -15,7 +16,7 @@ export async function GET() {
   const { data: users, error } = await supabase
     .from('users')
     .select('id, name, email, phone, role, is_active, created_at')
-    .in('role', ['admin', 'realtor'])
+    .in('role', ['admin', 'realtor', ...STAFF_ROLES])
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -51,6 +52,7 @@ export async function POST(request: NextRequest) {
   const password = String(body.password ?? '');
   const phone = body.phone ? String(body.phone).trim() : undefined;
   const accessLevel: AccessLevel = body.accessLevel === 'full' ? 'full' : 'limited';
+  const role: UserRole = STAFF_ROLES.includes(body.role) ? body.role : 'realtor';
 
   if (!name || !email || password.length < 6) {
     return NextResponse.json(
@@ -75,12 +77,25 @@ export async function POST(request: NextRequest) {
 
   const { data: newUser, error: userError } = await supabase
     .from('users')
-    .insert({ name, email, phone, role: 'realtor', password_hash: passwordHash, is_active: true })
+    .insert({ name, email, phone, role, password_hash: passwordHash, is_active: true })
     .select('id, name, email, phone, role, is_active, created_at')
     .single();
 
   if (userError || !newUser) {
     return NextResponse.json({ error: userError?.message ?? 'Falha ao criar usuário.' }, { status: 500 });
+  }
+
+  if (role !== 'realtor') {
+    await logAudit({
+      user: currentUser,
+      action: 'create',
+      entityType: 'user',
+      entityId: newUser.id,
+      description: `Criou o login de equipe "${newUser.name}" (${newUser.email}) com papel "${role}".`,
+      metadata: { role },
+    });
+
+    return NextResponse.json({ ...newUser, permissions: [] }, { status: 201 });
   }
 
   const { error: realtorError } = await supabase

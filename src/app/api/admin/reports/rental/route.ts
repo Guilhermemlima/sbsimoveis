@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessFinance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!canAccessFinance(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 

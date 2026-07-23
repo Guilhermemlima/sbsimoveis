@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessInspections } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessInspections;
 
 const REQUIRED_FIELDS = ['property_id', 'type'];
 

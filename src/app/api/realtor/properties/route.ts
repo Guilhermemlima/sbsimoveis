@@ -19,9 +19,11 @@ const REQUIRED_FIELDS = [
   'built_area',
 ];
 
+const READ_ONLY_ROLES = ['finance', 'inspector', 'maintenance_staff'];
+
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || (user.role !== 'realtor' && user.role !== 'admin')) {
+  if (!user || (user.role !== 'realtor' && user.role !== 'admin' && !READ_ONLY_ROLES.includes(user.role))) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 
@@ -32,7 +34,7 @@ export async function GET() {
     .is('deleted_at', null)
     .order('created_at', { ascending: false });
 
-  if (!canManageAllProperties(user)) {
+  if (user.role === 'realtor' && !canManageAllProperties(user)) {
     query = query.eq('realtor_id', user.id);
   }
 

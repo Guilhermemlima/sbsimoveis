@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessFinance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-function isAdmin(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAdmin = canAccessFinance;
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const user = await getCurrentUser();

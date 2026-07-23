@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessFinance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 function monthLabel(date: Date): string {
@@ -16,7 +17,7 @@ function clampDueDate(year: number, month: number, day: number): string {
 
 export async function POST() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!canAccessFinance(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 
@@ -78,7 +79,7 @@ export async function POST() {
       lease_contract_id: lease.id,
       owner_id: lease.owner_id,
       tenant_id: lease.tenant_id,
-      created_by: user.id,
+      created_by: user!.id,
       description: `Aluguel — ${monthLabel(now)}`,
       amount: lease.rent_value,
       competence_date: competenceDate,

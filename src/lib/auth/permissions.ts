@@ -8,6 +8,30 @@ export function canManageSales(user: { role: UserRole; permissions: string[] }):
   return user.role === 'admin' || user.permissions.includes('manage_sales');
 }
 
+export function canAccessFinance(user: { role: UserRole } | null): boolean {
+  return !!user && (user.role === 'admin' || user.role === 'finance');
+}
+
+export function hasFullPropertyAccess(user: { role: UserRole; permissions: string[] }): boolean {
+  return canManageAllProperties(user) || user.role === 'finance';
+}
+
+export function canAccessInspections(user: { role: UserRole } | null): boolean {
+  return !!user && (user.role === 'admin' || user.role === 'inspector');
+}
+
+export function canAccessMaintenance(user: { role: UserRole } | null): boolean {
+  return !!user && (user.role === 'admin' || user.role === 'maintenance_staff');
+}
+
+export const STAFF_ROLES: UserRole[] = ['finance', 'inspector', 'maintenance_staff'];
+
+export const STAFF_ROLE_LABEL: Record<string, string> = {
+  finance: 'Financeiro',
+  inspector: 'Vistoriador',
+  maintenance_staff: 'Responsável pela Manutenção',
+};
+
 export type AccessLevel = 'full' | 'limited';
 
 export const FULL_ACCESS_PERMISSIONS: RealtorPermission[] = [

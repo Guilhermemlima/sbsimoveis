@@ -18,6 +18,9 @@ function defaultRedirectFor(role: string): string {
   if (role === 'admin') return '/admin/dashboard';
   if (role === 'realtor') return '/realtor/dashboard';
   if (role === 'tenant') return '/tenant/dashboard';
+  if (role === 'finance') return '/staff/finance';
+  if (role === 'inspector') return '/staff/inspector';
+  if (role === 'maintenance_staff') return '/staff/maintenance';
   return '/client/dashboard';
 }
 

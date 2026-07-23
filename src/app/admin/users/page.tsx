@@ -9,11 +9,19 @@ interface ManagedUser {
   name: string;
   email: string;
   phone?: string;
-  role: 'admin' | 'realtor';
+  role: 'admin' | 'realtor' | 'finance' | 'inspector' | 'maintenance_staff';
   is_active: boolean;
   created_at: string;
   permissions: string[];
 }
+
+const ROLE_LABEL: Record<string, string> = {
+  admin: 'Admin',
+  realtor: 'Corretor',
+  finance: 'Financeiro',
+  inspector: 'Vistoriador',
+  maintenance_staff: 'Responsável pela Manutenção',
+};
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<ManagedUser[]>([]);
@@ -27,6 +35,7 @@ export default function AdminUsersPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [accessLevel, setAccessLevel] = useState<'full' | 'limited'>('limited');
+  const [role, setRole] = useState<'realtor' | 'finance' | 'inspector' | 'maintenance_staff'>('realtor');
 
   const loadUsers = () => {
     fetch('/api/admin/users')
@@ -49,7 +58,7 @@ export default function AdminUsersPage() {
     const res = await fetch('/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone, password, accessLevel }),
+      body: JSON.stringify({ name, email, phone, password, accessLevel, role }),
     });
 
     setSubmitting(false);
@@ -65,6 +74,7 @@ export default function AdminUsersPage() {
     setPhone('');
     setPassword('');
     setAccessLevel('limited');
+    setRole('realtor');
     setFormOpen(false);
     loadUsers();
   };
@@ -115,7 +125,7 @@ export default function AdminUsersPage() {
             className="inline-flex items-center gap-2 px-5 py-3 bg-navy-900 text-white rounded-lg font-semibold hover:bg-navy-800 transition-colors"
           >
             <UserPlus className="w-5 h-5" />
-            {formOpen ? 'Cancelar' : 'Novo Login de Corretor'}
+            {formOpen ? 'Cancelar' : 'Novo Login'}
           </button>
         </div>
 
@@ -179,34 +189,51 @@ export default function AdminUsersPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Nível de acesso
-              </label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50">
-                  <input
-                    type="radio"
-                    name="accessLevel"
-                    checked={accessLevel === 'limited'}
-                    onChange={() => setAccessLevel('limited')}
-                  />
-                  <span className="text-sm">
-                    <strong>Limitado</strong> — só cadastra e anuncia os próprios imóveis
-                  </span>
-                </label>
-                <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50">
-                  <input
-                    type="radio"
-                    name="accessLevel"
-                    checked={accessLevel === 'full'}
-                    onChange={() => setAccessLevel('full')}
-                  />
-                  <span className="text-sm">
-                    <strong>Completo</strong> — acesso geral a todo o sistema
-                  </span>
-                </label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Papel</label>
+              <div className="flex flex-wrap gap-4">
+                {(['realtor', 'finance', 'inspector', 'maintenance_staff'] as const).map((r) => (
+                  <label
+                    key={r}
+                    className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50"
+                  >
+                    <input type="radio" name="role" checked={role === r} onChange={() => setRole(r)} />
+                    <span className="text-sm">{ROLE_LABEL[r]}</span>
+                  </label>
+                ))}
               </div>
             </div>
+
+            {role === 'realtor' && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Nível de acesso
+                </label>
+                <div className="flex gap-4">
+                  <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50">
+                    <input
+                      type="radio"
+                      name="accessLevel"
+                      checked={accessLevel === 'limited'}
+                      onChange={() => setAccessLevel('limited')}
+                    />
+                    <span className="text-sm">
+                      <strong>Limitado</strong> — só cadastra e anuncia os próprios imóveis
+                    </span>
+                  </label>
+                  <label className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50">
+                    <input
+                      type="radio"
+                      name="accessLevel"
+                      checked={accessLevel === 'full'}
+                      onChange={() => setAccessLevel('full')}
+                    />
+                    <span className="text-sm">
+                      <strong>Completo</strong> — acesso geral a todo o sistema
+                    </span>
+                  </label>
+                </div>
+              </div>
+            )}
 
             <div className="md:col-span-2">
               <button
@@ -242,7 +269,7 @@ export default function AdminUsersPage() {
                   <tr key={user.id} className="border-t border-gray-100">
                     <td className="px-6 py-4 font-medium text-navy-950">{user.name}</td>
                     <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                    <td className="px-6 py-4 capitalize">{user.role}</td>
+                    <td className="px-6 py-4">{ROLE_LABEL[user.role] ?? user.role}</td>
                     <td className="px-6 py-4">
                       {user.role === 'realtor' ? (
                         <select

@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessMaintenance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessMaintenance;
 
 const BUCKET = 'property-documents';
 const MAX_SIZE = 15 * 1024 * 1024;

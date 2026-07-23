@@ -1,5 +1,13 @@
 // User Types
-export type UserRole = 'admin' | 'realtor' | 'client' | 'visitor' | 'tenant';
+export type UserRole =
+  | 'admin'
+  | 'realtor'
+  | 'client'
+  | 'visitor'
+  | 'tenant'
+  | 'finance'
+  | 'inspector'
+  | 'maintenance_staff';
 
 export interface User {
   id: string;

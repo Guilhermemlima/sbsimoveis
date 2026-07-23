@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessFinance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
-function isAdmin(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAdmin = canAccessFinance;
 
 async function getRentalProfitPool(supabase: ReturnType<typeof createServiceRoleClient>) {
   const { data: settings } = await supabase

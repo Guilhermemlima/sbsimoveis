@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { canManageAllProperties } from '@/lib/auth/permissions';
+import { canAccessFinance, hasFullPropertyAccess } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessFinance;
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -19,7 +17,7 @@ export async function GET() {
     .select('*, properties(title, code)')
     .order('competence_date', { ascending: false });
 
-  if (!canManageAllProperties(user!)) {
+  if (!hasFullPropertyAccess(user!)) {
     const { data: ownProperties } = await supabase
       .from('properties')
       .select('id')

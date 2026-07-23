@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessInspections } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessInspections;
 
 const RATING_RANK: Record<string, number | null> = {
   damaged: 0,

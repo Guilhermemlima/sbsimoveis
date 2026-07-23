@@ -1,12 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { canManageAllProperties } from '@/lib/auth/permissions';
+import { canAccessFinance, hasFullPropertyAccess } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessFinance;
 
 export async function PATCH(
   request: NextRequest,
@@ -30,7 +28,7 @@ export async function PATCH(
     return NextResponse.json({ error: 'Repasse não encontrado.' }, { status: 404 });
   }
 
-  if (!canManageAllProperties(user!)) {
+  if (!hasFullPropertyAccess(user!)) {
     const { data: property } = await supabase
       .from('properties')
       .select('realtor_id')

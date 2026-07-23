@@ -6,9 +6,13 @@ function isAuthorized(user: { role: string } | null) {
   return !!user && user.role === 'admin';
 }
 
+function canRead(user: { role: string } | null) {
+  return !!user && ['admin', 'finance', 'inspector', 'maintenance_staff'].includes(user.role);
+}
+
 export async function GET() {
   const user = await getCurrentUser();
-  if (!isAuthorized(user)) {
+  if (!canRead(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 

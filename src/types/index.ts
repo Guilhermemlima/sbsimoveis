@@ -586,6 +586,54 @@ export interface MaintenanceMedia {
   created_at: string;
 }
 
+// Lease Amendments (Aditivos)
+export type AmendmentType =
+  | 'rent_adjustment'
+  | 'term_extension'
+  | 'responsibility_change'
+  | 'tenant_change'
+  | 'owner_change'
+  | 'other';
+
+export type AmendmentStatus = 'draft' | 'pending_signature' | 'signed' | 'cancelled';
+
+export interface AmendmentChange {
+  from: unknown;
+  to: unknown;
+}
+
+export interface AmendmentTemplate {
+  id: string;
+  type: AmendmentType;
+  name: string;
+  content_template: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+export interface LeaseAmendment {
+  id: string;
+  lease_contract_id: string;
+  template_id?: string | null;
+  type: AmendmentType;
+  version: number;
+  title: string;
+  content: string;
+  changes: Record<string, AmendmentChange>;
+  status: AmendmentStatus;
+  effective_date?: string | null;
+  agency_signature_name?: string | null;
+  agency_signed_at?: string | null;
+  owner_signature_name?: string | null;
+  owner_signed_at?: string | null;
+  tenant_signature_name?: string | null;
+  tenant_signed_at?: string | null;
+  applied_at?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 // Filter Types
 export interface PropertyFilters {
   search?: string;

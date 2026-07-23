@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Plus, X, Loader2, FileText, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Plus, X, Loader2, FileText, ShieldCheck, FileEdit } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property, PropertyOwner, Tenant, BillingResponsible, DepositDeduction } from '@/types';
 
@@ -646,6 +646,7 @@ export default function LeasesPage() {
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Caução</th>
                   <th className="px-6 py-3">Retenção 1º Aluguel</th>
+                  <th className="px-6 py-3">Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -697,6 +698,15 @@ export default function LeasesPage() {
                       ) : (
                         <span className="text-gray-400">—</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <Link
+                        href={`/admin/amendments?lease=${lease.id}`}
+                        className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs"
+                      >
+                        <FileEdit className="w-4 h-4" />
+                        Aditivos
+                      </Link>
                     </td>
                   </tr>
                 ))}

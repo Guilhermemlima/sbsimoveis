@@ -226,6 +226,12 @@ export default function AdminDashboard() {
               >
                 Manutenção
               </Link>
+              <Link
+                href="/admin/amendments"
+                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold text-sm"
+              >
+                Aditivos
+              </Link>
             </div>
           </div>
 

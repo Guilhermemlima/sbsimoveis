@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import BackToDashboardLink from '@/components/common/BackToDashboardLink';
+import { CheckCircle2 } from 'lucide-react';
 import { formatMonthYearBR } from '@/lib/format';
 
 interface Payout {
@@ -63,13 +63,7 @@ export default function PayoutsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
-          <Link
-            href="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao Dashboard
-          </Link>
+          <BackToDashboardLink />
           <h1 className="text-3xl font-bold mb-2">Repasses a Proprietários</h1>
           <p className="text-navy-100">
             Calculado automaticamente a partir do aluguel recebido, descontando a taxa de administração

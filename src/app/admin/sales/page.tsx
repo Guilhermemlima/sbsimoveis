@@ -38,6 +38,7 @@ export default function AdminSalesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [defaultCommission, setDefaultCommission] = useState(5);
+  const [currentUser, setCurrentUser] = useState<{ id: string; role: string; name: string } | null>(null);
 
   const [form, setForm] = useState({
     property_id: '',
@@ -64,10 +65,20 @@ export default function AdminSalesPage() {
     fetch('/api/realtor/properties')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setProperties(Array.isArray(data) ? data : []));
+    fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me) => {
+        if (!me) return;
+        setCurrentUser(me);
+        if (me.role === 'realtor') {
+          setRealtorOptions([{ id: me.id, name: me.name }]);
+          setForm((f) => ({ ...f, realtor_id: me.id }));
+        }
+      });
     fetch('/api/admin/users')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
-        if (Array.isArray(data)) {
+        if (Array.isArray(data) && data.length > 0) {
           setRealtorOptions(
             data.filter((u) => u.role === 'realtor').map((u) => ({ id: u.id, name: u.name }))
           );
@@ -161,7 +172,7 @@ export default function AdminSalesPage() {
         <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
           <div>
             <Link
-              href="/admin/dashboard"
+              href={currentUser?.role === 'realtor' ? '/realtor/dashboard' : '/admin/dashboard'}
               className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
             >
               <ArrowLeft className="w-4 h-4" />

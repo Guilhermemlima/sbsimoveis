@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, RefreshCw, Plus, X, CheckCircle2, Loader2 } from 'lucide-react';
+import BackToDashboardLink from '@/components/common/BackToDashboardLink';
+import { RefreshCw, Plus, X, CheckCircle2, Loader2 } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import { formatDateBR } from '@/lib/format';
 
@@ -156,13 +156,7 @@ export default function RentChargesPage() {
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <Link
-              href="/admin/dashboard"
-              className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboardLink />
             <h1 className="text-3xl font-bold mb-2">Cobranças de Locação</h1>
             <p className="text-navy-100">Aluguel, água, energia, IPTU e outras cobranças</p>
           </div>

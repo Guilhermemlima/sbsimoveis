@@ -38,6 +38,7 @@ interface DashboardData {
 export default function RealtorDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [permissions, setPermissions] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('/api/realtor/dashboard-stats')
@@ -46,6 +47,10 @@ export default function RealtorDashboard() {
         if (json) setData(json);
       })
       .finally(() => setLoading(false));
+
+    fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me) => setPermissions(me?.permissions ?? []));
   }, []);
 
   if (loading || !data) {
@@ -99,6 +104,22 @@ export default function RealtorDashboard() {
             >
               Documentos
             </Link>
+            {permissions.includes('manage_sales') && (
+              <Link
+                href="/admin/sales"
+                className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold"
+              >
+                Vendas
+              </Link>
+            )}
+            {permissions.includes('view_reports') && (
+              <Link
+                href="/admin/reports"
+                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
+              >
+                Relatórios
+              </Link>
+            )}
           </div>
         </div>
 

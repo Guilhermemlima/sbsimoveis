@@ -122,6 +122,7 @@ type Tab = 'sales' | 'rental' | 'inspections' | 'maintenance' | 'amendments';
 
 export default function AdminReportsPage() {
   const [tab, setTab] = useState<Tab>('sales');
+  const [currentUser, setCurrentUser] = useState<{ role: string } | null>(null);
   const [sales, setSales] = useState<Sale[]>([]);
   const [rentalSummary, setRentalSummary] = useState<RentalSummary | null>(null);
   const [rentalTransactions, setRentalTransactions] = useState<RentalTransaction[]>([]);
@@ -133,6 +134,10 @@ export default function AdminReportsPage() {
   const [period, setPeriod] = useState<Period>('all');
 
   useEffect(() => {
+    fetch('/api/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((me) => setCurrentUser(me));
+
     fetch('/api/admin/sales')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setSales(Array.isArray(data) ? data : []))
@@ -308,7 +313,7 @@ export default function AdminReportsPage() {
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
           <Link
-            href="/admin/dashboard"
+            href={currentUser?.role === 'realtor' ? '/realtor/dashboard' : '/admin/dashboard'}
             className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm no-print"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -322,13 +327,16 @@ export default function AdminReportsPage() {
       <div className="container mx-auto px-4 py-10">
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 no-print">
           <div className="inline-flex p-1 rounded-lg bg-white shadow border border-gray-100">
-            {([
-              ['sales', 'Vendas'],
-              ['rental', 'Locação'],
-              ['inspections', 'Vistorias'],
-              ['maintenance', 'Manutenção'],
-              ['amendments', 'Aditivos'],
-            ] as [Tab, string][]).map(([key, label]) => (
+            {(currentUser?.role === 'realtor'
+              ? ([['sales', 'Vendas']] as [Tab, string][])
+              : ([
+                  ['sales', 'Vendas'],
+                  ['rental', 'Locação'],
+                  ['inspections', 'Vistorias'],
+                  ['maintenance', 'Manutenção'],
+                  ['amendments', 'Aditivos'],
+                ] as [Tab, string][])
+            ).map(([key, label]) => (
               <button
                 key={key}
                 onClick={() => setTab(key)}

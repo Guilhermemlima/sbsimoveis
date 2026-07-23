@@ -50,8 +50,75 @@ interface RentalSummary {
   agencyNetResult: number;
 }
 
+interface InspectionRow {
+  id: string;
+  type: string;
+  custom_type_label: string | null;
+  status: string;
+  scheduled_date: string | null;
+  performed_date: string | null;
+  inspector_signature_name: string | null;
+  ownerName: string | null;
+  tenantName: string | null;
+  properties?: { title: string; code: string };
+}
+
+interface MaintenanceRow {
+  id: string;
+  title: string;
+  category: string;
+  priority: string;
+  status: string;
+  responsibility: string;
+  estimated_cost: number | null;
+  actual_cost: number | null;
+  created_at: string;
+  properties?: { title: string; code: string };
+}
+
+interface AmendmentRow {
+  id: string;
+  title: string;
+  type: string;
+  version: number;
+  status: string;
+  effective_date: string | null;
+  created_at: string;
+  lease_contracts?: { properties?: { title: string; code: string } };
+}
+
+const INSPECTION_TYPE_LABEL: Record<string, string> = {
+  entry: 'Entrada',
+  exit: 'Saída',
+  periodic: 'Periódica',
+  emergency: 'Emergencial',
+  maintenance: 'Manutenção',
+  custom: 'Personalizada',
+};
+
+const MAINTENANCE_CATEGORY_LABEL: Record<string, string> = {
+  plumbing: 'Hidráulica',
+  electrical: 'Elétrica',
+  structural: 'Estrutural',
+  appliance: 'Eletrodoméstico',
+  hvac: 'Ar-condicionado/Climatização',
+  pest_control: 'Controle de pragas',
+  painting: 'Pintura',
+  locksmith: 'Chaveiro/Fechadura',
+  other: 'Outro',
+};
+
+const AMENDMENT_TYPE_LABEL: Record<string, string> = {
+  rent_adjustment: 'Reajuste de Aluguel',
+  term_extension: 'Prorrogação de Prazo',
+  responsibility_change: 'Alteração de Responsabilidades',
+  tenant_change: 'Substituição de Inquilino',
+  owner_change: 'Substituição de Proprietário',
+  other: 'Outro',
+};
+
 type Period = 'month' | 'quarter' | 'all';
-type Tab = 'sales' | 'rental';
+type Tab = 'sales' | 'rental' | 'inspections' | 'maintenance' | 'amendments';
 
 export default function AdminReportsPage() {
   const [tab, setTab] = useState<Tab>('sales');
@@ -59,6 +126,9 @@ export default function AdminReportsPage() {
   const [rentalSummary, setRentalSummary] = useState<RentalSummary | null>(null);
   const [rentalTransactions, setRentalTransactions] = useState<RentalTransaction[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [inspections, setInspections] = useState<InspectionRow[]>([]);
+  const [maintenanceRequests, setMaintenanceRequests] = useState<MaintenanceRow[]>([]);
+  const [amendments, setAmendments] = useState<AmendmentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>('all');
 
@@ -76,6 +146,18 @@ export default function AdminReportsPage() {
         setRentalTransactions(data.transactions ?? []);
         setPayouts(data.payouts ?? []);
       });
+
+    fetch('/api/admin/inspections')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setInspections(Array.isArray(data) ? data : []));
+
+    fetch('/api/admin/maintenance')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setMaintenanceRequests(Array.isArray(data) ? data : []));
+
+    fetch('/api/admin/amendments')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setAmendments(Array.isArray(data) ? data : []));
   }, []);
 
   const filteredSales = useMemo(() => {
@@ -145,6 +227,82 @@ export default function AdminReportsPage() {
     );
   };
 
+  const inspectionsSummary = useMemo(() => {
+    const total = inspections.length;
+    const completed = inspections.filter((i) => i.status === 'completed').length;
+    return { total, completed, open: total - completed };
+  }, [inspections]);
+
+  const exportInspectionsCSV = () => {
+    downloadCSV(
+      'vistorias',
+      ['Imóvel', 'Código', 'Tipo', 'Status', 'Data', 'Vistoriador', 'Proprietário', 'Inquilino'],
+      inspections.map((i) => [
+        i.properties?.title ?? '',
+        i.properties?.code ?? '',
+        i.type === 'custom' ? (i.custom_type_label ?? 'Personalizada') : (INSPECTION_TYPE_LABEL[i.type] ?? i.type),
+        i.status,
+        i.performed_date ? formatDateBR(i.performed_date) : i.scheduled_date ? formatDateBR(i.scheduled_date) : '',
+        i.inspector_signature_name ?? '',
+        i.ownerName ?? '',
+        i.tenantName ?? '',
+      ])
+    );
+  };
+
+  const maintenanceSummary = useMemo(() => {
+    const total = maintenanceRequests.length;
+    const completed = maintenanceRequests.filter((m) => m.status === 'completed');
+    const totalCost = completed.reduce((sum, m) => sum + Number(m.actual_cost ?? 0), 0);
+    return {
+      total,
+      completed: completed.length,
+      open: total - completed.length,
+      totalCost,
+      averageCost: completed.length > 0 ? totalCost / completed.length : 0,
+    };
+  }, [maintenanceRequests]);
+
+  const exportMaintenanceCSV = () => {
+    downloadCSV(
+      'manutencao',
+      ['Imóvel', 'Código', 'Título', 'Categoria', 'Prioridade', 'Status', 'Responsabilidade', 'Custo'],
+      maintenanceRequests.map((m) => [
+        m.properties?.title ?? '',
+        m.properties?.code ?? '',
+        m.title,
+        MAINTENANCE_CATEGORY_LABEL[m.category] ?? m.category,
+        m.priority,
+        m.status,
+        m.responsibility,
+        m.actual_cost != null ? Number(m.actual_cost).toFixed(2) : m.estimated_cost != null ? `~${Number(m.estimated_cost).toFixed(2)}` : '',
+      ])
+    );
+  };
+
+  const amendmentsSummary = useMemo(() => {
+    const total = amendments.length;
+    const signed = amendments.filter((a) => a.status === 'signed').length;
+    const pendingSignature = amendments.filter((a) => a.status === 'pending_signature').length;
+    return { total, signed, pendingSignature };
+  }, [amendments]);
+
+  const exportAmendmentsCSV = () => {
+    downloadCSV(
+      'aditivos',
+      ['Imóvel', 'Código', 'Título', 'Tipo', 'Versão', 'Status', 'Vigência'],
+      amendments.map((a) => [
+        a.lease_contracts?.properties?.title ?? '',
+        a.lease_contracts?.properties?.code ?? '',
+        a.title,
+        AMENDMENT_TYPE_LABEL[a.type] ?? a.type,
+        a.version,
+        a.status,
+        a.effective_date ? formatDateBR(a.effective_date) : '',
+      ])
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-noise-navy text-white py-8">
@@ -167,6 +325,9 @@ export default function AdminReportsPage() {
             {([
               ['sales', 'Vendas'],
               ['rental', 'Locação'],
+              ['inspections', 'Vistorias'],
+              ['maintenance', 'Manutenção'],
+              ['amendments', 'Aditivos'],
             ] as [Tab, string][]).map(([key, label]) => (
               <button
                 key={key}
@@ -183,7 +344,17 @@ export default function AdminReportsPage() {
 
           <div className="flex gap-3">
             <button
-              onClick={tab === 'sales' ? exportSalesCSV : exportRentalCSV}
+              onClick={
+                tab === 'sales'
+                  ? exportSalesCSV
+                  : tab === 'rental'
+                    ? exportRentalCSV
+                    : tab === 'inspections'
+                      ? exportInspectionsCSV
+                      : tab === 'maintenance'
+                        ? exportMaintenanceCSV
+                        : exportAmendmentsCSV
+              }
               className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors"
             >
               <Download className="w-4 h-4" />
@@ -398,6 +569,202 @@ export default function AdminReportsPage() {
                 </div>
               ) : (
                 <p className="text-gray-500 text-sm">Nenhum lançamento ainda.</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {tab === 'inspections' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Total de vistorias</p>
+                <p className="text-3xl font-bold text-gray-900">{inspectionsSummary.total}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Concluídas</p>
+                <p className="text-2xl font-bold text-green-600">{inspectionsSummary.completed}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Em aberto</p>
+                <p className="text-2xl font-bold text-gray-900">{inspectionsSummary.open}</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Vistorias</h2>
+              {inspections.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200">
+                      <tr>
+                        <th className="py-3 font-semibold text-gray-600">Imóvel</th>
+                        <th className="py-3 font-semibold text-gray-600">Tipo</th>
+                        <th className="py-3 font-semibold text-gray-600">Status</th>
+                        <th className="py-3 font-semibold text-gray-600">Data</th>
+                        <th className="py-3 font-semibold text-gray-600">Vistoriador</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {inspections.map((i) => (
+                        <tr key={i.id}>
+                          <td className="py-3 text-gray-700">
+                            {i.properties?.title ?? '—'} {i.properties?.code ? `· ${i.properties.code}` : ''}
+                          </td>
+                          <td className="py-3 text-gray-700">
+                            {i.type === 'custom'
+                              ? (i.custom_type_label ?? 'Personalizada')
+                              : (INSPECTION_TYPE_LABEL[i.type] ?? i.type)}
+                          </td>
+                          <td className="py-3 text-gray-700 capitalize">{i.status}</td>
+                          <td className="py-3 text-gray-700">
+                            {i.performed_date
+                              ? formatDateBR(i.performed_date)
+                              : i.scheduled_date
+                                ? formatDateBR(i.scheduled_date)
+                                : '—'}
+                          </td>
+                          <td className="py-3 text-gray-700">{i.inspector_signature_name ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Nenhuma vistoria registrada ainda.</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {tab === 'maintenance' && (
+          <>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-6 mb-10">
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Total de solicitações</p>
+                <p className="text-2xl font-bold text-gray-900">{maintenanceSummary.total}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Concluídas</p>
+                <p className="text-2xl font-bold text-green-600">{maintenanceSummary.completed}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Em aberto</p>
+                <p className="text-2xl font-bold text-gray-900">{maintenanceSummary.open}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Custo total</p>
+                <p className="text-xl font-bold text-gray-900">
+                  R$ {maintenanceSummary.totalCost.toLocaleString('pt-BR')}
+                </p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Custo médio</p>
+                <p className="text-xl font-bold text-gray-900">
+                  R$ {maintenanceSummary.averageCost.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Manutenção</h2>
+              {maintenanceRequests.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200">
+                      <tr>
+                        <th className="py-3 font-semibold text-gray-600">Imóvel</th>
+                        <th className="py-3 font-semibold text-gray-600">Título</th>
+                        <th className="py-3 font-semibold text-gray-600">Categoria</th>
+                        <th className="py-3 font-semibold text-gray-600">Status</th>
+                        <th className="py-3 font-semibold text-gray-600">Responsabilidade</th>
+                        <th className="py-3 font-semibold text-gray-600">Custo</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {maintenanceRequests.map((m) => (
+                        <tr key={m.id}>
+                          <td className="py-3 text-gray-700">
+                            {m.properties?.title ?? '—'} {m.properties?.code ? `· ${m.properties.code}` : ''}
+                          </td>
+                          <td className="py-3 text-gray-700">{m.title}</td>
+                          <td className="py-3 text-gray-700">
+                            {MAINTENANCE_CATEGORY_LABEL[m.category] ?? m.category}
+                          </td>
+                          <td className="py-3 text-gray-700 capitalize">{m.status}</td>
+                          <td className="py-3 text-gray-700 capitalize">{m.responsibility}</td>
+                          <td className="py-3 text-gray-700">
+                            {m.actual_cost != null
+                              ? `R$ ${Number(m.actual_cost).toLocaleString('pt-BR')}`
+                              : m.estimated_cost != null
+                                ? `~R$ ${Number(m.estimated_cost).toLocaleString('pt-BR')}`
+                                : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Nenhuma solicitação de manutenção registrada.</p>
+              )}
+            </div>
+          </>
+        )}
+
+        {tab === 'amendments' && (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Total de aditivos</p>
+                <p className="text-3xl font-bold text-gray-900">{amendmentsSummary.total}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Assinados</p>
+                <p className="text-2xl font-bold text-green-600">{amendmentsSummary.signed}</p>
+              </div>
+              <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent">
+                <p className="text-gray-600 text-sm mb-1">Aguardando assinatura</p>
+                <p className="text-2xl font-bold text-yellow-600">{amendmentsSummary.pendingSignature}</p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Aditivos Contratuais</h2>
+              {amendments.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="border-b border-gray-200">
+                      <tr>
+                        <th className="py-3 font-semibold text-gray-600">Imóvel</th>
+                        <th className="py-3 font-semibold text-gray-600">Título</th>
+                        <th className="py-3 font-semibold text-gray-600">Tipo</th>
+                        <th className="py-3 font-semibold text-gray-600">Versão</th>
+                        <th className="py-3 font-semibold text-gray-600">Status</th>
+                        <th className="py-3 font-semibold text-gray-600">Vigência</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {amendments.map((a) => (
+                        <tr key={a.id}>
+                          <td className="py-3 text-gray-700">
+                            {a.lease_contracts?.properties?.title ?? '—'}{' '}
+                            {a.lease_contracts?.properties?.code ? `· ${a.lease_contracts.properties.code}` : ''}
+                          </td>
+                          <td className="py-3 text-gray-700">{a.title}</td>
+                          <td className="py-3 text-gray-700">{AMENDMENT_TYPE_LABEL[a.type] ?? a.type}</td>
+                          <td className="py-3 text-gray-700">v{a.version}</td>
+                          <td className="py-3 text-gray-700 capitalize">{a.status}</td>
+                          <td className="py-3 text-gray-700">
+                            {a.effective_date ? formatDateBR(a.effective_date) : '—'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="text-gray-500 text-sm">Nenhum aditivo registrado ainda.</p>
               )}
             </div>
           </>

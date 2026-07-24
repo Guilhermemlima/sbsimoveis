@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowLeft, Download, Printer } from 'lucide-react';
 import { downloadCSV } from '@/lib/export';
 import { formatDateBR } from '@/lib/format';
+import PrintHeader from '@/components/common/PrintHeader';
 
 interface Sale {
   id: string;
@@ -325,6 +326,7 @@ export default function AdminReportsPage() {
       </div>
 
       <div className="container mx-auto px-4 py-10">
+        <PrintHeader subtitle={`Relatório gerado em ${formatDateBR(new Date().toISOString().slice(0, 10))}`} />
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 no-print">
           <div className="inline-flex p-1 rounded-lg bg-white shadow border border-gray-100">
             {(currentUser?.role === 'realtor'

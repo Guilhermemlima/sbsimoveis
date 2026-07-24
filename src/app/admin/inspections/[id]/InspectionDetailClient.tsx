@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Plus, Camera, Lock, CheckCircle2, GitCompare } from 'lucide-react';
 import { formatDateBR } from '@/lib/format';
+import PrintHeader from '@/components/common/PrintHeader';
 
 interface Inspection {
   id: string;
@@ -265,6 +266,9 @@ export default function InspectionDetailClient({ id }: { id: string }) {
       </div>
 
       <div className="container mx-auto px-4 py-10 space-y-8">
+        <PrintHeader
+          subtitle={`Laudo de vistoria — ${inspection.properties?.title ?? ''} · ${inspection.properties?.code ?? ''}`}
+        />
         <div className="bg-white rounded-xl shadow-md p-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-6 flex-wrap text-sm">
             <div>

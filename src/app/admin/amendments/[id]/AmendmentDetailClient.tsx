@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { ArrowLeft, Lock, CheckCircle2 } from 'lucide-react';
 import { formatDateBR } from '@/lib/format';
+import PrintHeader from '@/components/common/PrintHeader';
 
 interface Amendment {
   id: string;
@@ -173,6 +174,9 @@ export default function AmendmentDetailClient({ id }: { id: string }) {
       </div>
 
       <div className="container mx-auto px-4 py-10 space-y-8">
+        <PrintHeader
+          subtitle={`Aditivo contratual — ${amendment.lease_contracts?.properties?.title ?? ''} · ${amendment.lease_contracts?.properties?.code ?? ''}`}
+        />
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm no-print">
             {error}

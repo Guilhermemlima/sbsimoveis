@@ -1,13 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessAmendments } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { formatDateBR } from '@/lib/format';
 import { formatAmendmentValue, renderAmendmentTemplate } from '@/lib/amendments';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessAmendments;
 
 export async function GET(request: NextRequest) {
   const user = await getCurrentUser();

@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser, type SessionUser } from '@/lib/auth/session';
-import { canManageAllProperties } from '@/lib/auth/permissions';
+import { canManageAllProperties, canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessBackOffice;
 
 async function loadLease(supabase: ReturnType<typeof createServiceRoleClient>, id: string, user: SessionUser) {
   const { data: lease } = await supabase

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessAmendments } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { AMENDMENT_FIELD_LABEL, formatAmendmentValue } from '@/lib/amendments';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessAmendments;
 
 const APPLICABLE_LEASE_FIELDS = [
   'rent_value',

@@ -120,6 +120,88 @@ export default function RealtorDashboard() {
                 Relatórios
               </Link>
             )}
+            {permissions.includes('manage_all_properties') && (
+              <>
+                <Link
+                  href="/admin/leases"
+                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Contratos de Locação
+                </Link>
+                <Link
+                  href="/admin/owners"
+                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Proprietários
+                </Link>
+                <Link
+                  href="/admin/tenants"
+                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Inquilinos
+                </Link>
+                <Link
+                  href="/admin/rent-charges"
+                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Cobranças de Locação
+                </Link>
+                <Link
+                  href="/admin/payouts"
+                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Repasses a Proprietários
+                </Link>
+                <Link
+                  href="/admin/expenses"
+                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
+                >
+                  Despesas
+                </Link>
+                <Link
+                  href="/admin/schedule"
+                  className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
+                >
+                  Cronograma Financeiro
+                </Link>
+                <Link
+                  href="/admin/inspections"
+                  className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold"
+                >
+                  Vistorias
+                </Link>
+                <Link
+                  href="/admin/maintenance"
+                  className="px-4 py-3 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition text-center font-semibold"
+                >
+                  Manutenção
+                </Link>
+                <Link
+                  href="/admin/amendments"
+                  className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
+                >
+                  Aditivos
+                </Link>
+                <Link
+                  href="/admin/clients"
+                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
+                >
+                  Clientes
+                </Link>
+                <Link
+                  href="/admin/realtors"
+                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
+                >
+                  Corretores
+                </Link>
+                <Link
+                  href="/admin/audit-log"
+                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
+                >
+                  Auditoria
+                </Link>
+              </>
+            )}
           </div>
         </div>
 

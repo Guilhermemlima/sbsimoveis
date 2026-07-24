@@ -1,14 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { canManageAllProperties } from '@/lib/auth/permissions';
+import { canManageAllProperties, canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 
 const REQUIRED_FIELDS = ['property_id', 'owner_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessBackOffice;
 
 export async function GET() {
   const user = await getCurrentUser();

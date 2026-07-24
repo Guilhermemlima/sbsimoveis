@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, Plus, X, FileEdit } from 'lucide-react';
+import BackToDashboardLink from '@/components/common/BackToDashboardLink';
+import { Plus, X, FileEdit } from 'lucide-react';
 import type { Tenant, PropertyOwner } from '@/types';
 import { formatDateBR } from '@/lib/format';
 
@@ -235,13 +235,7 @@ export default function AmendmentsPage() {
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <Link
-              href="/admin/dashboard"
-              className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Voltar ao Dashboard
-            </Link>
+            <BackToDashboardLink />
             <h1 className="text-3xl font-bold mb-2 flex items-center gap-2">
               <FileEdit className="w-7 h-7 text-gold-400" />
               Aditivos Contratuais

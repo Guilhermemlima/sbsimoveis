@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 export async function GET() {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!canAccessBackOffice(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 
@@ -22,7 +23,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!canAccessBackOffice(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 

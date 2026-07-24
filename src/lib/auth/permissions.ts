@@ -8,20 +8,37 @@ export function canManageSales(user: { role: UserRole; permissions: string[] }):
   return user.role === 'admin' || user.permissions.includes('manage_sales');
 }
 
-export function canAccessFinance(user: { role: UserRole } | null): boolean {
-  return !!user && (user.role === 'admin' || user.role === 'finance');
+function isFullAccessRealtor(user: { role: UserRole; permissions?: string[] }): boolean {
+  return user.role === 'realtor' && !!user.permissions?.includes('manage_all_properties');
+}
+
+export function canAccessFinance(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'finance' || isFullAccessRealtor(user);
 }
 
 export function hasFullPropertyAccess(user: { role: UserRole; permissions: string[] }): boolean {
   return canManageAllProperties(user) || user.role === 'finance';
 }
 
-export function canAccessInspections(user: { role: UserRole } | null): boolean {
-  return !!user && (user.role === 'admin' || user.role === 'inspector');
+export function canAccessInspections(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'inspector' || isFullAccessRealtor(user);
 }
 
-export function canAccessMaintenance(user: { role: UserRole } | null): boolean {
-  return !!user && (user.role === 'admin' || user.role === 'maintenance_staff');
+export function canAccessMaintenance(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'maintenance_staff' || isFullAccessRealtor(user);
+}
+
+export function canAccessAmendments(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || isFullAccessRealtor(user);
+}
+
+export function canAccessBackOffice(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || isFullAccessRealtor(user);
 }
 
 export const STAFF_ROLES: UserRole[] = ['finance', 'inspector', 'maintenance_staff'];

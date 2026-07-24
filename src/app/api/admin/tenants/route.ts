@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import type { UserRole } from '@/types';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessBackOffice;
 
-function canRead(user: { role: string } | null) {
-  return !!user && ['admin', 'finance', 'inspector', 'maintenance_staff'].includes(user.role);
+function canRead(user: { role: UserRole; permissions?: string[] } | null) {
+  if (!user) return false;
+  if (['admin', 'finance', 'inspector', 'maintenance_staff'].includes(user.role)) return true;
+  return canAccessBackOffice(user);
 }
 
 export async function GET() {

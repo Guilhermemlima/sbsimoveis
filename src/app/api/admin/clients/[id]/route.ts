@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 export async function PATCH(
@@ -7,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const user = await getCurrentUser();
-  if (!user || user.role !== 'admin') {
+  if (!canAccessBackOffice(user)) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 

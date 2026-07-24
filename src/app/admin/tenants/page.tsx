@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { ArrowLeft, UserPlus, Trash2, KeyRound, ShieldCheck } from 'lucide-react';
+import BackToDashboardLink from '@/components/common/BackToDashboardLink';
+import { UserPlus, Trash2, KeyRound, ShieldCheck } from 'lucide-react';
 import type { Tenant } from '@/types';
 
 export default function TenantsPage() {
@@ -100,13 +100,7 @@ export default function TenantsPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
-          <Link
-            href="/admin/dashboard"
-            className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Voltar ao Dashboard
-          </Link>
+          <BackToDashboardLink />
           <h1 className="text-3xl font-bold mb-2">Inquilinos</h1>
           <p className="text-navy-100">Cadastro de inquilinos e acesso ao portal</p>
         </div>

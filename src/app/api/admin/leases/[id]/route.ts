@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
-import { canManageAllProperties } from '@/lib/auth/permissions';
+import { canManageAllProperties, canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
 const UPDATABLE_FIELDS = [
@@ -30,9 +30,7 @@ const RETENTION_FIELDS = [
 
 const ENDED_STATUSES = ['terminated', 'cancelled', 'expired'];
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessBackOffice;
 
 export async function PUT(
   request: NextRequest,

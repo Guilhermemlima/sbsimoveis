@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
+import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-function isAuthorized(user: { role: string } | null) {
-  return !!user && user.role === 'admin';
-}
+const isAuthorized = canAccessBackOffice;
 
 const RENEWAL_WINDOW_DAYS = 60;
 const RENT_ADJUSTMENT_OVERDUE_DAYS = 365;

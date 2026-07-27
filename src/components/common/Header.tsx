@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useEffect, useState, useTransition } from 'react';
 import { Menu, X, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/auth/actions';
@@ -63,13 +64,15 @@ export default function Header({ userRole = null }: HeaderProps) {
       <div className="container mx-auto px-4">
         <div className="flex justify-between items-center py-3.5">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-gold-300 via-gold-500 to-gold-600 text-navy-950 font-display font-bold text-lg shadow-[0_0_0_1px_rgba(198,163,85,0.3)] transition-transform group-hover:scale-105">
-              S
-            </span>
-            <span className="font-display text-xl font-semibold tracking-wide text-white">
-              SBS <span className="text-gradient-gold">Imóveis</span>
-            </span>
+          <Link href="/" className="flex items-center group">
+            <Image
+              src="/logo-header.webp"
+              alt="SBS Imóveis"
+              width={600}
+              height={358}
+              priority
+              className="h-10 w-auto transition-transform group-hover:scale-105"
+            />
           </Link>
 
           {/* Desktop Menu */}

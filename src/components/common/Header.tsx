@@ -5,7 +5,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { Menu, X, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
 import { logoutAction } from '@/lib/auth/actions';
 import { useAppSettings } from '@/lib/settings-context';
-import { WhatsAppIcon } from '@/components/common/SocialIcons';
+import { WhatsAppIcon, InstagramIcon, FacebookIcon } from '@/components/common/SocialIcons';
 import type { UserRole } from '@/types';
 
 interface HeaderProps {
@@ -93,15 +93,39 @@ export default function Header({ userRole = null }: HeaderProps) {
 
           {/* CTA Buttons */}
           <div className="hidden md:flex gap-3 items-center">
-            <a
-              href={`https://wa.me/${settings.whatsapp_number}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-            >
-              <WhatsAppIcon className="w-4 h-4" />
-              WhatsApp
-            </a>
+            <div className="flex items-center gap-2 mr-1">
+              {settings.social_instagram && (
+                <a
+                  href={settings.social_instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                </a>
+              )}
+              {settings.social_facebook && (
+                <a
+                  href={settings.social_facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Facebook"
+                >
+                  <FacebookIcon className="w-4 h-4" />
+                </a>
+              )}
+              <a
+                href={`https://wa.me/${settings.whatsapp_number}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="WhatsApp"
+              >
+                <WhatsAppIcon className="w-4 h-4" />
+              </a>
+            </div>
 
             {isAuthenticated ? (
               <>
@@ -166,6 +190,40 @@ export default function Header({ userRole = null }: HeaderProps) {
             <Link href="/contato" className="block text-navy-100 hover:text-white transition">
               Contato
             </Link>
+
+            <div className="flex items-center gap-2 pt-1">
+              {settings.social_instagram && (
+                <a
+                  href={settings.social_instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Instagram"
+                >
+                  <InstagramIcon className="w-4 h-4" />
+                </a>
+              )}
+              {settings.social_facebook && (
+                <a
+                  href={settings.social_facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                  aria-label="Facebook"
+                >
+                  <FacebookIcon className="w-4 h-4" />
+                </a>
+              )}
+              <a
+                href={`https://wa.me/${settings.whatsapp_number}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex h-8 w-8 items-center justify-center rounded-full text-navy-100/80 hover:text-white hover:bg-white/10 transition-colors"
+                aria-label="WhatsApp"
+              >
+                <WhatsAppIcon className="w-4 h-4" />
+              </a>
+            </div>
 
             {isAuthenticated ? (
               <div className="flex gap-2 pt-4">

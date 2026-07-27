@@ -12,8 +12,7 @@ interface QuickActionItem {
 interface QuickActionCategory {
   key: string;
   label: string;
-  bg: string;
-  hoverBg: string;
+  accent: string;
   items: QuickActionItem[];
 }
 
@@ -23,8 +22,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
     {
       key: 'imoveis',
       label: 'Imóveis',
-      bg: 'bg-gold-500',
-      hoverBg: 'hover:bg-gold-400',
+      accent: 'border-gold-500',
       items: [
         { href: '/realtor/properties/new', label: '+ Novo Imóvel' },
         { href: '/realtor/properties', label: 'Meus Imóveis' },
@@ -41,8 +39,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
     categories.push({
       key: 'vendas',
       label: 'Vendas & Clientes',
-      bg: 'bg-emerald-700',
-      hoverBg: 'hover:bg-emerald-800',
+      accent: 'border-emerald-700',
       items: vendasItems,
     });
   }
@@ -52,8 +49,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
       {
         key: 'locacao',
         label: 'Locação',
-        bg: 'bg-blue-700',
-        hoverBg: 'hover:bg-blue-800',
+        accent: 'border-blue-700',
         items: [
           { href: '/admin/leases', label: 'Contratos de Locação' },
           { href: '/admin/owners', label: 'Proprietários' },
@@ -63,8 +59,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
       {
         key: 'financeiro',
         label: 'Financeiro',
-        bg: 'bg-navy-950',
-        hoverBg: 'hover:bg-navy-900',
+        accent: 'border-navy-950',
         items: [
           { href: '/admin/rent-charges', label: 'Cobranças de Locação' },
           { href: '/admin/payouts', label: 'Repasses a Proprietários' },
@@ -75,8 +70,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
       {
         key: 'operacoes',
         label: 'Operações',
-        bg: 'bg-orange-700',
-        hoverBg: 'hover:bg-orange-800',
+        accent: 'border-orange-700',
         items: [
           { href: '/admin/inspections', label: 'Vistorias' },
           { href: '/admin/maintenance', label: 'Manutenção' },
@@ -86,8 +80,7 @@ function buildCategories(permissions: string[]): QuickActionCategory[] {
       {
         key: 'equipe',
         label: 'Equipe & Admin',
-        bg: 'bg-slate-600',
-        hoverBg: 'hover:bg-slate-700',
+        accent: 'border-slate-600',
         items: [
           { href: '/admin/realtors', label: 'Corretores' },
           { href: '/admin/audit-log', label: 'Auditoria' },
@@ -129,7 +122,7 @@ export default function QuickActionsMenu({ permissions }: { permissions: string[
               type="button"
               onClick={() => setOpenKey(isOpen ? null : category.key)}
               aria-expanded={isOpen}
-              className={`w-full h-full min-h-[3.25rem] px-3 py-3 rounded-lg font-bold text-white text-center text-sm sm:text-base leading-tight transition flex items-center justify-center gap-1.5 ${category.bg} ${category.hoverBg}`}
+              className={`w-full h-full min-h-[3.25rem] px-3 py-3 rounded-lg font-bold bg-white text-navy-950 text-center text-sm sm:text-base leading-tight transition flex items-center justify-center gap-1.5 border-2 ${category.accent} hover:bg-gray-50`}
             >
               <span>{category.label}</span>
               <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />

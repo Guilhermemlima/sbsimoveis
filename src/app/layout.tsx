@@ -67,11 +67,11 @@ export default async function RootLayout({
           <a href="#conteudo-principal" className="skip-link">
             Pular para o conteúdo principal
           </a>
-          <Header userRole={user?.role ?? null} />
+          <Header />
           <main id="conteudo-principal" className="min-h-screen">
             {children}
           </main>
-          <Footer />
+          <Footer userRole={user?.role ?? null} />
         </SettingsProvider>
       </body>
     </html>

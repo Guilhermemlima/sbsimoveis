@@ -1,10 +1,16 @@
 import Link from 'next/link';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { Phone, Mail, MapPin, LogIn } from 'lucide-react';
 import { getAppSettings } from '@/lib/settings';
 import { FacebookIcon, InstagramIcon, WhatsAppIcon } from '@/components/common/SocialIcons';
+import LogoutButton from '@/components/common/LogoutButton';
+import { dashboardHrefFor, dashboardLabelFor } from '@/lib/dashboard-nav';
+import type { UserRole } from '@/types';
 
-export default async function Footer() {
+export default async function Footer({ userRole = null }: { userRole?: UserRole | null }) {
   const settings = await getAppSettings();
+  const isAuthenticated = !!userRole;
+  const dashboardHref = dashboardHrefFor(userRole);
+  const dashboardLabel = dashboardLabelFor(userRole);
 
   return (
     <footer className="bg-navy-950 text-white py-12 relative">
@@ -83,20 +89,29 @@ export default async function Footer() {
             </ul>
           </div>
 
-          {/* For Realtors */}
+          {/* Access / Realtor Area */}
           <div>
-            <h4 className="font-semibold mb-4 text-gold-400">Corretores</h4>
+            <h4 className="font-semibold mb-4 text-gold-400">Acesso</h4>
             <ul className="space-y-2 text-sm text-navy-100">
-              <li>
-                <Link href="/realtor/dashboard" className="hover:text-white transition">
-                  Dashboard
-                </Link>
-              </li>
-              <li>
-                <Link href="/realtor/properties" className="hover:text-white transition">
-                  Meus Imóveis
-                </Link>
-              </li>
+              {isAuthenticated ? (
+                <>
+                  <li>
+                    <Link href={dashboardHref} className="hover:text-white transition">
+                      {dashboardLabel}
+                    </Link>
+                  </li>
+                  <li>
+                    <LogoutButton className="flex items-center gap-1.5 text-navy-100 hover:text-white transition" />
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link href="/login" className="flex items-center gap-1.5 hover:text-white transition">
+                    <LogIn className="w-3.5 h-3.5" />
+                    Área do Corretor
+                  </Link>
+                </li>
+              )}
             </ul>
           </div>
         </div>

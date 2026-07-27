@@ -2,45 +2,15 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useEffect, useState, useTransition } from 'react';
-import { Menu, X, LogIn, LayoutDashboard, LogOut } from 'lucide-react';
-import { logoutAction } from '@/lib/auth/actions';
+import { useEffect, useState } from 'react';
+import { Menu, X } from 'lucide-react';
 import { useAppSettings } from '@/lib/settings-context';
 import { WhatsAppIcon, InstagramIcon, FacebookIcon } from '@/components/common/SocialIcons';
-import type { UserRole } from '@/types';
 
-interface HeaderProps {
-  userRole?: UserRole | null;
-}
-
-function dashboardHrefFor(role?: UserRole | null): string {
-  if (role === 'admin') return '/admin/dashboard';
-  if (role === 'realtor') return '/realtor/dashboard';
-  if (role === 'client') return '/client/dashboard';
-  if (role === 'tenant') return '/tenant/dashboard';
-  if (role === 'finance') return '/staff/finance';
-  if (role === 'inspector') return '/staff/inspector';
-  if (role === 'maintenance_staff') return '/staff/maintenance';
-  return '/login';
-}
-
-function dashboardLabelFor(role?: UserRole | null): string {
-  if (role === 'client') return 'Minha Conta';
-  if (role === 'tenant') return 'Meu Aluguel';
-  if (role === 'finance') return 'Financeiro';
-  if (role === 'inspector') return 'Vistorias';
-  if (role === 'maintenance_staff') return 'Manutenção';
-  return 'Área do Corretor';
-}
-
-export default function Header({ userRole = null }: HeaderProps) {
+export default function Header() {
   const settings = useAppSettings();
-  const isAuthenticated = !!userRole;
-  const dashboardHref = dashboardHrefFor(userRole);
-  const dashboardLabel = dashboardLabelFor(userRole);
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isPending, startTransition] = useTransition();
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -129,34 +99,6 @@ export default function Header({ userRole = null }: HeaderProps) {
                 <WhatsAppIcon className="w-4 h-4" />
               </a>
             </div>
-
-            {isAuthenticated ? (
-              <>
-                <Link
-                  href={dashboardHref}
-                  className="flex items-center gap-2 px-4 py-2 text-navy-950 bg-white rounded-lg hover:bg-navy-100 transition-colors font-medium"
-                >
-                  <LayoutDashboard className="w-4 h-4" />
-                  {dashboardLabel}
-                </Link>
-                <button
-                  onClick={() => startTransition(() => logoutAction())}
-                  disabled={isPending}
-                  className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition-colors disabled:opacity-50 font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  {isPending ? 'Saindo...' : 'Sair'}
-                </button>
-              </>
-            ) : (
-              <Link
-                href="/login"
-                className="flex items-center gap-2 px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition-colors font-medium shadow-[var(--shadow-gold)]"
-              >
-                <LogIn className="w-4 h-4" />
-                Área do Corretor
-              </Link>
-            )}
           </div>
 
           {/* Mobile Menu Button */}
@@ -227,31 +169,6 @@ export default function Header({ userRole = null }: HeaderProps) {
                 <WhatsAppIcon className="w-4 h-4" />
               </a>
             </div>
-
-            {isAuthenticated ? (
-              <div className="flex gap-2 pt-4">
-                <Link
-                  href={dashboardHref}
-                  className="flex-1 text-center px-4 py-2 bg-white text-navy-950 rounded-lg hover:bg-navy-100 font-medium"
-                >
-                  {dashboardLabel}
-                </Link>
-                <button
-                  onClick={() => startTransition(() => logoutAction())}
-                  disabled={isPending}
-                  className="flex-1 text-center px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 disabled:opacity-50 font-medium"
-                >
-                  {isPending ? 'Saindo...' : 'Sair'}
-                </button>
-              </div>
-            ) : (
-              <Link
-                href="/login"
-                className="block text-center px-4 py-2 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 font-medium"
-              >
-                Área do Corretor
-              </Link>
-            )}
           </div>
         </nav>
       )}

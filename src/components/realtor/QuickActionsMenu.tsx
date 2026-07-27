@@ -129,10 +129,10 @@ export default function QuickActionsMenu({ permissions }: { permissions: string[
               type="button"
               onClick={() => setOpenKey(isOpen ? null : category.key)}
               aria-expanded={isOpen}
-              className={`w-full px-4 py-3 rounded-lg font-bold text-white text-center transition flex items-center justify-center gap-1.5 ${category.bg} ${category.hoverBg}`}
+              className={`w-full h-full min-h-[3.25rem] px-3 py-3 rounded-lg font-bold text-white text-center text-sm sm:text-base leading-tight transition flex items-center justify-center gap-1.5 ${category.bg} ${category.hoverBg}`}
             >
-              {category.label}
-              <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+              <span>{category.label}</span>
+              <ChevronDown className={`w-4 h-4 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isOpen && (

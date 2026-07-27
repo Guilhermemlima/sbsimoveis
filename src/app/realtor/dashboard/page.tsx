@@ -5,6 +5,7 @@ import { Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import LogoutButton from '@/components/common/LogoutButton';
+import QuickActionsMenu from '@/components/realtor/QuickActionsMenu';
 import { formatDateBR } from '@/lib/format';
 
 interface RealtorData {
@@ -84,125 +85,9 @@ export default function RealtorDashboard() {
       <div className="container mx-auto px-4 py-10">
         {/* Quick Actions */}
         <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300 mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações Rápidas</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            <Link
-              href="/realtor/properties/new"
-              className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-            >
-              + Novo Imóvel
-            </Link>
-            <Link
-              href="/realtor/properties"
-              className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold"
-            >
-              Meus Imóveis
-            </Link>
-            <Link
-              href="/realtor/documents"
-              className="px-4 py-3 bg-gold-500 text-navy-950 rounded-lg hover:bg-gold-400 transition text-center font-semibold"
-            >
-              Documentos
-            </Link>
-            {permissions.includes('manage_sales') && (
-              <Link
-                href="/admin/sales"
-                className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold"
-              >
-                Vendas
-              </Link>
-            )}
-            {permissions.includes('view_reports') && (
-              <Link
-                href="/admin/reports"
-                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
-              >
-                Relatórios
-              </Link>
-            )}
-            {permissions.includes('manage_all_properties') && (
-              <>
-                <Link
-                  href="/admin/leases"
-                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Contratos de Locação
-                </Link>
-                <Link
-                  href="/admin/owners"
-                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Proprietários
-                </Link>
-                <Link
-                  href="/admin/tenants"
-                  className="px-4 py-3 bg-navy-700 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Inquilinos
-                </Link>
-                <Link
-                  href="/admin/rent-charges"
-                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Cobranças de Locação
-                </Link>
-                <Link
-                  href="/admin/payouts"
-                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Repasses a Proprietários
-                </Link>
-                <Link
-                  href="/admin/expenses"
-                  className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold"
-                >
-                  Despesas
-                </Link>
-                <Link
-                  href="/admin/schedule"
-                  className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
-                >
-                  Cronograma Financeiro
-                </Link>
-                <Link
-                  href="/admin/inspections"
-                  className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold"
-                >
-                  Vistorias
-                </Link>
-                <Link
-                  href="/admin/maintenance"
-                  className="px-4 py-3 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition text-center font-semibold"
-                >
-                  Manutenção
-                </Link>
-                <Link
-                  href="/admin/amendments"
-                  className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold"
-                >
-                  Aditivos
-                </Link>
-                <Link
-                  href="/admin/clients"
-                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
-                >
-                  Clientes
-                </Link>
-                <Link
-                  href="/admin/realtors"
-                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
-                >
-                  Corretores
-                </Link>
-                <Link
-                  href="/admin/audit-log"
-                  className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold"
-                >
-                  Auditoria
-                </Link>
-              </>
-            )}
-          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Ações Rápidas</h2>
+          <p className="text-sm text-gray-500 mb-6">Passe o mouse ou toque em uma área para ver as opções</p>
+          <QuickActionsMenu permissions={permissions} />
         </div>
 
         {/* KPI Cards */}

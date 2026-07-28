@@ -5,6 +5,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { TrendingUp, Home, Users, DollarSign, BellRing, AlertTriangle, Wrench, ClipboardCheck, FileEdit, Percent } from 'lucide-react';
 import Link from 'next/link';
 import LogoutButton from '@/components/common/LogoutButton';
+import AdminActionsMenu from '@/components/admin/AdminActionsMenu';
 
 interface ScheduleItem {
   id: string;
@@ -136,129 +137,9 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           {/* Quick Actions */}
           <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">Ações de Gestão</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link
-                href="/realtor/properties"
-                className="px-4 py-3 bg-navy-900 text-white rounded-lg hover:bg-navy-800 transition text-center font-semibold text-sm"
-              >
-                Imóveis
-              </Link>
-              <Link
-                href="/admin/realtors"
-                className="px-4 py-3 bg-navy-600 text-white rounded-lg hover:bg-navy-700 transition text-center font-semibold text-sm"
-              >
-                Corretores
-              </Link>
-              <Link
-                href="/admin/clients"
-                className="px-4 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 transition text-center font-semibold text-sm"
-              >
-                Clientes
-              </Link>
-              <Link
-                href="/admin/sales"
-                className="px-4 py-3 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition text-center font-semibold text-sm"
-              >
-                Vendas
-              </Link>
-              <Link
-                href="/admin/carousel"
-                className="px-4 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition text-center font-semibold text-sm"
-              >
-                Carrossel
-              </Link>
-              <Link
-                href="/admin/reports"
-                className="px-4 py-3 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 transition text-center font-semibold text-sm"
-              >
-                Relatórios
-              </Link>
-              <Link
-                href="/admin/settings"
-                className="px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition text-center font-semibold text-sm"
-              >
-                Configurações
-              </Link>
-              <Link
-                href="/admin/users"
-                className="px-4 py-3 bg-navy-400 text-white rounded-lg hover:bg-navy-500 transition text-center font-semibold text-sm"
-              >
-                Usuários
-              </Link>
-              <Link
-                href="/admin/leases"
-                className="px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition text-center font-semibold text-sm"
-              >
-                Contratos de Locação
-              </Link>
-              <Link
-                href="/admin/owners"
-                className="px-4 py-3 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition text-center font-semibold text-sm"
-              >
-                Proprietários
-              </Link>
-              <Link
-                href="/admin/tenants"
-                className="px-4 py-3 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition text-center font-semibold text-sm"
-              >
-                Inquilinos
-              </Link>
-              <Link
-                href="/admin/rent-charges"
-                className="px-4 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition text-center font-semibold text-sm"
-              >
-                Cobranças de Locação
-              </Link>
-              <Link
-                href="/admin/payouts"
-                className="px-4 py-3 bg-lime-600 text-white rounded-lg hover:bg-lime-700 transition text-center font-semibold text-sm"
-              >
-                Repasses a Proprietários
-              </Link>
-              <Link
-                href="/admin/expenses"
-                className="px-4 py-3 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition text-center font-semibold text-sm"
-              >
-                Despesas
-              </Link>
-              <Link
-                href="/admin/audit-log"
-                className="px-4 py-3 bg-slate-600 text-white rounded-lg hover:bg-slate-700 transition text-center font-semibold text-sm"
-              >
-                Auditoria
-              </Link>
-              <Link
-                href="/admin/schedule"
-                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold text-sm"
-              >
-                Cronograma Financeiro
-              </Link>
-              <Link
-                href="/realtor/documents"
-                className="px-4 py-3 bg-fuchsia-600 text-white rounded-lg hover:bg-fuchsia-700 transition text-center font-semibold text-sm"
-              >
-                Documentos
-              </Link>
-              <Link
-                href="/admin/inspections"
-                className="px-4 py-3 bg-emerald-700 text-white rounded-lg hover:bg-emerald-800 transition text-center font-semibold text-sm"
-              >
-                Vistorias
-              </Link>
-              <Link
-                href="/admin/maintenance"
-                className="px-4 py-3 bg-orange-700 text-white rounded-lg hover:bg-orange-800 transition text-center font-semibold text-sm"
-              >
-                Manutenção
-              </Link>
-              <Link
-                href="/admin/amendments"
-                className="px-4 py-3 bg-cyan-700 text-white rounded-lg hover:bg-cyan-800 transition text-center font-semibold text-sm"
-              >
-                Aditivos
-              </Link>
-            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Ações de Gestão</h2>
+            <p className="text-sm text-gray-500 mb-6">Passe o mouse ou toque em uma área para ver as opções</p>
+            <AdminActionsMenu />
           </div>
 
           <div className="lg:col-span-3">

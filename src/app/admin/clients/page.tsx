@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, ShieldCheck, ShieldOff, Power } from 'lucide-react';
+import { ArrowLeft, UserPlus, ShieldCheck, ShieldOff, Power, FileText } from 'lucide-react';
 
 interface Client {
   id: string;
@@ -85,7 +85,8 @@ export default function AdminClientsPage() {
           </Link>
           <h1 className="text-3xl font-bold mb-2">Clientes</h1>
           <p className="text-navy-100">
-            Ainda não existe cadastro público de cliente — crie logins manualmente aqui
+            Ainda não existe cadastro público de cliente — crie logins manualmente aqui. Clique em um
+            cliente para anexar e visualizar seus documentos (IPTU, contrato, etc.).
           </p>
         </div>
       </div>
@@ -190,8 +191,12 @@ export default function AdminClientsPage() {
               </thead>
               <tbody>
                 {clients.map((client) => (
-                  <tr key={client.id} className="border-t border-gray-100">
-                    <td className="px-6 py-4 font-medium text-navy-950">{client.name}</td>
+                  <tr key={client.id} className="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-navy-950">
+                      <Link href={`/admin/clients/${client.id}`} className="hover:text-gold-600 hover:underline">
+                        {client.name}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 text-gray-600">{client.email}</td>
                     <td className="px-6 py-4 text-gray-600">{client.phone ?? '—'}</td>
                     <td className="px-6 py-4">
@@ -206,13 +211,22 @@ export default function AdminClientsPage() {
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => toggleActive(client)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 hover:bg-gray-50 transition-colors"
-                      >
-                        <Power className="w-3 h-3" />
-                        {client.is_active ? 'Desativar' : 'Reativar'}
-                      </button>
+                      <div className="flex items-center justify-end gap-3">
+                        <Link
+                          href={`/admin/clients/${client.id}`}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                          <FileText className="w-3 h-3" />
+                          Documentos
+                        </Link>
+                        <button
+                          onClick={() => toggleActive(client)}
+                          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 hover:bg-gray-50 transition-colors"
+                        >
+                          <Power className="w-3 h-3" />
+                          {client.is_active ? 'Desativar' : 'Reativar'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

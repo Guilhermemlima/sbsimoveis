@@ -72,7 +72,7 @@ export default function Header() {
                   href={settings.social_instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-fuchsia-500 to-purple-600 text-white opacity-90 hover:opacity-100 transition-opacity"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-gradient-to-br hover:from-amber-400 hover:via-fuchsia-500 hover:to-purple-600"
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="w-4 h-4" />
@@ -83,7 +83,7 @@ export default function Header() {
                   href={settings.social_facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white opacity-90 hover:opacity-100 transition-opacity"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-blue-600"
                   aria-label="Facebook"
                 >
                   <FacebookIcon className="w-4 h-4" />
@@ -93,7 +93,7 @@ export default function Header() {
                 href={`https://wa.me/${settings.whatsapp_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white opacity-90 hover:opacity-100 transition-opacity"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-green-500"
                 aria-label="WhatsApp"
               >
                 <WhatsAppIcon className="w-4 h-4" />
@@ -142,7 +142,7 @@ export default function Header() {
                   href={settings.social_instagram}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 via-fuchsia-500 to-purple-600 text-white opacity-90 hover:opacity-100 transition-opacity"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-gradient-to-br hover:from-amber-400 hover:via-fuchsia-500 hover:to-purple-600"
                   aria-label="Instagram"
                 >
                   <InstagramIcon className="w-4 h-4" />
@@ -153,7 +153,7 @@ export default function Header() {
                   href={settings.social_facebook}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white opacity-90 hover:opacity-100 transition-opacity"
+                  className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-blue-600"
                   aria-label="Facebook"
                 >
                   <FacebookIcon className="w-4 h-4" />
@@ -163,7 +163,7 @@ export default function Header() {
                 href={`https://wa.me/${settings.whatsapp_number}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white opacity-90 hover:opacity-100 transition-opacity"
+                className="flex h-8 w-8 items-center justify-center rounded-full bg-transparent text-navy-100/70 transition-all hover:text-white hover:bg-green-500"
                 aria-label="WhatsApp"
               >
                 <WhatsAppIcon className="w-4 h-4" />

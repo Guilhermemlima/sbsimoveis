@@ -2,7 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Search, MapPin, TrendingUp, Users, Shield } from 'lucide-react';
+import {
+  Search,
+  MapPin,
+  TrendingUp,
+  Users,
+  Shield,
+  Home,
+  HandCoins,
+  KeyRound,
+  Gem,
+  Landmark,
+  BarChart3,
+} from 'lucide-react';
 import OpportunitiesCarousel from '@/components/public/OpportunitiesCarousel';
 import Reveal from '@/components/common/Reveal';
 import { useAppSettings } from '@/lib/settings-context';
@@ -218,39 +230,39 @@ export default function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
-                emoji: '🏠',
+                icon: Home,
                 title: 'Compra de Imóvel',
                 description: 'Encontre e compre seu imóvel dos sonhos com segurança.',
               },
               {
-                emoji: '💰',
+                icon: HandCoins,
                 title: 'Venda de Imóvel',
                 description: 'Venda seu imóvel rápido e pelo melhor preço.',
               },
               {
-                emoji: '🔑',
+                icon: KeyRound,
                 title: 'Aluguel',
                 description: 'Alugue imóveis com condições flexíveis e seguras.',
               },
               {
-                emoji: '💎',
+                icon: Gem,
                 title: 'Avaliação',
                 description: 'Avaliação profissional do seu imóvel por peritos.',
               },
               {
-                emoji: '🏦',
+                icon: Landmark,
                 title: 'Financiamento',
                 description: 'Ajudamos a encontrar as melhores opções de crédito.',
               },
               {
-                emoji: '📊',
+                icon: BarChart3,
                 title: 'Consultoria',
                 description: 'Consultoria especializada em investimentos imobiliários.',
               },
             ].map((service, index) => (
               <Reveal key={index} delay={(index % 3) * 100}>
                 <div className="card-premium bg-white p-8 rounded-xl shadow-sm hover:shadow-xl border border-gray-100 hover:border-gold-300 text-center h-full">
-                  <div className="text-5xl mb-4">{service.emoji}</div>
+                  <service.icon className="w-10 h-10 mb-4 mx-auto text-gold-600" strokeWidth={1.5} />
                   <h3 className="text-xl font-bold mb-3 text-navy-950">{service.title}</h3>
                   <p className="text-gray-600 mb-4">{service.description}</p>
                   <a href="#contact" className="text-gold-600 font-semibold hover:underline">

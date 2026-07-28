@@ -26,8 +26,8 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'glass-navy shadow-lg' : 'bg-navy-950'
+      className={`sticky top-0 z-50 bg-navy-950 transition-shadow duration-300 ${
+        isScrolled ? 'shadow-lg' : ''
       }`}
     >
       <div className="h-px w-full bg-gradient-to-r from-transparent via-gold-400/70 to-transparent" />

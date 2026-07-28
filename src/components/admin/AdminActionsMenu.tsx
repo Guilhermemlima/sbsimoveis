@@ -10,7 +10,6 @@ const categories: ActionCategory[] = [
     items: [
       { href: '/realtor/properties', label: 'Imóveis' },
       { href: '/realtor/documents', label: 'Documentos' },
-      { href: '/admin/carousel', label: 'Carrossel' },
     ],
   },
   {
@@ -28,9 +27,7 @@ const categories: ActionCategory[] = [
     label: 'Locação',
     accent: 'border-blue-500',
     items: [
-      { href: '/admin/leases', label: 'Contratos de Locação' },
       { href: '/admin/owners', label: 'Proprietários' },
-      { href: '/admin/tenants', label: 'Inquilinos' },
     ],
   },
   {
@@ -51,7 +48,6 @@ const categories: ActionCategory[] = [
     items: [
       { href: '/admin/inspections', label: 'Vistorias' },
       { href: '/admin/maintenance', label: 'Manutenção' },
-      { href: '/admin/amendments', label: 'Aditivos' },
     ],
   },
   {

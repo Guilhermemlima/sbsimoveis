@@ -18,6 +18,11 @@ const UPDATABLE_FIELDS = [
   'status',
   'notes',
   'guarantor_id',
+  'fiance_insurance_company',
+  'fiance_insurance_policy_number',
+  'fiance_insurance_value',
+  'fiance_insurance_start_date',
+  'fiance_insurance_end_date',
 ];
 
 const RETENTION_FIELDS = [
@@ -72,8 +77,10 @@ export async function PUT(
   const updates: Record<string, unknown> = {};
   for (const key of [...UPDATABLE_FIELDS, ...RETENTION_FIELDS]) {
     if (body[key] === undefined) continue;
-    if (key === 'deposit_months') {
+    if (key === 'deposit_months' || key === 'fiance_insurance_value') {
       updates[key] = body[key] === '' || body[key] === null ? null : Number(body[key]);
+    } else if (key === 'fiance_insurance_start_date' || key === 'fiance_insurance_end_date') {
+      updates[key] = body[key] === '' ? null : body[key];
     } else {
       updates[key] = body[key];
     }

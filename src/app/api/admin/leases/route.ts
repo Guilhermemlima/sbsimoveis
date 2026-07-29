@@ -193,6 +193,11 @@ export async function POST(request: NextRequest) {
       deposit_value: Number(body.deposit_value) || 0,
       deposit_months: body.deposit_months ? Number(body.deposit_months) : null,
       deposit_received_date: Number(body.deposit_value) > 0 ? body.start_date : null,
+      fiance_insurance_company: body.fiance_insurance_company || null,
+      fiance_insurance_policy_number: body.fiance_insurance_policy_number || null,
+      fiance_insurance_value: body.fiance_insurance_value ? Number(body.fiance_insurance_value) : null,
+      fiance_insurance_start_date: body.fiance_insurance_start_date || null,
+      fiance_insurance_end_date: body.fiance_insurance_end_date || null,
       first_rent_retention_type: body.first_rent_retention_type || 'none',
       first_rent_retention_percentage:
         body.first_rent_retention_type === 'custom_percentage'

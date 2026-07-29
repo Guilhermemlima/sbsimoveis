@@ -393,6 +393,13 @@ export interface LeaseContract {
   deposit_received_date?: string | null;
   deposit_returned_date?: string | null;
   deposit_returned_amount?: number | null;
+  fiance_insurance_company?: string | null;
+  fiance_insurance_policy_number?: string | null;
+  fiance_insurance_value?: number | null;
+  fiance_insurance_start_date?: string | null;
+  fiance_insurance_end_date?: string | null;
+  fiance_insurance_file_path?: string | null;
+  fiance_insurance_file_name?: string | null;
   first_rent_retention_type: FirstRentRetentionType;
   first_rent_retention_percentage?: number | null;
   first_rent_retention_fixed_amount?: number | null;

@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { Plus, X, Loader2, FileText, ShieldCheck, FileEdit } from 'lucide-react';
+import { Plus, X, Loader2, FileText, ShieldCheck, FileEdit, Umbrella, Upload, Download, Trash2 } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property, PropertyOwner, Tenant, Guarantor, BillingResponsible, DepositDeduction } from '@/types';
 
@@ -21,6 +21,13 @@ interface Lease {
   deposit_months?: number | null;
   deposit_status: string;
   deposit_returned_amount?: number | null;
+  fiance_insurance_company?: string | null;
+  fiance_insurance_policy_number?: string | null;
+  fiance_insurance_value?: number | null;
+  fiance_insurance_start_date?: string | null;
+  fiance_insurance_end_date?: string | null;
+  fiance_insurance_file_path?: string | null;
+  fiance_insurance_file_name?: string | null;
   first_rent_retention_type: string;
   first_rent_retention_installments: number;
   first_rent_retention_installments_applied: number;
@@ -109,6 +116,23 @@ export default function LeasesPage() {
   const [settleResult, setSettleResult] = useState<{ refundAmount: number; totalDeductions: number } | null>(
     null
   );
+
+  const [insuranceLeaseId, setInsuranceLeaseId] = useState<string | null>(null);
+  const [insuranceForm, setInsuranceForm] = useState({
+    fiance_insurance_company: '',
+    fiance_insurance_policy_number: '',
+    fiance_insurance_value: '',
+    fiance_insurance_start_date: '',
+    fiance_insurance_end_date: '',
+  });
+  const [insuranceSaving, setInsuranceSaving] = useState(false);
+  const [insuranceError, setInsuranceError] = useState('');
+  const [insuranceFile, setInsuranceFile] = useState<File | null>(null);
+  const [insuranceFileInfo, setInsuranceFileInfo] = useState<{ downloadUrl: string | null; fileName: string | null }>({
+    downloadUrl: null,
+    fileName: null,
+  });
+  const [insuranceUploading, setInsuranceUploading] = useState(false);
 
   const [form, setForm] = useState<Record<string, string>>({
     property_id: '',
@@ -261,6 +285,92 @@ export default function LeasesPage() {
       setDeductionForm({ description: '', amount: '' });
       openDeposit(depositLeaseId);
     }
+  };
+
+  const insuranceLease = leases.find((l) => l.id === insuranceLeaseId);
+
+  const openInsurance = (lease: Lease) => {
+    setInsuranceLeaseId(lease.id);
+    setInsuranceError('');
+    setInsuranceFile(null);
+    setInsuranceForm({
+      fiance_insurance_company: lease.fiance_insurance_company ?? '',
+      fiance_insurance_policy_number: lease.fiance_insurance_policy_number ?? '',
+      fiance_insurance_value: lease.fiance_insurance_value ? String(lease.fiance_insurance_value) : '',
+      fiance_insurance_start_date: lease.fiance_insurance_start_date ?? '',
+      fiance_insurance_end_date: lease.fiance_insurance_end_date ?? '',
+    });
+    setInsuranceFileInfo({ downloadUrl: null, fileName: lease.fiance_insurance_file_name ?? null });
+    if (lease.fiance_insurance_file_name) {
+      fetch(`/api/admin/leases/${lease.id}/insurance-policy`)
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => data && setInsuranceFileInfo(data));
+    }
+  };
+
+  const saveInsuranceFields = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!insuranceLeaseId) return;
+    setInsuranceError('');
+    setInsuranceSaving(true);
+
+    const res = await fetch(`/api/admin/leases/${insuranceLeaseId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...insuranceForm,
+        fiance_insurance_value: insuranceForm.fiance_insurance_value
+          ? Number(insuranceForm.fiance_insurance_value)
+          : null,
+      }),
+    });
+
+    setInsuranceSaving(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setInsuranceError(data.error || 'Não foi possível salvar os dados do seguro fiança.');
+      return;
+    }
+
+    loadLeases();
+  };
+
+  const uploadInsuranceFile = async () => {
+    if (!insuranceLeaseId || !insuranceFile) return;
+    setInsuranceUploading(true);
+    setInsuranceError('');
+
+    const body = new FormData();
+    body.append('file', insuranceFile);
+
+    const res = await fetch(`/api/admin/leases/${insuranceLeaseId}/insurance-policy`, {
+      method: 'POST',
+      body,
+    });
+
+    setInsuranceUploading(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setInsuranceError(data.error || 'Não foi possível enviar a apólice.');
+      return;
+    }
+
+    setInsuranceFile(null);
+    const leaseId = insuranceLeaseId;
+    fetch(`/api/admin/leases/${leaseId}/insurance-policy`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => data && setInsuranceFileInfo(data));
+    loadLeases();
+  };
+
+  const removeInsuranceFile = async () => {
+    if (!insuranceLeaseId) return;
+    if (!confirm('Remover o arquivo da apólice?')) return;
+    await fetch(`/api/admin/leases/${insuranceLeaseId}/insurance-policy`, { method: 'DELETE' });
+    setInsuranceFileInfo({ downloadUrl: null, fileName: null });
+    loadLeases();
   };
 
   const settleDeposit = async () => {
@@ -848,6 +958,7 @@ export default function LeasesPage() {
                   <th className="px-6 py-3">Vencimento</th>
                   <th className="px-6 py-3">Status</th>
                   <th className="px-6 py-3">Caução</th>
+                  <th className="px-6 py-3">Seguro Fiança</th>
                   <th className="px-6 py-3">Retenção 1º Aluguel</th>
                   <th className="px-6 py-3">Ações</th>
                 </tr>
@@ -892,6 +1003,24 @@ export default function LeasesPage() {
                         </button>
                       ) : (
                         <span className="text-xs text-gray-400">Sem caução</span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
+                      {lease.fiance_insurance_company ? (
+                        <button
+                          onClick={() => openInsurance(lease)}
+                          className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs"
+                        >
+                          <Umbrella className="w-4 h-4" />
+                          <span>{lease.fiance_insurance_company}</span>
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => openInsurance(lease)}
+                          className="text-xs text-gray-400 hover:text-navy-700"
+                        >
+                          Sem seguro fiança
+                        </button>
                       )}
                     </td>
                     <td className="px-6 py-4 text-xs text-gray-600">
@@ -1026,6 +1155,143 @@ export default function LeasesPage() {
                   )}
                 </>
               )}
+            </div>
+          </div>
+        )}
+
+        {insuranceLease && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-lg w-full max-h-[85vh] overflow-y-auto p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-navy-950 flex items-center gap-2">
+                    <Umbrella className="w-5 h-5 text-navy-600" />
+                    Seguro Fiança — {insuranceLease.properties?.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">Alternativa ou complemento à caução</p>
+                </div>
+                <button
+                  onClick={() => setInsuranceLeaseId(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {insuranceError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+                  {insuranceError}
+                </div>
+              )}
+
+              <form onSubmit={saveInsuranceFields} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <div className="md:col-span-2">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Seguradora</label>
+                  <input
+                    value={insuranceForm.fiance_insurance_company}
+                    onChange={(e) =>
+                      setInsuranceForm((f) => ({ ...f, fiance_insurance_company: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Nº da apólice</label>
+                  <input
+                    value={insuranceForm.fiance_insurance_policy_number}
+                    onChange={(e) =>
+                      setInsuranceForm((f) => ({ ...f, fiance_insurance_policy_number: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Valor</label>
+                  <CurrencyInput
+                    value={insuranceForm.fiance_insurance_value}
+                    onChange={(v) => setInsuranceForm((f) => ({ ...f, fiance_insurance_value: v }))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Vigência — início</label>
+                  <input
+                    type="date"
+                    value={insuranceForm.fiance_insurance_start_date}
+                    onChange={(e) =>
+                      setInsuranceForm((f) => ({ ...f, fiance_insurance_start_date: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">Vigência — fim</label>
+                  <input
+                    type="date"
+                    value={insuranceForm.fiance_insurance_end_date}
+                    onChange={(e) =>
+                      setInsuranceForm((f) => ({ ...f, fiance_insurance_end_date: e.target.value }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <button
+                    type="submit"
+                    disabled={insuranceSaving}
+                    className="px-4 py-2 bg-gold-500 text-navy-950 rounded-lg font-bold text-sm hover:bg-gold-400 transition-colors disabled:opacity-50"
+                  >
+                    {insuranceSaving ? 'Salvando...' : 'Salvar dados do seguro'}
+                  </button>
+                </div>
+              </form>
+
+              <div className="border-t border-gray-100 pt-4">
+                <p className="text-sm font-semibold text-gray-700 mb-2">Arquivo da apólice</p>
+                {insuranceFileInfo.fileName ? (
+                  <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 mb-2">
+                    <span className="text-sm text-navy-950">{insuranceFileInfo.fileName}</span>
+                    <div className="flex items-center gap-3">
+                      {insuranceFileInfo.downloadUrl && (
+                        <a
+                          href={insuranceFileInfo.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-navy-900 hover:text-gold-600 font-semibold text-xs"
+                        >
+                          <Download className="w-3 h-3" />
+                          Baixar
+                        </a>
+                      )}
+                      <button
+                        onClick={removeInsuranceFile}
+                        className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 font-semibold text-xs"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Remover
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 mb-2">Nenhum arquivo enviado ainda.</p>
+                )}
+
+                <div className="flex items-center gap-2">
+                  <input
+                    type="file"
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                    onChange={(e) => setInsuranceFile(e.target.files?.[0] ?? null)}
+                    className="flex-1 text-xs text-gray-600"
+                  />
+                  <button
+                    onClick={uploadInsuranceFile}
+                    disabled={!insuranceFile || insuranceUploading}
+                    className="inline-flex items-center gap-1 px-3 py-2 bg-navy-900 text-white rounded-lg text-xs font-semibold hover:bg-navy-800 disabled:opacity-50"
+                  >
+                    {insuranceUploading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Upload className="w-3 h-3" />}
+                    Enviar
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

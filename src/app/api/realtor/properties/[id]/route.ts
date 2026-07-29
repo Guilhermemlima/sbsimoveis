@@ -3,6 +3,7 @@ import { getCurrentUser, type SessionUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { recordSaleForProperty } from '@/lib/sales';
+import { isValidYouTubeUrl } from '@/lib/youtube';
 
 const UPDATABLE_FIELDS = [
   'title',
@@ -25,6 +26,7 @@ const UPDATABLE_FIELDS = [
   'is_featured',
   'is_exclusive',
   'commission_rate',
+  'video_url',
 ];
 
 const SOLD_STATUSES = ['sold', 'rented'];
@@ -85,9 +87,17 @@ export async function PUT(
   }
 
   const body = await request.json();
+
+  if (body.video_url && !isValidYouTubeUrl(body.video_url)) {
+    return NextResponse.json(
+      { error: 'O vídeo do imóvel deve ser um link válido do YouTube.' },
+      { status: 400 }
+    );
+  }
+
   const updates: Record<string, unknown> = {};
   for (const key of UPDATABLE_FIELDS) {
-    if (body[key] !== undefined) updates[key] = body[key];
+    if (body[key] !== undefined) updates[key] = body[key] === '' && key === 'video_url' ? null : body[key];
   }
   updates.updated_at = new Date().toISOString();
 

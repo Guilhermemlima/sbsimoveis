@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { recordSaleForProperty } from '@/lib/sales';
+import { isValidYouTubeUrl } from '@/lib/youtube';
 
 const SOLD_STATUSES = ['sold', 'rented'];
 
@@ -57,6 +58,13 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  if (body.video_url && !isValidYouTubeUrl(body.video_url)) {
+    return NextResponse.json(
+      { error: 'O vídeo do imóvel deve ser um link válido do YouTube.' },
+      { status: 400 }
+    );
+  }
+
   const supabase = createServiceRoleClient();
 
   let realtorId = user.id;
@@ -98,6 +106,7 @@ export async function POST(request: NextRequest) {
       is_featured: !!body.is_featured,
       is_exclusive: !!body.is_exclusive,
       commission_rate: Number(body.commission_rate) || 0,
+      video_url: body.video_url || null,
     })
     .select()
     .single();

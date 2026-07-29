@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, MapPin, Bed, Bath, Maximize2, Car } from 'lucide-react';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { getAppSettings } from '@/lib/settings';
+import { youTubeEmbedUrl } from '@/lib/youtube';
 import ShareButton from '@/components/public/ShareButton';
 
 const TYPE_LABEL: Record<string, string> = {
@@ -53,6 +54,7 @@ export default async function PropertyDetailPage({
   );
   const mainImage =
     images.find((img) => img.is_main)?.image_url ?? images[0]?.image_url ?? '/placeholder.jpg';
+  const videoEmbedUrl = property.video_url ? youTubeEmbedUrl(property.video_url) : null;
 
   return (
     <div className="min-h-screen bg-gray-50 py-10">
@@ -142,6 +144,21 @@ export default async function PropertyDetailPage({
             <p className="text-gray-700 leading-relaxed mb-6 whitespace-pre-line">
               {property.description || 'Sem descrição.'}
             </p>
+
+            {videoEmbedUrl && (
+              <>
+                <h2 className="text-xl font-bold text-navy-950 mb-3">Vídeo do Imóvel</h2>
+                <div className="relative w-full aspect-video rounded-xl overflow-hidden mb-6 bg-black">
+                  <iframe
+                    src={videoEmbedUrl}
+                    title={`Vídeo do imóvel: ${property.title}`}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+              </>
+            )}
 
             {property.amenities?.length > 0 && (
               <>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Upload, X, Star, Loader2 } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
+import { isValidYouTubeUrl } from '@/lib/youtube';
 import type { Property, PropertyImage, PropertyType, PropertyPurpose, PropertyStatus } from '@/types';
 
 interface RealtorOption {
@@ -54,6 +55,7 @@ export default function PropertyForm({
     bathrooms: initialData?.bathrooms?.toString() ?? '0',
     parking_spaces: initialData?.parking_spaces?.toString() ?? '0',
     description: initialData?.description ?? '',
+    video_url: initialData?.video_url ?? '',
     amenities: (initialData?.amenities ?? []).join(', '),
     status: initialStatus,
     is_opportunity: initialData?.is_opportunity ?? false,
@@ -72,6 +74,7 @@ export default function PropertyForm({
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [videoUrlError, setVideoUrlError] = useState('');
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
@@ -107,6 +110,12 @@ export default function PropertyForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (form.video_url.trim() && !isValidYouTubeUrl(form.video_url)) {
+      setVideoUrlError('Informe um link válido do YouTube (ex: https://www.youtube.com/watch?v=...).');
+      return;
+    }
+    setVideoUrlError('');
     setSubmitting(true);
 
     const payload: Record<string, unknown> = {
@@ -133,6 +142,7 @@ export default function PropertyForm({
       is_featured: form.is_featured,
       is_exclusive: form.is_exclusive,
       commission_rate: Number(form.commission_rate) || 0,
+      video_url: form.video_url.trim(),
     };
 
     if (canAssignRealtor && form.realtor_id) {
@@ -506,6 +516,27 @@ export default function PropertyForm({
             rows={4}
             className={inputClass}
           />
+        </div>
+
+        <div className="col-span-2 md:col-span-5">
+          <label className={labelClass}>Vídeo do Imóvel</label>
+          <input
+            type="url"
+            value={form.video_url}
+            onChange={(e) => {
+              set('video_url', e.target.value);
+              if (videoUrlError) setVideoUrlError('');
+            }}
+            className={`${inputClass} ${videoUrlError ? 'border-red-400' : ''}`}
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+          {videoUrlError ? (
+            <p className="text-xs text-red-600 mt-1">{videoUrlError}</p>
+          ) : (
+            <p className="text-xs text-gray-500 mt-1">
+              Opcional. Aceita apenas links do YouTube — o vídeo aparece incorporado na página do imóvel.
+            </p>
+          )}
         </div>
       </div>
 

@@ -52,6 +52,9 @@ export async function POST(request: NextRequest) {
       bank_agency: body.bank_agency || null,
       bank_account: body.bank_account || null,
       pix_key: body.pix_key || null,
+      payment_method: body.payment_method || 'pix',
+      payment_beneficiary_name: body.payment_beneficiary_name || null,
+      preferred_payment_day: body.preferred_payment_day ? Number(body.preferred_payment_day) : null,
       notes: body.notes || null,
     })
     .select()

@@ -297,6 +297,8 @@ export type ContractStatus = 'draft' | 'active' | 'expiring_soon' | 'expired' | 
 export type FinancialCenter = 'sales' | 'rental' | 'administrative' | 'maintenance' | 'owner_payouts';
 export type FinancialType = 'revenue' | 'expense';
 
+export type OwnerPaymentMethod = 'pix' | 'ted' | 'doc' | 'dinheiro' | 'boleto';
+
 export interface PropertyOwner {
   id: string;
   user_id?: string | null;
@@ -308,6 +310,9 @@ export interface PropertyOwner {
   bank_agency?: string | null;
   bank_account?: string | null;
   pix_key?: string | null;
+  payment_method?: OwnerPaymentMethod | null;
+  payment_beneficiary_name?: string | null;
+  preferred_payment_day?: number | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;

@@ -12,6 +12,9 @@ const UPDATABLE_FIELDS = [
   'bank_agency',
   'bank_account',
   'pix_key',
+  'payment_method',
+  'payment_beneficiary_name',
+  'preferred_payment_day',
   'notes',
 ];
 
@@ -30,7 +33,12 @@ export async function PUT(
   const body = await request.json();
   const updates: Record<string, unknown> = {};
   for (const key of UPDATABLE_FIELDS) {
-    if (body[key] !== undefined) updates[key] = body[key];
+    if (body[key] === undefined) continue;
+    if (key === 'preferred_payment_day') {
+      updates[key] = body[key] === '' || body[key] === null ? null : Number(body[key]);
+    } else {
+      updates[key] = body[key];
+    }
   }
   updates.updated_at = new Date().toISOString();
 

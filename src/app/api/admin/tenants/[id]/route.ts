@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-const UPDATABLE_FIELDS = ['name', 'email', 'phone', 'document_number', 'notes'];
+const UPDATABLE_FIELDS = ['name', 'email', 'phone', 'document_number', 'rg', 'notes'];
 
 const isAuthorized = canAccessBackOffice;
 

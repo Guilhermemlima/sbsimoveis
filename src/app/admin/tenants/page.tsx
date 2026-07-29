@@ -2,8 +2,16 @@
 
 import { useEffect, useState } from 'react';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { UserPlus, Trash2, KeyRound, ShieldCheck } from 'lucide-react';
+import { UserPlus, Trash2, KeyRound, ShieldCheck, Pencil } from 'lucide-react';
 import type { Tenant } from '@/types';
+
+const emptyForm = {
+  name: '',
+  email: '',
+  phone: '',
+  document_number: '',
+  rg: '',
+};
 
 export default function TenantsPage() {
   const [tenants, setTenants] = useState<Tenant[]>([]);
@@ -11,17 +19,13 @@ export default function TenantsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [formError, setFormError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [loginTenantId, setLoginTenantId] = useState<string | null>(null);
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
   const [loginSubmitting, setLoginSubmitting] = useState(false);
 
-  const [form, setForm] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    document_number: '',
-  });
+  const [form, setForm] = useState(emptyForm);
 
   const load = () => {
     fetch('/api/admin/tenants')
@@ -36,13 +40,34 @@ export default function TenantsPage() {
 
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleNew = () => {
+    const shouldOpen = editingId !== null || !formOpen;
+    setEditingId(null);
+    setForm(emptyForm);
+    setFormError('');
+    setFormOpen(shouldOpen);
+  };
+
+  const handleEdit = (tenant: Tenant) => {
+    setEditingId(tenant.id);
+    setForm({
+      name: tenant.name,
+      email: tenant.email ?? '',
+      phone: tenant.phone ?? '',
+      document_number: tenant.document_number ?? '',
+      rg: tenant.rg ?? '',
+    });
+    setFormError('');
+    setFormOpen(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
     setSubmitting(true);
 
-    const res = await fetch('/api/admin/tenants', {
-      method: 'POST',
+    const res = await fetch(editingId ? `/api/admin/tenants/${editingId}` : '/api/admin/tenants', {
+      method: editingId ? 'PUT' : 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(form),
     });
@@ -51,11 +76,12 @@ export default function TenantsPage() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setFormError(data.error || 'Não foi possível cadastrar o inquilino.');
+      setFormError(data.error || 'Não foi possível salvar o inquilino.');
       return;
     }
 
-    setForm({ name: '', email: '', phone: '', document_number: '' });
+    setEditingId(null);
+    setForm(emptyForm);
     setFormOpen(false);
     load();
   };
@@ -109,7 +135,7 @@ export default function TenantsPage() {
       <div className="container mx-auto px-4 py-10">
         <div className="flex justify-end mb-6">
           <button
-            onClick={() => setFormOpen((v) => !v)}
+            onClick={handleNew}
             className="inline-flex items-center gap-2 px-5 py-3 bg-navy-900 text-white rounded-lg font-semibold hover:bg-navy-800 transition-colors"
           >
             <UserPlus className="w-5 h-5" />
@@ -119,9 +145,12 @@ export default function TenantsPage() {
 
         {formOpen && (
           <form
-            onSubmit={handleCreate}
+            onSubmit={handleSubmit}
             className="bg-white rounded-xl shadow-md p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-4"
           >
+            <h2 className="md:col-span-2 text-lg font-bold text-navy-950">
+              {editingId ? 'Editar Inquilino' : 'Novo Inquilino'}
+            </h2>
             {formError && (
               <div className="md:col-span-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
                 {formError}
@@ -142,6 +171,14 @@ export default function TenantsPage() {
               <input
                 value={form.document_number}
                 onChange={(e) => set('document_number', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">RG</label>
+              <input
+                value={form.rg}
+                onChange={(e) => set('rg', e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
               />
             </div>
@@ -172,7 +209,7 @@ export default function TenantsPage() {
                 disabled={submitting}
                 className="px-6 py-3 bg-gold-500 text-navy-950 rounded-lg font-bold hover:bg-gold-400 transition-colors disabled:opacity-50"
               >
-                {submitting ? 'Salvando...' : 'Cadastrar Inquilino'}
+                {submitting ? 'Salvando...' : editingId ? 'Salvar Alterações' : 'Cadastrar Inquilino'}
               </button>
             </div>
           </form>
@@ -232,6 +269,7 @@ export default function TenantsPage() {
                   <th className="px-6 py-3">Nome</th>
                   <th className="px-6 py-3">Contato</th>
                   <th className="px-6 py-3">CPF</th>
+                  <th className="px-6 py-3">RG</th>
                   <th className="px-6 py-3">Portal</th>
                   <th className="px-6 py-3 text-right">Ações</th>
                 </tr>
@@ -244,6 +282,7 @@ export default function TenantsPage() {
                       {tenant.phone || tenant.email || '—'}
                     </td>
                     <td className="px-6 py-4 text-gray-600">{tenant.document_number || '—'}</td>
+                    <td className="px-6 py-4 text-gray-600">{tenant.rg || '—'}</td>
                     <td className="px-6 py-4">
                       {tenant.user_id ? (
                         <span className="inline-flex items-center gap-1 text-green-700 bg-green-50 px-2 py-1 rounded-full text-xs font-semibold">
@@ -267,6 +306,13 @@ export default function TenantsPage() {
                             Criar Login
                           </button>
                         )}
+                        <button
+                          onClick={() => handleEdit(tenant)}
+                          className="inline-flex items-center gap-1 text-navy-900 hover:text-gold-600 font-semibold"
+                        >
+                          <Pencil className="w-3 h-3" />
+                          Editar
+                        </button>
                         <button
                           onClick={() => handleDelete(tenant.id)}
                           className="inline-flex items-center gap-1 text-red-600 hover:text-red-700 font-semibold"

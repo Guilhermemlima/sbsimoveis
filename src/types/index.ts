@@ -325,9 +325,18 @@ export interface Tenant {
   email?: string | null;
   phone?: string | null;
   document_number?: string | null;
+  rg?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+export interface LeaseContractTenant {
+  id: string;
+  lease_contract_id: string;
+  tenant_id: string;
+  participation_percentage: number;
+  created_at: string;
 }
 
 export type FirstRentRetentionType =

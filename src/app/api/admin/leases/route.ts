@@ -4,8 +4,9 @@ import { canManageAllProperties, canAccessBackOffice } from '@/lib/auth/permissi
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { validateLeaseOwners, saveLeaseOwners, primaryOwnerId, type LeaseOwnerInput } from '@/lib/lease-owners';
+import { validateLeaseTenants, saveLeaseTenants, primaryTenantId, type LeaseTenantInput } from '@/lib/lease-tenants';
 
-const REQUIRED_FIELDS = ['property_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
+const REQUIRED_FIELDS = ['property_id', 'start_date', 'end_date', 'rent_value'];
 
 const isAuthorized = canAccessBackOffice;
 
@@ -29,21 +30,21 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const leaseIds = (leases ?? []).map((l) => l.id);
-  const tenantIds = [...new Set((leases ?? []).map((l) => l.tenant_id))];
 
-  const [coOwnersRes, tenantsRes] = await Promise.all([
+  const [coOwnersRes, coTenantsRes] = await Promise.all([
     leaseIds.length > 0
       ? supabase
           .from('lease_contract_owners')
           .select('lease_contract_id, owner_id, percentage, commission_rate, property_owners(name)')
           .in('lease_contract_id', leaseIds)
       : Promise.resolve({ data: [] }),
-    tenantIds.length > 0
-      ? supabase.from('tenants').select('id, name').in('id', tenantIds)
+    leaseIds.length > 0
+      ? supabase
+          .from('lease_contract_tenants')
+          .select('lease_contract_id, tenant_id, participation_percentage, tenants(name)')
+          .in('lease_contract_id', leaseIds)
       : Promise.resolve({ data: [] }),
   ]);
-
-  const tenantNameById = new Map((tenantsRes.data ?? []).map((t) => [t.id, t.name]));
 
   const coOwnersByLease = new Map<string, { owner_id: string; name: string; percentage: number; commission_rate: number }[]>();
   for (const row of coOwnersRes.data ?? []) {
@@ -59,13 +60,30 @@ export async function GET() {
     coOwnersByLease.set(row.lease_contract_id, list);
   }
 
+  const coTenantsByLease = new Map<string, { tenant_id: string; name: string; participation_percentage: number }[]>();
+  for (const row of coTenantsRes.data ?? []) {
+    const tenantRef = row.tenants as unknown as { name: string } | { name: string }[] | null;
+    const tenantName = Array.isArray(tenantRef) ? tenantRef[0]?.name : tenantRef?.name;
+    const list = coTenantsByLease.get(row.lease_contract_id) ?? [];
+    list.push({
+      tenant_id: row.tenant_id,
+      name: tenantName ?? 'Inquilino',
+      participation_percentage: Number(row.participation_percentage),
+    });
+    coTenantsByLease.set(row.lease_contract_id, list);
+  }
+
   const enriched = (leases ?? []).map((lease) => {
     const coOwners = (coOwnersByLease.get(lease.id) ?? []).sort((a, b) => b.percentage - a.percentage);
+    const coTenants = (coTenantsByLease.get(lease.id) ?? []).sort(
+      (a, b) => b.participation_percentage - a.participation_percentage
+    );
     return {
       ...lease,
       owners: coOwners,
+      tenants: coTenants,
       ownerName: coOwners.length > 0 ? coOwners.map((o) => o.name).join(', ') : 'Proprietário',
-      tenantName: tenantNameById.get(lease.tenant_id) ?? 'Inquilino',
+      tenantName: coTenants.length > 0 ? coTenants.map((t) => t.name).join(', ') : 'Inquilino',
     };
   });
 
@@ -98,6 +116,20 @@ export async function POST(request: NextRequest) {
   const ownersError = validateLeaseOwners(owners);
   if (ownersError) {
     return NextResponse.json({ error: ownersError }, { status: 400 });
+  }
+
+  const tenants: LeaseTenantInput[] = Array.isArray(body.tenants) && body.tenants.length > 0
+    ? body.tenants.map((t: { tenant_id: string; participation_percentage: string | number }) => ({
+        tenant_id: t.tenant_id,
+        participation_percentage: Number(t.participation_percentage),
+      }))
+    : body.tenant_id
+      ? [{ tenant_id: body.tenant_id, participation_percentage: 100 }]
+      : [];
+
+  const tenantsError = validateLeaseTenants(tenants);
+  if (tenantsError) {
+    return NextResponse.json({ error: tenantsError }, { status: 400 });
   }
 
   const supabase = createServiceRoleClient();
@@ -135,7 +167,7 @@ export async function POST(request: NextRequest) {
     .insert({
       property_id: body.property_id,
       owner_id: primaryOwnerId(owners),
-      tenant_id: body.tenant_id,
+      tenant_id: primaryTenantId(tenants),
       realtor_id: property.realtor_id,
       start_date: body.start_date,
       end_date: body.end_date,
@@ -176,6 +208,12 @@ export async function POST(request: NextRequest) {
   if (ownersInsertError) {
     await supabase.from('lease_contracts').delete().eq('id', data.id);
     return NextResponse.json({ error: ownersInsertError.message }, { status: 400 });
+  }
+
+  const { error: tenantsInsertError } = await saveLeaseTenants(supabase, data.id, tenants);
+  if (tenantsInsertError) {
+    await supabase.from('lease_contracts').delete().eq('id', data.id);
+    return NextResponse.json({ error: tenantsInsertError.message }, { status: 400 });
   }
 
   await supabase.from('properties').update({ status: 'rented' }).eq('id', body.property_id);

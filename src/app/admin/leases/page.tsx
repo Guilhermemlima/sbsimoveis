@@ -147,6 +147,24 @@ export default function LeasesPage() {
 
   const ownersPercentageTotal = leaseOwners.reduce((sum, o) => sum + (Number(o.percentage) || 0), 0);
 
+  const [leaseTenants, setLeaseTenants] = useState<{ tenant_id: string; participation_percentage: string }[]>([
+    { tenant_id: '', participation_percentage: '100' },
+  ]);
+
+  const addTenantRow = () =>
+    setLeaseTenants((rows) => [...rows, { tenant_id: '', participation_percentage: '' }]);
+
+  const removeTenantRow = (index: number) =>
+    setLeaseTenants((rows) => (rows.length > 1 ? rows.filter((_, i) => i !== index) : rows));
+
+  const setTenantRow = (index: number, key: 'tenant_id' | 'participation_percentage', value: string) =>
+    setLeaseTenants((rows) => rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+
+  const tenantsPercentageTotal = leaseTenants.reduce(
+    (sum, t) => sum + (Number(t.participation_percentage) || 0),
+    0
+  );
+
   const loadLeases = () => {
     fetch('/api/admin/leases')
       .then((res) => (res.ok ? res.json() : []))
@@ -258,8 +276,8 @@ export default function LeasesPage() {
     e.preventDefault();
     setError('');
 
-    if (!form.property_id || !form.tenant_id || !form.end_date || !form.rent_value) {
-      setError('Preencha imóvel, inquilino, valor do aluguel e data final.');
+    if (!form.property_id || !form.end_date || !form.rent_value) {
+      setError('Preencha imóvel, valor do aluguel e data final.');
       return;
     }
 
@@ -273,6 +291,16 @@ export default function LeasesPage() {
       return;
     }
 
+    if (leaseTenants.some((t) => !t.tenant_id)) {
+      setError('Selecione o inquilino em todas as linhas.');
+      return;
+    }
+
+    if (Math.abs(tenantsPercentageTotal - 100) > 0.01) {
+      setError(`A soma das participações dos inquilinos deve ser 100%. Total atual: ${tenantsPercentageTotal.toFixed(2)}%.`);
+      return;
+    }
+
     setSubmitting(true);
     const res = await fetch('/api/admin/leases', {
       method: 'POST',
@@ -283,6 +311,10 @@ export default function LeasesPage() {
           owner_id: o.owner_id,
           percentage: Number(o.percentage),
           commission_rate: Number(o.commission_rate) || 0,
+        })),
+        tenants: leaseTenants.map((t) => ({
+          tenant_id: t.tenant_id,
+          participation_percentage: Number(t.participation_percentage),
         })),
         due_day: Number(form.due_day),
         rent_value: Number(form.rent_value),
@@ -315,6 +347,7 @@ export default function LeasesPage() {
       first_rent_retention_notes: '',
     }));
     setLeaseOwners([{ owner_id: '', percentage: '100', commission_rate: '' }]);
+    setLeaseTenants([{ tenant_id: '', participation_percentage: '100' }]);
     setFormOpen(false);
     loadLeases();
     fetch('/api/realtor/properties')
@@ -460,21 +493,65 @@ export default function LeasesPage() {
               </p>
             </div>
 
-            <div>
-              <label className={labelClass}>Inquilino</label>
-              <select
-                required
-                value={form.tenant_id}
-                onChange={(e) => set('tenant_id', e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Selecione</option>
-                {tenants.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
+            <div className="md:col-span-2 border-t border-gray-100 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className={labelClass + ' mb-0'}>
+                  Inquilino(s) · Total: {tenantsPercentageTotal.toFixed(2)}%
+                  {Math.abs(tenantsPercentageTotal - 100) > 0.01 && (
+                    <span className="text-red-600 font-normal"> (deve somar 100%)</span>
+                  )}
+                </label>
+                <button
+                  type="button"
+                  onClick={addTenantRow}
+                  className="text-xs font-semibold text-gold-700 hover:underline"
+                >
+                  + Adicionar Inquilino
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {leaseTenants.map((row, index) => (
+                  <div key={index} className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_auto] gap-2 items-start">
+                    <select
+                      required
+                      value={row.tenant_id}
+                      onChange={(e) => setTenantRow(index, 'tenant_id', e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Selecione o inquilino</option>
+                      {tenants.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      required
+                      type="number"
+                      min="0.01"
+                      max="100"
+                      step="0.01"
+                      placeholder="% Participação"
+                      value={row.participation_percentage}
+                      onChange={(e) => setTenantRow(index, 'participation_percentage', e.target.value)}
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeTenantRow(index)}
+                      disabled={leaseTenants.length === 1}
+                      className="px-3 py-2 text-red-600 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Remover inquilino"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
-              </select>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Se houver mais de um inquilino, cada um fica com o percentual de participação registrado no contrato.
+              </p>
             </div>
 
             <div>

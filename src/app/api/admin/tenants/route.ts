@@ -48,6 +48,7 @@ export async function POST(request: NextRequest) {
       email: body.email || null,
       phone: body.phone || null,
       document_number: body.document_number || null,
+      rg: body.rg || null,
       notes: body.notes || null,
     })
     .select()

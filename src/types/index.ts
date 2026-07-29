@@ -91,6 +91,8 @@ export interface Property {
   is_featured: boolean;
   is_exclusive: boolean;
   views_count: number;
+  contacts_count?: number;
+  shares_count?: number;
   video_url?: string | null;
   created_at: string;
   updated_at: string;

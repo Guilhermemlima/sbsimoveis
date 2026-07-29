@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, Key, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Home, Key, Plus, Pencil, Trash2, Eye, MessageCircle, Share2 } from 'lucide-react';
 import type { Property, PropertyImage, PropertyPurpose } from '@/types';
 
 type PropertyWithImages = Property & { property_images?: PropertyImage[] };
@@ -133,6 +133,7 @@ export default function MyPropertiesPage() {
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Finalidade</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Valor</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Status</th>
+                  <th className="px-6 py-4 text-sm font-semibold text-gray-600">Estatísticas</th>
                   <th className="px-6 py-4 text-sm font-semibold text-gray-600">Ações</th>
                 </tr>
               </thead>
@@ -187,6 +188,22 @@ export default function MyPropertiesPage() {
                       >
                         {STATUS_LABEL[property.status]}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3 text-xs text-gray-600">
+                        <span className="inline-flex items-center gap-1" title="Visualizações">
+                          <Eye className="w-3.5 h-3.5 text-navy-500" />
+                          {property.views_count ?? 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1" title="Contatos">
+                          <MessageCircle className="w-3.5 h-3.5 text-green-600" />
+                          {property.contacts_count ?? 0}
+                        </span>
+                        <span className="inline-flex items-center gap-1" title="Compartilhamentos">
+                          <Share2 className="w-3.5 h-3.5 text-gold-600" />
+                          {property.shares_count ?? 0}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">

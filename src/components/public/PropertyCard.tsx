@@ -174,6 +174,9 @@ export default function PropertyCard({
             )}`}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => {
+              fetch(`/api/properties/${property.id}/contact`, { method: 'POST' }).catch(() => {});
+            }}
             className="flex-1 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors text-center font-semibold"
           >
             Interessado

@@ -7,9 +7,10 @@ import { FacebookIcon, InstagramIcon, WhatsAppIcon } from '@/components/common/S
 interface ShareButtonProps {
   title: string;
   code: string;
+  propertyId: string;
 }
 
-export default function ShareButton({ title, code }: ShareButtonProps) {
+export default function ShareButton({ title, code, propertyId }: ShareButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,10 +28,15 @@ export default function ShareButton({ title, code }: ShareButtonProps) {
   const getUrl = () => (typeof window !== 'undefined' ? window.location.href : '');
   const getMessage = () => `${title} (código ${code})`;
 
+  const registerShare = () => {
+    fetch(`/api/properties/${propertyId}/share`, { method: 'POST' }).catch(() => {});
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(getUrl());
       setCopied(true);
+      registerShare();
       setTimeout(() => setCopied(false), 2000);
     } catch {
       // clipboard unavailable; silently ignore
@@ -43,6 +49,7 @@ export default function ShareButton({ title, code }: ShareButtonProps) {
       label: 'WhatsApp',
       icon: <WhatsAppIcon className="w-4 h-4" />,
       onClick: () => {
+        registerShare();
         window.open(
           `https://wa.me/?text=${encodeURIComponent(`${getMessage()} ${getUrl()}`)}`,
           '_blank',
@@ -55,6 +62,7 @@ export default function ShareButton({ title, code }: ShareButtonProps) {
       label: 'Facebook',
       icon: <FacebookIcon className="w-4 h-4" />,
       onClick: () => {
+        registerShare();
         window.open(
           `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(getUrl())}`,
           '_blank',
@@ -73,6 +81,7 @@ export default function ShareButton({ title, code }: ShareButtonProps) {
       label: 'E-mail',
       icon: <Mail className="w-4 h-4" />,
       onClick: () => {
+        registerShare();
         window.location.href = `mailto:?subject=${encodeURIComponent(
           `Imóvel: ${title}`
         )}&body=${encodeURIComponent(`${getMessage()}\n\n${getUrl()}`)}`;

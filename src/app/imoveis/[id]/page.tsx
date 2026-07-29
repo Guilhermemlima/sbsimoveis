@@ -6,6 +6,7 @@ import { createServiceRoleClient } from '@/lib/supabase';
 import { getAppSettings } from '@/lib/settings';
 import { youTubeEmbedUrl } from '@/lib/youtube';
 import ShareButton from '@/components/public/ShareButton';
+import InterestButton from '@/components/public/InterestButton';
 
 const TYPE_LABEL: Record<string, string> = {
   house: 'Casa',
@@ -186,18 +187,14 @@ export default async function PropertyDetailPage({
                 )}
               </p>
               <p className="text-sm text-gray-500 mb-6">{TYPE_LABEL[property.type]}</p>
-              <a
+              <InterestButton
+                propertyId={property.id}
                 href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(
                   `Tenho interesse no imóvel: ${property.title} (código ${property.code})`
                 )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full text-center px-4 py-3 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600 transition-colors"
-              >
-                💬 Tenho Interesse
-              </a>
+              />
               <div className="mt-3">
-                <ShareButton title={property.title} code={property.code} />
+                <ShareButton title={property.title} code={property.code} propertyId={property.id} />
               </div>
             </div>
           </div>

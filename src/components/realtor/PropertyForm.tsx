@@ -120,7 +120,6 @@ export default function PropertyForm({
 
     const payload: Record<string, unknown> = {
       title: form.title,
-      code: form.code,
       type: form.type,
       purpose: form.purpose,
       value: Number(form.value),
@@ -269,16 +268,21 @@ export default function PropertyForm({
           />
         </div>
 
-        <div>
-          <label className={labelClass}>Código</label>
-          <input
-            required
-            value={form.code}
-            onChange={(e) => set('code', e.target.value)}
-            className={inputClass}
-            placeholder="Ex: APT-010"
-          />
-        </div>
+        {isEdit ? (
+          <div>
+            <label className={labelClass}>Código</label>
+            <input disabled value={form.code} className={`${inputClass} bg-gray-100 text-gray-500`} />
+            <p className="text-xs text-gray-500 mt-1">Gerado automaticamente, não pode ser alterado.</p>
+          </div>
+        ) : (
+          <div>
+            <label className={labelClass}>Código</label>
+            <p className="text-sm text-gray-500 py-2">
+              Será gerado automaticamente ao salvar, conforme o tipo do imóvel (ex: CS-000001 para casas,
+              AP-000001 para apartamentos).
+            </p>
+          </div>
+        )}
 
         <div>
           <label className={labelClass}>Tipo</label>

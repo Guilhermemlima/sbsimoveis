@@ -7,7 +7,6 @@ import { isValidYouTubeUrl } from '@/lib/youtube';
 
 const UPDATABLE_FIELDS = [
   'title',
-  'code',
   'type',
   'purpose',
   'value',

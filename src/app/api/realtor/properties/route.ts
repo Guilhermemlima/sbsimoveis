@@ -4,12 +4,13 @@ import { canManageAllProperties } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { recordSaleForProperty } from '@/lib/sales';
 import { isValidYouTubeUrl } from '@/lib/youtube';
+import { propertyCodePrefix } from '@/lib/property-code';
+import type { PropertyType } from '@/types';
 
 const SOLD_STATUSES = ['sold', 'rented'];
 
 const REQUIRED_FIELDS = [
   'title',
-  'code',
   'type',
   'purpose',
   'value',
@@ -82,12 +83,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Corretor responsável inválido.' }, { status: 400 });
   }
 
+  const { data: codeData, error: codeError } = await supabase.rpc('next_property_code', {
+    prefix_in: propertyCodePrefix(body.type as PropertyType),
+  });
+
+  if (codeError) {
+    return NextResponse.json({ error: 'Não foi possível gerar o código do imóvel: ' + codeError.message }, { status: 500 });
+  }
+
   const { data, error } = await supabase
     .from('properties')
     .insert({
       realtor_id: realtorId,
       title: body.title,
-      code: body.code,
+      code: codeData,
       type: body.type,
       purpose: body.purpose,
       value: body.value,

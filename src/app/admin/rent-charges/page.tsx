@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { RefreshCw, Plus, X, CheckCircle2, Loader2 } from 'lucide-react';
+import { RefreshCw, Plus, X, CheckCircle2, Loader2, Mail } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import { formatDateBR } from '@/lib/format';
 
@@ -64,6 +64,7 @@ export default function RentChargesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [reminderStatus, setReminderStatus] = useState<Record<string, 'sending' | 'sent' | string>>({});
 
   const [form, setForm] = useState({
     lease_contract_id: '',
@@ -104,7 +105,10 @@ export default function RentChargesPage() {
     const data = await res.json();
     setGenerating(false);
     if (res.ok) {
-      setGenerateMessage(`${data.generated} cobrança(s) de aluguel gerada(s), ${data.skipped} já existiam.`);
+      setGenerateMessage(
+        `${data.generated} cobrança(s) de aluguel gerada(s), ${data.skipped} já existiam. ` +
+          `${data.emailsSent ?? 0} e-mail(s) de boleto enviado(s).`
+      );
       loadCharges();
     } else {
       setGenerateMessage(data.error || 'Erro ao gerar cobranças.');
@@ -149,6 +153,13 @@ export default function RentChargesPage() {
       body: JSON.stringify({ status: 'paid' }),
     });
     loadCharges();
+  };
+
+  const sendReminder = async (id: string) => {
+    setReminderStatus((prev) => ({ ...prev, [id]: 'sending' }));
+    const res = await fetch(`/api/admin/rent-charges/${id}/send-reminder`, { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    setReminderStatus((prev) => ({ ...prev, [id]: res.ok ? 'sent' : data.error || 'Erro ao enviar.' }));
   };
 
   return (
@@ -310,15 +321,40 @@ export default function RentChargesPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-right">
-                      {charge.status !== 'paid' && (
-                        <button
-                          onClick={() => markAsPaid(charge.id)}
-                          className="inline-flex items-center gap-1 text-green-700 hover:text-green-800 font-semibold"
-                        >
-                          <CheckCircle2 className="w-4 h-4" />
-                          Marcar como paga
-                        </button>
-                      )}
+                      <div className="flex items-center justify-end gap-3">
+                        {charge.status === 'pending' && charge.tenantName && (
+                          <button
+                            onClick={() => sendReminder(charge.id)}
+                            disabled={reminderStatus[charge.id] === 'sending'}
+                            className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs disabled:opacity-50"
+                            title={
+                              reminderStatus[charge.id] && reminderStatus[charge.id] !== 'sending' && reminderStatus[charge.id] !== 'sent'
+                                ? reminderStatus[charge.id]
+                                : undefined
+                            }
+                          >
+                            {reminderStatus[charge.id] === 'sending' ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Mail className="w-3.5 h-3.5" />
+                            )}
+                            {reminderStatus[charge.id] === 'sent'
+                              ? 'Lembrete enviado'
+                              : reminderStatus[charge.id] && reminderStatus[charge.id] !== 'sending'
+                                ? 'Erro ao enviar'
+                                : 'Enviar lembrete'}
+                          </button>
+                        )}
+                        {charge.status !== 'paid' && (
+                          <button
+                            onClick={() => markAsPaid(charge.id)}
+                            className="inline-flex items-center gap-1 text-green-700 hover:text-green-800 font-semibold"
+                          >
+                            <CheckCircle2 className="w-4 h-4" />
+                            Marcar como paga
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getCurrentUser } from '@/lib/auth/session';
 import { canAccessFinance } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
+import { sendBoletoEmail } from '@/lib/rent-charge-emails';
 
 function monthLabel(date: Date): string {
   return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
@@ -54,6 +55,7 @@ export async function POST() {
 
   let generated = 0;
   let skipped = 0;
+  let emailsSent = 0;
 
   for (const lease of activeLeases) {
     const { count } = await supabase
@@ -71,6 +73,8 @@ export async function POST() {
 
     const dueDate = clampDueDate(now.getFullYear(), now.getMonth(), lease.due_day);
 
+    const description = `Aluguel — ${monthLabel(now)}`;
+
     const { error } = await supabase.from('financial_transactions').insert({
       type: 'revenue',
       center: 'rental',
@@ -80,15 +84,37 @@ export async function POST() {
       owner_id: lease.owner_id,
       tenant_id: lease.tenant_id,
       created_by: user!.id,
-      description: `Aluguel — ${monthLabel(now)}`,
+      description,
       amount: lease.rent_value,
       competence_date: competenceDate,
       due_date: dueDate,
       status: 'pending',
     });
 
-    if (!error) generated += 1;
+    if (!error) {
+      generated += 1;
+
+      if (lease.tenant_id) {
+        const [{ data: tenant }, { data: property }] = await Promise.all([
+          supabase.from('tenants').select('name, email').eq('id', lease.tenant_id).maybeSingle(),
+          supabase.from('properties').select('title, code').eq('id', lease.property_id).maybeSingle(),
+        ]);
+
+        if (tenant?.email && property) {
+          const result = await sendBoletoEmail({
+            tenantName: tenant.name,
+            tenantEmail: tenant.email,
+            propertyTitle: property.title,
+            propertyCode: property.code,
+            description,
+            amount: lease.rent_value,
+            dueDate,
+          });
+          if (result.sent) emailsSent += 1;
+        }
+      }
+    }
   }
 
-  return NextResponse.json({ generated, skipped });
+  return NextResponse.json({ generated, skipped, emailsSent });
 }

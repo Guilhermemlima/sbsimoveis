@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { AlertTriangle, MessageCircle, Mail } from 'lucide-react';
+import { AlertTriangle, MessageCircle, Mail, Loader2 } from 'lucide-react';
 import { formatDateBR } from '@/lib/format';
 
 interface OverdueCharge {
@@ -57,6 +57,7 @@ function mailtoUrl(charge: OverdueCharge): string | null {
 export default function OverdueRentChargesPage() {
   const [charges, setCharges] = useState<OverdueCharge[]>([]);
   const [loading, setLoading] = useState(true);
+  const [sendStatus, setSendStatus] = useState<Record<string, 'sending' | 'sent' | string>>({});
 
   useEffect(() => {
     fetch('/api/admin/rent-charges/overdue')
@@ -66,6 +67,13 @@ export default function OverdueRentChargesPage() {
   }, []);
 
   const totalOverdue = charges.reduce((sum, c) => sum + c.total, 0);
+
+  const sendCollectionEmail = async (id: string) => {
+    setSendStatus((prev) => ({ ...prev, [id]: 'sending' }));
+    const res = await fetch(`/api/admin/rent-charges/${id}/send-collection`, { method: 'POST' });
+    const data = await res.json().catch(() => ({}));
+    setSendStatus((prev) => ({ ...prev, [id]: res.ok ? 'sent' : data.error || 'Erro ao enviar.' }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -149,13 +157,36 @@ export default function OverdueRentChargesPage() {
                               <span className="text-xs text-gray-400">Sem telefone</span>
                             )}
                             {mail ? (
-                              <a
-                                href={mail}
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-navy-950 hover:bg-gray-50 transition-colors"
-                              >
-                                <Mail className="w-3.5 h-3.5" />
-                                E-mail
-                              </a>
+                              <>
+                                <a
+                                  href={mail}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 text-navy-950 hover:bg-gray-50 transition-colors"
+                                >
+                                  <Mail className="w-3.5 h-3.5" />
+                                  Abrir e-mail
+                                </a>
+                                <button
+                                  onClick={() => sendCollectionEmail(charge.id)}
+                                  disabled={sendStatus[charge.id] === 'sending'}
+                                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-navy-900 text-white hover:bg-navy-800 transition-colors disabled:opacity-50"
+                                  title={
+                                    sendStatus[charge.id] && sendStatus[charge.id] !== 'sending' && sendStatus[charge.id] !== 'sent'
+                                      ? sendStatus[charge.id]
+                                      : undefined
+                                  }
+                                >
+                                  {sendStatus[charge.id] === 'sending' ? (
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                  ) : (
+                                    <Mail className="w-3.5 h-3.5" />
+                                  )}
+                                  {sendStatus[charge.id] === 'sent'
+                                    ? 'Enviado'
+                                    : sendStatus[charge.id] && sendStatus[charge.id] !== 'sending'
+                                      ? 'Erro'
+                                      : 'Enviar automático'}
+                                </button>
+                              </>
                             ) : (
                               <span className="text-xs text-gray-400">Sem e-mail</span>
                             )}

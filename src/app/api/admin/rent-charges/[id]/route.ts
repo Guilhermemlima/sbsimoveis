@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canAccessFinance, hasFullPropertyAccess } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
+import { sendPaymentConfirmationEmail } from '@/lib/rent-charge-emails';
 
 const isAuthorized = canAccessFinance;
 
@@ -69,6 +70,26 @@ export async function PATCH(
       entityId: id,
       description: `Marcou a cobrança "${data.description}" (R$ ${Number(data.amount).toFixed(2)}) como paga.`,
     });
+
+    if (charge.status !== 'paid' && charge.tenant_id) {
+      const [{ data: tenant }, { data: property }] = await Promise.all([
+        supabase.from('tenants').select('name, email').eq('id', charge.tenant_id).maybeSingle(),
+        supabase.from('properties').select('title, code').eq('id', charge.property_id).maybeSingle(),
+      ]);
+
+      if (tenant?.email && property) {
+        await sendPaymentConfirmationEmail({
+          tenantName: tenant.name,
+          tenantEmail: tenant.email,
+          propertyTitle: property.title,
+          propertyCode: property.code,
+          description: data.description,
+          amount: Number(data.amount),
+          dueDate: data.due_date,
+          paidDate: data.paid_date,
+        });
+      }
+    }
   }
 
   const categoryField = charge.financial_categories as unknown as { name: string }[] | { name: string } | null;

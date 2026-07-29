@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { ArrowLeft, MapPin, Bed, Bath, Maximize2, Car } from 'lucide-react';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { getAppSettings } from '@/lib/settings';
+import ShareButton from '@/components/public/ShareButton';
 
 const TYPE_LABEL: Record<string, string> = {
   house: 'Casa',
@@ -178,6 +179,9 @@ export default async function PropertyDetailPage({
               >
                 💬 Tenho Interesse
               </a>
+              <div className="mt-3">
+                <ShareButton title={property.title} code={property.code} />
+              </div>
             </div>
           </div>
         </div>

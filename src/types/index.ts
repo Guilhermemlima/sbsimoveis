@@ -7,7 +7,8 @@ export type UserRole =
   | 'tenant'
   | 'finance'
   | 'inspector'
-  | 'maintenance_staff';
+  | 'maintenance_staff'
+  | 'legal';
 
 export interface User {
   id: string;
@@ -709,6 +710,61 @@ export interface LeaseAmendment {
   created_by?: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// Legal Case Types
+export type LegalCaseType =
+  | 'contract'
+  | 'termination'
+  | 'notification'
+  | 'collection'
+  | 'eviction'
+  | 'lawsuit'
+  | 'other';
+
+export type LegalCaseStatus = 'open' | 'in_progress' | 'awaiting_response' | 'resolved' | 'archived';
+
+export interface LegalCase {
+  id: string;
+  property_id: string;
+  lease_contract_id?: string | null;
+  tenant_id?: string | null;
+  owner_id?: string | null;
+  case_type: LegalCaseType;
+  title: string;
+  description?: string | null;
+  status: LegalCaseStatus;
+  process_number?: string | null;
+  court?: string | null;
+  responsible_id?: string | null;
+  opened_date: string;
+  deadline_date?: string | null;
+  closed_date?: string | null;
+  notes?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LegalCaseDocument {
+  id: string;
+  legal_case_id: string;
+  name: string;
+  file_path: string;
+  file_type: string | null;
+  uploaded_by?: string | null;
+  created_at: string;
+}
+
+export interface LegalCaseStatusHistory {
+  id: string;
+  legal_case_id: string;
+  from_status: LegalCaseStatus | null;
+  to_status: LegalCaseStatus;
+  changed_by?: string | null;
+  changedByName?: string | null;
+  note?: string | null;
+  created_at: string;
 }
 
 // Filter Types

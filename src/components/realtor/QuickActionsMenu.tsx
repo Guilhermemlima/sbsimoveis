@@ -63,6 +63,7 @@ function buildCategories(permissions: string[]): ActionCategory[] {
           { href: '/admin/inspections', label: 'Vistorias' },
           { href: '/admin/maintenance', label: 'Manutenção' },
           { href: '/admin/amendments', label: 'Aditivos' },
+          { href: '/admin/legal-cases', label: 'Jurídico' },
         ],
       },
       {

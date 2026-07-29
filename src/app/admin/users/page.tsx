@@ -9,7 +9,7 @@ interface ManagedUser {
   name: string;
   email: string;
   phone?: string;
-  role: 'admin' | 'realtor' | 'finance' | 'inspector' | 'maintenance_staff';
+  role: 'admin' | 'realtor' | 'finance' | 'inspector' | 'maintenance_staff' | 'legal';
   is_active: boolean;
   created_at: string;
   permissions: string[];
@@ -21,6 +21,7 @@ const ROLE_LABEL: Record<string, string> = {
   finance: 'Financeiro',
   inspector: 'Vistoriador',
   maintenance_staff: 'Responsável pela Manutenção',
+  legal: 'Jurídico',
 };
 
 export default function AdminUsersPage() {
@@ -35,7 +36,7 @@ export default function AdminUsersPage() {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [accessLevel, setAccessLevel] = useState<'full' | 'limited'>('limited');
-  const [role, setRole] = useState<'realtor' | 'finance' | 'inspector' | 'maintenance_staff'>('realtor');
+  const [role, setRole] = useState<'realtor' | 'finance' | 'inspector' | 'maintenance_staff' | 'legal'>('realtor');
 
   const loadUsers = () => {
     fetch('/api/admin/users')
@@ -191,7 +192,7 @@ export default function AdminUsersPage() {
             <div className="md:col-span-2">
               <label className="block text-sm font-semibold text-gray-700 mb-2">Papel</label>
               <div className="flex flex-wrap gap-4">
-                {(['realtor', 'finance', 'inspector', 'maintenance_staff'] as const).map((r) => (
+                {(['realtor', 'finance', 'inspector', 'maintenance_staff', 'legal'] as const).map((r) => (
                   <label
                     key={r}
                     className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer has-[:checked]:border-gold-500 has-[:checked]:bg-gold-50"

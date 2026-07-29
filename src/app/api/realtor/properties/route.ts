@@ -21,7 +21,7 @@ const REQUIRED_FIELDS = [
   'built_area',
 ];
 
-const READ_ONLY_ROLES = ['finance', 'inspector', 'maintenance_staff'];
+const READ_ONLY_ROLES = ['finance', 'inspector', 'maintenance_staff', 'legal'];
 
 export async function GET() {
   const user = await getCurrentUser();

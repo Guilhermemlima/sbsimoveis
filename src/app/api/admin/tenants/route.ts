@@ -8,7 +8,7 @@ const isAuthorized = canAccessBackOffice;
 
 function canRead(user: { role: UserRole; permissions?: string[] } | null) {
   if (!user) return false;
-  if (['admin', 'finance', 'inspector', 'maintenance_staff'].includes(user.role)) return true;
+  if (['admin', 'finance', 'inspector', 'maintenance_staff', 'legal'].includes(user.role)) return true;
   return canAccessBackOffice(user);
 }
 

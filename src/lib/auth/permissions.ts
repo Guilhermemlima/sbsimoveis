@@ -40,17 +40,23 @@ export function canAccessAmendments(user: { role: UserRole; permissions?: string
   return user.role === 'admin' || isFullAccessRealtor(user);
 }
 
+export function canAccessLegal(user: { role: UserRole; permissions?: string[] } | null): boolean {
+  if (!user) return false;
+  return user.role === 'admin' || user.role === 'legal' || isFullAccessRealtor(user);
+}
+
 export function canAccessBackOffice(user: { role: UserRole; permissions?: string[] } | null): boolean {
   if (!user) return false;
   return user.role === 'admin' || isFullAccessRealtor(user);
 }
 
-export const STAFF_ROLES: UserRole[] = ['finance', 'inspector', 'maintenance_staff'];
+export const STAFF_ROLES: UserRole[] = ['finance', 'inspector', 'maintenance_staff', 'legal'];
 
 export const STAFF_ROLE_LABEL: Record<string, string> = {
   finance: 'Financeiro',
   inspector: 'Vistoriador',
   maintenance_staff: 'Responsável pela Manutenção',
+  legal: 'Jurídico',
 };
 
 export type AccessLevel = 'full' | 'limited';

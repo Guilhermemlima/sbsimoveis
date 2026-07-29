@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/session';
 
-const ALLOWED_ROLES = ['admin', 'realtor', 'finance', 'inspector', 'maintenance_staff'];
+const ALLOWED_ROLES = ['admin', 'realtor', 'finance', 'inspector', 'maintenance_staff', 'legal'];
 
 export default async function AdminAreaLayout({
   children,

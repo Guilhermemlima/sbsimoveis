@@ -10,6 +10,7 @@ const DASHBOARD_BY_ROLE: Record<string, string> = {
   finance: '/staff/finance',
   inspector: '/staff/inspector',
   maintenance_staff: '/staff/maintenance',
+  legal: '/staff/legal',
 };
 
 export default function BackToDashboardLink({ className }: { className?: string }) {

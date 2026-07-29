@@ -51,6 +51,7 @@ const categories: ActionCategory[] = [
     items: [
       { href: '/admin/inspections', label: 'Vistorias' },
       { href: '/admin/maintenance', label: 'Manutenção' },
+      { href: '/admin/legal-cases', label: 'Jurídico' },
     ],
   },
   {

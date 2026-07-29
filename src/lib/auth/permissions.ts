@@ -8,6 +8,10 @@ export function canManageSales(user: { role: UserRole; permissions: string[] }):
   return user.role === 'admin' || user.permissions.includes('manage_sales');
 }
 
+export function canManageLeads(user: { role: UserRole; permissions: string[] }): boolean {
+  return user.role === 'admin' || user.permissions.includes('manage_leads');
+}
+
 function isFullAccessRealtor(user: { role: UserRole; permissions?: string[] }): boolean {
   return user.role === 'realtor' && !!user.permissions?.includes('manage_all_properties');
 }

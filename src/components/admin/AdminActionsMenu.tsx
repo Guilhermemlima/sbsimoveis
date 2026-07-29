@@ -17,6 +17,7 @@ const categories: ActionCategory[] = [
     label: 'Vendas & Clientes',
     accent: 'border-emerald-500',
     items: [
+      { href: '/admin/leads', label: 'Leads (CRM)' },
       { href: '/admin/clients', label: 'Clientes' },
       { href: '/admin/sales', label: 'Vendas' },
       { href: '/admin/reports', label: 'Relatórios' },

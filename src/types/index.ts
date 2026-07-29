@@ -161,9 +161,21 @@ export type LeadStatus =
   | 'visit_scheduled'
   | 'proposal_sent'
   | 'negotiating'
+  | 'contract'
   | 'sold'
   | 'lost'
   | 'no_response';
+
+export interface LeadStatusHistory {
+  id: string;
+  lead_id: string;
+  from_status: LeadStatus | null;
+  to_status: LeadStatus;
+  changed_by?: string | null;
+  changedByName?: string | null;
+  note?: string | null;
+  created_at: string;
+}
 
 // Interaction Types
 export interface LeadInteraction {

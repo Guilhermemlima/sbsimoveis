@@ -377,6 +377,15 @@ export interface LeaseContract {
   updated_at: string;
 }
 
+export interface LeaseContractOwner {
+  id: string;
+  lease_contract_id: string;
+  owner_id: string;
+  percentage: number;
+  commission_rate: number;
+  created_at: string;
+}
+
 export type DepositStatus = 'held' | 'partially_refunded' | 'refunded' | 'forfeited';
 
 export interface DepositDeduction {

@@ -132,6 +132,21 @@ export default function LeasesPage() {
     first_rent_retention_notes: '',
   });
 
+  const [leaseOwners, setLeaseOwners] = useState<
+    { owner_id: string; percentage: string; commission_rate: string }[]
+  >([{ owner_id: '', percentage: '100', commission_rate: '' }]);
+
+  const addOwnerRow = () =>
+    setLeaseOwners((rows) => [...rows, { owner_id: '', percentage: '', commission_rate: '' }]);
+
+  const removeOwnerRow = (index: number) =>
+    setLeaseOwners((rows) => (rows.length > 1 ? rows.filter((_, i) => i !== index) : rows));
+
+  const setOwnerRow = (index: number, key: 'owner_id' | 'percentage' | 'commission_rate', value: string) =>
+    setLeaseOwners((rows) => rows.map((row, i) => (i === index ? { ...row, [key]: value } : row)));
+
+  const ownersPercentageTotal = leaseOwners.reduce((sum, o) => sum + (Number(o.percentage) || 0), 0);
+
   const loadLeases = () => {
     fetch('/api/admin/leases')
       .then((res) => (res.ok ? res.json() : []))
@@ -243,8 +258,18 @@ export default function LeasesPage() {
     e.preventDefault();
     setError('');
 
-    if (!form.property_id || !form.owner_id || !form.tenant_id || !form.end_date || !form.rent_value) {
-      setError('Preencha imóvel, proprietário, inquilino, valor do aluguel e data final.');
+    if (!form.property_id || !form.tenant_id || !form.end_date || !form.rent_value) {
+      setError('Preencha imóvel, inquilino, valor do aluguel e data final.');
+      return;
+    }
+
+    if (leaseOwners.some((o) => !o.owner_id)) {
+      setError('Selecione o proprietário em todas as linhas.');
+      return;
+    }
+
+    if (Math.abs(ownersPercentageTotal - 100) > 0.01) {
+      setError(`A soma dos percentuais dos proprietários deve ser 100%. Total atual: ${ownersPercentageTotal.toFixed(2)}%.`);
       return;
     }
 
@@ -254,6 +279,11 @@ export default function LeasesPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
+        owners: leaseOwners.map((o) => ({
+          owner_id: o.owner_id,
+          percentage: Number(o.percentage),
+          commission_rate: Number(o.commission_rate) || 0,
+        })),
         due_day: Number(form.due_day),
         rent_value: Number(form.rent_value),
         admin_fee_percentage: Number(form.admin_fee_percentage),
@@ -284,6 +314,7 @@ export default function LeasesPage() {
       first_rent_retention_include_extra_fees: '',
       first_rent_retention_notes: '',
     }));
+    setLeaseOwners([{ owner_id: '', percentage: '100', commission_rate: '' }]);
     setFormOpen(false);
     loadLeases();
     fetch('/api/realtor/properties')
@@ -358,21 +389,75 @@ export default function LeasesPage() {
               </select>
             </div>
 
-            <div>
-              <label className={labelClass}>Proprietário</label>
-              <select
-                required
-                value={form.owner_id}
-                onChange={(e) => set('owner_id', e.target.value)}
-                className={inputClass}
-              >
-                <option value="">Selecione</option>
-                {owners.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.name}
-                  </option>
+            <div className="md:col-span-2 border-t border-gray-100 pt-4">
+              <div className="flex items-center justify-between mb-2">
+                <label className={labelClass + ' mb-0'}>
+                  Proprietário(s) · Total: {ownersPercentageTotal.toFixed(2)}%
+                  {Math.abs(ownersPercentageTotal - 100) > 0.01 && (
+                    <span className="text-red-600 font-normal"> (deve somar 100%)</span>
+                  )}
+                </label>
+                <button
+                  type="button"
+                  onClick={addOwnerRow}
+                  className="text-xs font-semibold text-gold-700 hover:underline"
+                >
+                  + Adicionar Proprietário
+                </button>
+              </div>
+
+              <div className="space-y-3">
+                {leaseOwners.map((row, index) => (
+                  <div key={index} className="grid grid-cols-1 sm:grid-cols-[2fr_1fr_1fr_auto] gap-2 items-start">
+                    <select
+                      required
+                      value={row.owner_id}
+                      onChange={(e) => setOwnerRow(index, 'owner_id', e.target.value)}
+                      className={inputClass}
+                    >
+                      <option value="">Selecione o proprietário</option>
+                      {owners.map((o) => (
+                        <option key={o.id} value={o.id}>
+                          {o.name}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      required
+                      type="number"
+                      min="0.01"
+                      max="100"
+                      step="0.01"
+                      placeholder="% Participação"
+                      value={row.percentage}
+                      onChange={(e) => setOwnerRow(index, 'percentage', e.target.value)}
+                      className={inputClass}
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      step="0.01"
+                      placeholder="% Comissão"
+                      value={row.commission_rate}
+                      onChange={(e) => setOwnerRow(index, 'commission_rate', e.target.value)}
+                      className={inputClass}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeOwnerRow(index)}
+                      disabled={leaseOwners.length === 1}
+                      className="px-3 py-2 text-red-600 hover:text-red-700 disabled:opacity-30 disabled:cursor-not-allowed"
+                      aria-label="Remover proprietário"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
                 ))}
-              </select>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Se houver mais de um proprietário, os repasses são divididos automaticamente pelo percentual de cada um.
+              </p>
             </div>
 
             <div>

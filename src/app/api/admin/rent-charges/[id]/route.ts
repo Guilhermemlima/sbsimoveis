@@ -201,28 +201,44 @@ export async function PATCH(
 
     const netAmount = rentAmount - adminFeeAmount - retentionInstallmentAmount - deductionsAmount;
 
-    const { data: newPayout } = await supabase
-      .from('owner_payouts')
-      .insert({
-        owner_id: charge.owner_id,
-        property_id: charge.property_id,
-        lease_contract_id: charge.lease_contract_id,
-        rent_charge_id: charge.id,
-        competence_date: charge.competence_date,
-        rent_amount: rentAmount,
-        admin_fee_amount: adminFeeAmount,
-        deductions_amount: deductionsAmount,
-        first_rent_retention_amount: retentionInstallmentAmount,
-        net_amount: netAmount,
-        status: 'pending',
-      })
-      .select('id')
-      .single();
+    const { data: coOwners } = await supabase
+      .from('lease_contract_owners')
+      .select('owner_id, percentage')
+      .eq('lease_contract_id', charge.lease_contract_id);
 
-    if (newPayout && (pendingDeductions ?? []).length > 0) {
+    const shares =
+      coOwners && coOwners.length > 0
+        ? coOwners
+        : [{ owner_id: charge.owner_id, percentage: 100 }];
+
+    const newPayoutIds: string[] = [];
+    for (const share of shares) {
+      const pct = Number(share.percentage) / 100;
+      const { data: payout } = await supabase
+        .from('owner_payouts')
+        .insert({
+          owner_id: share.owner_id,
+          property_id: charge.property_id,
+          lease_contract_id: charge.lease_contract_id,
+          rent_charge_id: charge.id,
+          competence_date: charge.competence_date,
+          rent_amount: Number((rentAmount * pct).toFixed(2)),
+          admin_fee_amount: Number((adminFeeAmount * pct).toFixed(2)),
+          deductions_amount: Number((deductionsAmount * pct).toFixed(2)),
+          first_rent_retention_amount: Number((retentionInstallmentAmount * pct).toFixed(2)),
+          net_amount: Number((netAmount * pct).toFixed(2)),
+          ownership_percentage: Number(share.percentage),
+          status: 'pending',
+        })
+        .select('id')
+        .single();
+      if (payout) newPayoutIds.push(payout.id);
+    }
+
+    if (newPayoutIds.length > 0 && (pendingDeductions ?? []).length > 0) {
       await supabase
         .from('maintenance_owner_deductions')
-        .update({ applied: true, owner_payout_id: newPayout.id })
+        .update({ applied: true, owner_payout_id: newPayoutIds[0] })
         .in(
           'id',
           (pendingDeductions ?? []).map((d) => d.id)
@@ -232,7 +248,7 @@ export async function PATCH(
         user: user!,
         action: 'apply_maintenance_deduction',
         entityType: 'owner_payout',
-        entityId: newPayout.id,
+        entityId: newPayoutIds[0],
         description: `Aplicou R$ ${deductionsAmount.toFixed(2)} em deduções de manutenção pendentes no repasse.`,
       });
     }

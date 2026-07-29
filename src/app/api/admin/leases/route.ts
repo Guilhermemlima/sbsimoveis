@@ -3,8 +3,9 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canManageAllProperties, canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
+import { validateLeaseOwners, saveLeaseOwners, primaryOwnerId, type LeaseOwnerInput } from '@/lib/lease-owners';
 
-const REQUIRED_FIELDS = ['property_id', 'owner_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
+const REQUIRED_FIELDS = ['property_id', 'tenant_id', 'start_date', 'end_date', 'rent_value'];
 
 const isAuthorized = canAccessBackOffice;
 
@@ -27,26 +28,46 @@ export async function GET() {
   const { data: leases, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  const ownerIds = [...new Set((leases ?? []).map((l) => l.owner_id))];
+  const leaseIds = (leases ?? []).map((l) => l.id);
   const tenantIds = [...new Set((leases ?? []).map((l) => l.tenant_id))];
 
-  const [ownersRes, tenantsRes] = await Promise.all([
-    ownerIds.length > 0
-      ? supabase.from('property_owners').select('id, name').in('id', ownerIds)
+  const [coOwnersRes, tenantsRes] = await Promise.all([
+    leaseIds.length > 0
+      ? supabase
+          .from('lease_contract_owners')
+          .select('lease_contract_id, owner_id, percentage, commission_rate, property_owners(name)')
+          .in('lease_contract_id', leaseIds)
       : Promise.resolve({ data: [] }),
     tenantIds.length > 0
       ? supabase.from('tenants').select('id, name').in('id', tenantIds)
       : Promise.resolve({ data: [] }),
   ]);
 
-  const ownerNameById = new Map((ownersRes.data ?? []).map((o) => [o.id, o.name]));
   const tenantNameById = new Map((tenantsRes.data ?? []).map((t) => [t.id, t.name]));
 
-  const enriched = (leases ?? []).map((lease) => ({
-    ...lease,
-    ownerName: ownerNameById.get(lease.owner_id) ?? 'Proprietário',
-    tenantName: tenantNameById.get(lease.tenant_id) ?? 'Inquilino',
-  }));
+  const coOwnersByLease = new Map<string, { owner_id: string; name: string; percentage: number; commission_rate: number }[]>();
+  for (const row of coOwnersRes.data ?? []) {
+    const ownerRef = row.property_owners as unknown as { name: string } | { name: string }[] | null;
+    const ownerName = Array.isArray(ownerRef) ? ownerRef[0]?.name : ownerRef?.name;
+    const list = coOwnersByLease.get(row.lease_contract_id) ?? [];
+    list.push({
+      owner_id: row.owner_id,
+      name: ownerName ?? 'Proprietário',
+      percentage: Number(row.percentage),
+      commission_rate: Number(row.commission_rate),
+    });
+    coOwnersByLease.set(row.lease_contract_id, list);
+  }
+
+  const enriched = (leases ?? []).map((lease) => {
+    const coOwners = (coOwnersByLease.get(lease.id) ?? []).sort((a, b) => b.percentage - a.percentage);
+    return {
+      ...lease,
+      owners: coOwners,
+      ownerName: coOwners.length > 0 ? coOwners.map((o) => o.name).join(', ') : 'Proprietário',
+      tenantName: tenantNameById.get(lease.tenant_id) ?? 'Inquilino',
+    };
+  });
 
   return NextResponse.json(enriched);
 }
@@ -62,6 +83,21 @@ export async function POST(request: NextRequest) {
     if (body[field] === undefined || body[field] === '') {
       return NextResponse.json({ error: `Campo obrigatório faltando: ${field}` }, { status: 400 });
     }
+  }
+
+  const owners: LeaseOwnerInput[] = Array.isArray(body.owners) && body.owners.length > 0
+    ? body.owners.map((o: { owner_id: string; percentage: string | number; commission_rate?: string | number }) => ({
+        owner_id: o.owner_id,
+        percentage: Number(o.percentage),
+        commission_rate: Number(o.commission_rate) || 0,
+      }))
+    : body.owner_id
+      ? [{ owner_id: body.owner_id, percentage: 100, commission_rate: 0 }]
+      : [];
+
+  const ownersError = validateLeaseOwners(owners);
+  if (ownersError) {
+    return NextResponse.json({ error: ownersError }, { status: 400 });
   }
 
   const supabase = createServiceRoleClient();
@@ -98,7 +134,7 @@ export async function POST(request: NextRequest) {
     .from('lease_contracts')
     .insert({
       property_id: body.property_id,
-      owner_id: body.owner_id,
+      owner_id: primaryOwnerId(owners),
       tenant_id: body.tenant_id,
       realtor_id: property.realtor_id,
       start_date: body.start_date,
@@ -135,6 +171,12 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  const { error: ownersInsertError } = await saveLeaseOwners(supabase, data.id, owners);
+  if (ownersInsertError) {
+    await supabase.from('lease_contracts').delete().eq('id', data.id);
+    return NextResponse.json({ error: ownersInsertError.message }, { status: 400 });
+  }
 
   await supabase.from('properties').update({ status: 'rented' }).eq('id', body.property_id);
 

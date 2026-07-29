@@ -4,6 +4,7 @@ import { canAccessFinance, hasFullPropertyAccess } from '@/lib/auth/permissions'
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { sendOverdueCollectionEmail } from '@/lib/rent-charge-emails';
+import { loadBoletoAttachment } from '@/lib/boleto-attachment';
 
 // Mesmo padrão de multa/juros usado em /api/admin/rent-charges/overdue.
 const LATE_FEE_RATE = 0.02;
@@ -31,7 +32,7 @@ export async function POST(
 
   const { data: charge } = await supabase
     .from('financial_transactions')
-    .select('id, description, amount, due_date, tenant_id, property_id, status')
+    .select('id, description, amount, due_date, tenant_id, property_id, status, boleto_file_path, boleto_file_name')
     .eq('id', id)
     .maybeSingle();
 
@@ -71,6 +72,8 @@ export async function POST(
   const lateFee = Number((amount * LATE_FEE_RATE).toFixed(2));
   const interest = Number((amount * LATE_INTEREST_RATE_MONTHLY * (late / 30)).toFixed(2));
 
+  const attachment = await loadBoletoAttachment(supabase, charge.boleto_file_path, charge.boleto_file_name);
+
   const result = await sendOverdueCollectionEmail({
     tenantName: tenant.name,
     tenantEmail: tenant.email,
@@ -83,6 +86,7 @@ export async function POST(
     lateFee,
     interest,
     total: Number((amount + lateFee + interest).toFixed(2)),
+    attachment,
   });
 
   if (!result.sent) {

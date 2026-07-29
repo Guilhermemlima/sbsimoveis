@@ -28,7 +28,9 @@ export async function GET() {
 
   let query = supabase
     .from('financial_transactions')
-    .select('id, property_id, tenant_id, amount, due_date, description, properties(title, code)')
+    .select(
+      'id, property_id, tenant_id, amount, due_date, description, boleto_file_name, properties(title, code)'
+    )
     .eq('center', 'rental')
     .eq('type', 'revenue')
     .eq('status', 'pending')
@@ -79,6 +81,7 @@ export async function GET() {
       lateFee,
       interest,
       total: Number((amount + lateFee + interest).toFixed(2)),
+      boletoFileName: c.boleto_file_name ?? null,
     };
   });
 

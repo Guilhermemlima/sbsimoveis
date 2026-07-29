@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { RefreshCw, Plus, X, CheckCircle2, Loader2, Mail } from 'lucide-react';
+import { RefreshCw, Plus, X, CheckCircle2, Loader2, Mail, Paperclip, Trash2 } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import { formatDateBR } from '@/lib/format';
 
@@ -15,6 +15,7 @@ interface Charge {
   status: string;
   tenantName: string | null;
   categoryName: string | null;
+  boleto_file_name?: string | null;
   properties?: { title: string; code: string };
 }
 
@@ -65,6 +66,7 @@ export default function RentChargesPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [reminderStatus, setReminderStatus] = useState<Record<string, 'sending' | 'sent' | string>>({});
+  const [boletoUploading, setBoletoUploading] = useState<Record<string, boolean>>({});
 
   const [form, setForm] = useState({
     lease_contract_id: '',
@@ -160,6 +162,27 @@ export default function RentChargesPage() {
     const res = await fetch(`/api/admin/rent-charges/${id}/send-reminder`, { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     setReminderStatus((prev) => ({ ...prev, [id]: res.ok ? 'sent' : data.error || 'Erro ao enviar.' }));
+  };
+
+  const uploadBoleto = async (id: string, file: File) => {
+    setBoletoUploading((prev) => ({ ...prev, [id]: true }));
+    const body = new FormData();
+    body.append('file', file);
+    const res = await fetch(`/api/admin/rent-charges/${id}/boleto`, { method: 'POST', body });
+    setBoletoUploading((prev) => ({ ...prev, [id]: false }));
+    if (res.ok) {
+      const data = await res.json();
+      setCharges((prev) => prev.map((c) => (c.id === id ? { ...c, boleto_file_name: data.fileName } : c)));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Não foi possível anexar o boleto.');
+    }
+  };
+
+  const removeBoleto = async (id: string) => {
+    if (!confirm('Remover o boleto anexado?')) return;
+    setCharges((prev) => prev.map((c) => (c.id === id ? { ...c, boleto_file_name: null } : c)));
+    await fetch(`/api/admin/rent-charges/${id}/boleto`, { method: 'DELETE' });
   };
 
   return (
@@ -322,6 +345,38 @@ export default function RentChargesPage() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-3">
+                        {charge.boleto_file_name ? (
+                          <span className="inline-flex items-center gap-1 text-xs text-gray-600">
+                            <Paperclip className="w-3.5 h-3.5" />
+                            {charge.boleto_file_name}
+                            <button
+                              onClick={() => removeBoleto(charge.id)}
+                              className="text-red-500 hover:text-red-700"
+                              aria-label="Remover boleto"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </span>
+                        ) : (
+                          <label className="inline-flex items-center gap-1 text-xs text-navy-700 hover:text-navy-900 font-semibold cursor-pointer">
+                            {boletoUploading[charge.id] ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Paperclip className="w-3.5 h-3.5" />
+                            )}
+                            Anexar boleto
+                            <input
+                              type="file"
+                              accept=".pdf,.jpg,.jpeg,.png"
+                              className="hidden"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) uploadBoleto(charge.id, file);
+                                e.target.value = '';
+                              }}
+                            />
+                          </label>
+                        )}
                         {charge.status === 'pending' && charge.tenantName && (
                           <button
                             onClick={() => sendReminder(charge.id)}

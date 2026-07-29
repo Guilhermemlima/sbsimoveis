@@ -8,10 +8,16 @@ function getClient(): Resend | null {
   return client;
 }
 
+export interface SendEmailAttachment {
+  filename: string;
+  content: Buffer;
+}
+
 export interface SendEmailInput {
   to: string;
   subject: string;
   html: string;
+  attachments?: SendEmailAttachment[];
 }
 
 export interface SendEmailResult {
@@ -21,7 +27,7 @@ export interface SendEmailResult {
 
 // Envio best-effort: nunca lança erro, para não quebrar o fluxo principal
 // (geração de boleto, confirmação de pagamento etc) caso o e-mail falhe.
-export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<SendEmailResult> {
+export async function sendEmail({ to, subject, html, attachments }: SendEmailInput): Promise<SendEmailResult> {
   const resend = getClient();
   if (!resend) {
     return { sent: false, error: 'RESEND_API_KEY não configurada.' };
@@ -31,7 +37,14 @@ export async function sendEmail({ to, subject, html }: SendEmailInput): Promise<
   const replyTo = process.env.EMAIL_REPLY_TO || undefined;
 
   try {
-    const { error } = await resend.emails.send({ from, to, subject, html, replyTo });
+    const { error } = await resend.emails.send({
+      from,
+      to,
+      subject,
+      html,
+      replyTo,
+      attachments: attachments?.map((a) => ({ filename: a.filename, content: a.content })),
+    });
     if (error) return { sent: false, error: error.message };
     return { sent: true };
   } catch (err) {

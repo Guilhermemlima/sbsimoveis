@@ -1,4 +1,4 @@
-import { sendEmail } from '@/lib/email';
+import { sendEmail, type SendEmailAttachment } from '@/lib/email';
 import { formatDateBR } from '@/lib/format';
 
 function formatMoney(value: number): string {
@@ -29,6 +29,7 @@ interface ChargeEmailInput {
   description: string;
   amount: number;
   dueDate: string;
+  attachment?: SendEmailAttachment | null;
 }
 
 export async function sendBoletoEmail(charge: ChargeEmailInput) {
@@ -43,10 +44,15 @@ export async function sendBoletoEmail(charge: ChargeEmailInput) {
        <tr><td style="padding:6px 0; color:#6b7280;">Valor</td><td style="padding:6px 0; text-align:right; font-weight:bold;">${formatMoney(charge.amount)}</td></tr>
        <tr><td style="padding:6px 0; color:#6b7280;">Vencimento</td><td style="padding:6px 0; text-align:right;">${formatDateBR(charge.dueDate)}</td></tr>
      </table>
-     <p>Qualquer dúvida, estamos à disposição.</p>`
+     <p>${charge.attachment ? 'Segue o boleto em anexo. ' : ''}Qualquer dúvida, estamos à disposição.</p>`
   );
 
-  return sendEmail({ to: charge.tenantEmail, subject: `Novo boleto — ${charge.propertyTitle} (${charge.propertyCode})`, html });
+  return sendEmail({
+    to: charge.tenantEmail,
+    subject: `Novo boleto — ${charge.propertyTitle} (${charge.propertyCode})`,
+    html,
+    attachments: charge.attachment ? [charge.attachment] : undefined,
+  });
 }
 
 export async function sendDueReminderEmail(charge: ChargeEmailInput) {
@@ -61,10 +67,15 @@ export async function sendDueReminderEmail(charge: ChargeEmailInput) {
        <tr><td style="padding:6px 0; color:#6b7280;">Valor</td><td style="padding:6px 0; text-align:right; font-weight:bold;">${formatMoney(charge.amount)}</td></tr>
        <tr><td style="padding:6px 0; color:#6b7280;">Vencimento</td><td style="padding:6px 0; text-align:right;">${formatDateBR(charge.dueDate)}</td></tr>
      </table>
-     <p>Qualquer dúvida, estamos à disposição.</p>`
+     <p>${charge.attachment ? 'Segue o boleto em anexo. ' : ''}Qualquer dúvida, estamos à disposição.</p>`
   );
 
-  return sendEmail({ to: charge.tenantEmail, subject: `Lembrete de vencimento — ${charge.propertyTitle} (${charge.propertyCode})`, html });
+  return sendEmail({
+    to: charge.tenantEmail,
+    subject: `Lembrete de vencimento — ${charge.propertyTitle} (${charge.propertyCode})`,
+    html,
+    attachments: charge.attachment ? [charge.attachment] : undefined,
+  });
 }
 
 interface OverdueEmailInput extends ChargeEmailInput {
@@ -90,10 +101,15 @@ export async function sendOverdueCollectionEmail(charge: OverdueEmailInput) {
        <tr><td style="padding:6px 0; color:#6b7280;">Juros</td><td style="padding:6px 0; text-align:right;">${formatMoney(charge.interest)}</td></tr>
        <tr><td style="padding:10px 0 0; color:#0b1e3d; font-weight:bold;">Total atualizado</td><td style="padding:10px 0 0; text-align:right; font-weight:bold; color:#b91c1c;">${formatMoney(charge.total)}</td></tr>
      </table>
-     <p>Poderia regularizar o pagamento? Qualquer dúvida estamos à disposição.</p>`
+     <p>${charge.attachment ? 'Segue o boleto em anexo. ' : ''}Poderia regularizar o pagamento? Qualquer dúvida estamos à disposição.</p>`
   );
 
-  return sendEmail({ to: charge.tenantEmail, subject: `Cobrança em atraso — ${charge.propertyTitle} (${charge.propertyCode})`, html });
+  return sendEmail({
+    to: charge.tenantEmail,
+    subject: `Cobrança em atraso — ${charge.propertyTitle} (${charge.propertyCode})`,
+    html,
+    attachments: charge.attachment ? [charge.attachment] : undefined,
+  });
 }
 
 export async function sendPaymentConfirmationEmail(charge: ChargeEmailInput & { paidDate: string }) {

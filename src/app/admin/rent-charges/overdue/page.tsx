@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { AlertTriangle, MessageCircle, Mail, Loader2 } from 'lucide-react';
+import { AlertTriangle, MessageCircle, Mail, Loader2, Paperclip, Trash2 } from 'lucide-react';
 import { formatDateBR } from '@/lib/format';
 
 interface OverdueCharge {
@@ -19,24 +19,23 @@ interface OverdueCharge {
   lateFee: number;
   interest: number;
   total: number;
+  boletoFileName: string | null;
 }
 
 function formatMoney(value: number): string {
   return `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
-function whatsappUrl(charge: OverdueCharge): string | null {
-  if (!charge.tenantPhone) return null;
-  const digits = charge.tenantPhone.replace(/\D/g, '');
-  const phone = digits.startsWith('55') ? digits : `55${digits}`;
-  const message =
+function whatsappMessage(charge: OverdueCharge, boletoUrl: string | null): string {
+  return (
     `Olá, ${charge.tenantName}! Identificamos que a parcela "${charge.description}" ` +
     `do imóvel ${charge.propertyTitle} (${charge.propertyCode}), no valor de ${formatMoney(charge.amount)}, ` +
     `venceu em ${formatDateBR(charge.dueDate)} e está ${charge.daysLate} dia(s) em atraso.\n\n` +
     `Com multa (${formatMoney(charge.lateFee)}) e juros (${formatMoney(charge.interest)}), ` +
     `o valor atualizado é ${formatMoney(charge.total)}.\n\n` +
-    `Poderia regularizar o pagamento? Qualquer dúvida estamos à disposição.`;
-  return `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    (boletoUrl ? `Boleto para pagamento: ${boletoUrl}\n\n` : '') +
+    `Poderia regularizar o pagamento? Qualquer dúvida estamos à disposição.`
+  );
 }
 
 function mailtoUrl(charge: OverdueCharge): string | null {
@@ -58,6 +57,8 @@ export default function OverdueRentChargesPage() {
   const [charges, setCharges] = useState<OverdueCharge[]>([]);
   const [loading, setLoading] = useState(true);
   const [sendStatus, setSendStatus] = useState<Record<string, 'sending' | 'sent' | string>>({});
+  const [boletoUploading, setBoletoUploading] = useState<Record<string, boolean>>({});
+  const [waLoading, setWaLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     fetch('/api/admin/rent-charges/overdue')
@@ -73,6 +74,45 @@ export default function OverdueRentChargesPage() {
     const res = await fetch(`/api/admin/rent-charges/${id}/send-collection`, { method: 'POST' });
     const data = await res.json().catch(() => ({}));
     setSendStatus((prev) => ({ ...prev, [id]: res.ok ? 'sent' : data.error || 'Erro ao enviar.' }));
+  };
+
+  const uploadBoleto = async (id: string, file: File) => {
+    setBoletoUploading((prev) => ({ ...prev, [id]: true }));
+    const body = new FormData();
+    body.append('file', file);
+    const res = await fetch(`/api/admin/rent-charges/${id}/boleto`, { method: 'POST', body });
+    setBoletoUploading((prev) => ({ ...prev, [id]: false }));
+    if (res.ok) {
+      const data = await res.json();
+      setCharges((prev) => prev.map((c) => (c.id === id ? { ...c, boletoFileName: data.fileName } : c)));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Não foi possível anexar o boleto.');
+    }
+  };
+
+  const removeBoleto = async (id: string) => {
+    if (!confirm('Remover o boleto anexado?')) return;
+    setCharges((prev) => prev.map((c) => (c.id === id ? { ...c, boletoFileName: null } : c)));
+    await fetch(`/api/admin/rent-charges/${id}/boleto`, { method: 'DELETE' });
+  };
+
+  const openWhatsApp = async (charge: OverdueCharge) => {
+    if (!charge.tenantPhone) return;
+    const digits = charge.tenantPhone.replace(/\D/g, '');
+    const phone = digits.startsWith('55') ? digits : `55${digits}`;
+
+    let boletoUrl: string | null = null;
+    if (charge.boletoFileName) {
+      setWaLoading((prev) => ({ ...prev, [charge.id]: true }));
+      const res = await fetch(`/api/admin/rent-charges/${charge.id}/boleto`);
+      const data = await res.json().catch(() => ({}));
+      boletoUrl = data.downloadUrl ?? null;
+      setWaLoading((prev) => ({ ...prev, [charge.id]: false }));
+    }
+
+    const message = whatsappMessage(charge, boletoUrl);
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -124,7 +164,6 @@ export default function OverdueRentChargesPage() {
                 </thead>
                 <tbody>
                   {charges.map((charge) => {
-                    const wa = whatsappUrl(charge);
                     const mail = mailtoUrl(charge);
                     return (
                       <tr key={charge.id} className="border-t border-gray-100">
@@ -143,16 +182,51 @@ export default function OverdueRentChargesPage() {
                         <td className="px-6 py-4 font-bold text-red-600">{formatMoney(charge.total)}</td>
                         <td className="px-6 py-4">
                           <div className="flex items-center justify-end gap-3">
-                            {wa ? (
-                              <a
-                                href={wa}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500 text-white hover:bg-green-600 transition-colors"
+                            {charge.boletoFileName ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-gray-600">
+                                <Paperclip className="w-3.5 h-3.5" />
+                                {charge.boletoFileName}
+                                <button
+                                  onClick={() => removeBoleto(charge.id)}
+                                  className="text-red-500 hover:text-red-700"
+                                  aria-label="Remover boleto"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </span>
+                            ) : (
+                              <label className="inline-flex items-center gap-1 text-xs text-navy-700 hover:text-navy-900 font-semibold cursor-pointer">
+                                {boletoUploading[charge.id] ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <Paperclip className="w-3.5 h-3.5" />
+                                )}
+                                Anexar boleto
+                                <input
+                                  type="file"
+                                  accept=".pdf,.jpg,.jpeg,.png"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    if (file) uploadBoleto(charge.id, file);
+                                    e.target.value = '';
+                                  }}
+                                />
+                              </label>
+                            )}
+                            {charge.tenantPhone ? (
+                              <button
+                                onClick={() => openWhatsApp(charge)}
+                                disabled={waLoading[charge.id]}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-500 text-white hover:bg-green-600 transition-colors disabled:opacity-50"
                               >
-                                <MessageCircle className="w-3.5 h-3.5" />
+                                {waLoading[charge.id] ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : (
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                )}
                                 WhatsApp
-                              </a>
+                              </button>
                             ) : (
                               <span className="text-xs text-gray-400">Sem telefone</span>
                             )}

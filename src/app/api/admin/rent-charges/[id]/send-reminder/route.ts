@@ -4,6 +4,7 @@ import { canAccessFinance, hasFullPropertyAccess } from '@/lib/auth/permissions'
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { sendDueReminderEmail } from '@/lib/rent-charge-emails';
+import { loadBoletoAttachment } from '@/lib/boleto-attachment';
 
 export async function POST(
   request: NextRequest,
@@ -19,7 +20,7 @@ export async function POST(
 
   const { data: charge } = await supabase
     .from('financial_transactions')
-    .select('id, description, amount, due_date, tenant_id, property_id, status')
+    .select('id, description, amount, due_date, tenant_id, property_id, status, boleto_file_path, boleto_file_name')
     .eq('id', id)
     .maybeSingle();
 
@@ -51,6 +52,8 @@ export async function POST(
     return NextResponse.json({ error: 'Inquilino sem e-mail cadastrado.' }, { status: 400 });
   }
 
+  const attachment = await loadBoletoAttachment(supabase, charge.boleto_file_path, charge.boleto_file_name);
+
   const result = await sendDueReminderEmail({
     tenantName: tenant.name,
     tenantEmail: tenant.email,
@@ -59,6 +62,7 @@ export async function POST(
     description: charge.description,
     amount: Number(charge.amount),
     dueDate: charge.due_date,
+    attachment,
   });
 
   if (!result.sent) {

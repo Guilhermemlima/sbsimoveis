@@ -30,8 +30,9 @@ export async function GET() {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
   const leaseIds = (leases ?? []).map((l) => l.id);
+  const guarantorIds = [...new Set((leases ?? []).map((l) => l.guarantor_id).filter(Boolean))];
 
-  const [coOwnersRes, coTenantsRes] = await Promise.all([
+  const [coOwnersRes, coTenantsRes, guarantorsRes] = await Promise.all([
     leaseIds.length > 0
       ? supabase
           .from('lease_contract_owners')
@@ -44,7 +45,15 @@ export async function GET() {
           .select('lease_contract_id, tenant_id, participation_percentage, tenants(name)')
           .in('lease_contract_id', leaseIds)
       : Promise.resolve({ data: [] }),
+    guarantorIds.length > 0
+      ? supabase.from('guarantors').select('id, name').in('id', guarantorIds)
+      : Promise.resolve({ data: [] }),
   ]);
+
+  const guarantorNameById = new Map<string, string>();
+  for (const g of guarantorsRes.data ?? []) {
+    guarantorNameById.set(g.id, g.name);
+  }
 
   const coOwnersByLease = new Map<string, { owner_id: string; name: string; percentage: number; commission_rate: number }[]>();
   for (const row of coOwnersRes.data ?? []) {
@@ -84,6 +93,7 @@ export async function GET() {
       tenants: coTenants,
       ownerName: coOwners.length > 0 ? coOwners.map((o) => o.name).join(', ') : 'Proprietário',
       tenantName: coTenants.length > 0 ? coTenants.map((t) => t.name).join(', ') : 'Inquilino',
+      guarantorName: lease.guarantor_id ? guarantorNameById.get(lease.guarantor_id) ?? null : null,
     };
   });
 
@@ -168,6 +178,7 @@ export async function POST(request: NextRequest) {
       property_id: body.property_id,
       owner_id: primaryOwnerId(owners),
       tenant_id: primaryTenantId(tenants),
+      guarantor_id: body.guarantor_id || null,
       realtor_id: property.realtor_id,
       start_date: body.start_date,
       end_date: body.end_date,

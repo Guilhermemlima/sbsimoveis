@@ -5,7 +5,7 @@ import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
 import { Plus, X, Loader2, FileText, ShieldCheck, FileEdit } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
-import type { Property, PropertyOwner, Tenant, BillingResponsible, DepositDeduction } from '@/types';
+import type { Property, PropertyOwner, Tenant, Guarantor, BillingResponsible, DepositDeduction } from '@/types';
 
 interface Lease {
   id: string;
@@ -26,6 +26,7 @@ interface Lease {
   status: string;
   ownerName: string;
   tenantName: string;
+  guarantorName?: string | null;
   properties?: { title: string; code: string; city: string; neighborhood: string };
 }
 
@@ -94,6 +95,7 @@ export default function LeasesPage() {
   const [properties, setProperties] = useState<Property[]>([]);
   const [owners, setOwners] = useState<PropertyOwner[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [guarantors, setGuarantors] = useState<Guarantor[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -111,6 +113,7 @@ export default function LeasesPage() {
     property_id: '',
     owner_id: '',
     tenant_id: '',
+    guarantor_id: '',
     start_date: new Date().toISOString().slice(0, 10),
     end_date: '',
     due_day: '10',
@@ -183,6 +186,9 @@ export default function LeasesPage() {
     fetch('/api/admin/tenants')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setTenants(Array.isArray(data) ? data : []));
+    fetch('/api/admin/guarantors')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setGuarantors(Array.isArray(data) ? data : []));
   }, []);
 
   const availableProperties = useMemo(
@@ -337,6 +343,7 @@ export default function LeasesPage() {
       property_id: '',
       owner_id: '',
       tenant_id: '',
+      guarantor_id: '',
       rent_value: '',
       end_date: '',
       first_rent_retention_type: 'none',
@@ -551,6 +558,30 @@ export default function LeasesPage() {
               </div>
               <p className="text-xs text-gray-500 mt-2">
                 Se houver mais de um inquilino, cada um fica com o percentual de participação registrado no contrato.
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <label className={labelClass}>Fiador (opcional)</label>
+              <select
+                value={form.guarantor_id}
+                onChange={(e) => set('guarantor_id', e.target.value)}
+                className={inputClass}
+              >
+                <option value="">Sem fiador</option>
+                {guarantors.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                    {g.document_number ? ` · ${g.document_number}` : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Gerencie os dados do fiador em{' '}
+                <Link href="/admin/guarantors" className="text-gold-700 hover:underline">
+                  Fiadores
+                </Link>
+                .
               </p>
             </div>
 
@@ -814,7 +845,12 @@ export default function LeasesPage() {
                       <p className="text-xs text-gray-500">{lease.properties?.code}</p>
                     </td>
                     <td className="px-6 py-4 text-gray-600">{lease.ownerName}</td>
-                    <td className="px-6 py-4 text-gray-600">{lease.tenantName}</td>
+                    <td className="px-6 py-4 text-gray-600">
+                      {lease.tenantName}
+                      {lease.guarantorName && (
+                        <p className="text-xs text-gray-400">Fiador: {lease.guarantorName}</p>
+                      )}
+                    </td>
                     <td className="px-6 py-4 font-semibold text-navy-950">
                       R$ {Number(lease.rent_value).toLocaleString('pt-BR')}
                     </td>

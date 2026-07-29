@@ -28,6 +28,7 @@ const categories: ActionCategory[] = [
     accent: 'border-blue-500',
     items: [
       { href: '/admin/owners', label: 'Proprietários' },
+      { href: '/admin/guarantors', label: 'Fiadores' },
     ],
   },
   {

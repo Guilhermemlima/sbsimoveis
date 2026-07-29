@@ -16,6 +16,7 @@ const UPDATABLE_FIELDS = [
   'deposit_value',
   'status',
   'notes',
+  'guarantor_id',
 ];
 
 const RETENTION_FIELDS = [

@@ -318,6 +318,29 @@ export interface PropertyOwner {
   updated_at: string;
 }
 
+export interface Guarantor {
+  id: string;
+  name: string;
+  document_number?: string | null;
+  rg?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  notes?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GuarantorDocument {
+  id: string;
+  guarantor_id: string;
+  name: string;
+  file_path: string;
+  file_type: string | null;
+  uploaded_by?: string | null;
+  created_at: string;
+}
+
 export interface Tenant {
   id: string;
   user_id?: string | null;

@@ -40,6 +40,7 @@ function buildCategories(permissions: string[]): ActionCategory[] {
           { href: '/admin/leases', label: 'Contratos de Locação' },
           { href: '/admin/owners', label: 'Proprietários' },
           { href: '/admin/tenants', label: 'Inquilinos' },
+          { href: '/admin/guarantors', label: 'Fiadores' },
         ],
       },
       {

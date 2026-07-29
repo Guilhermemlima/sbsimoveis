@@ -3,9 +3,27 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canAccessBackOffice } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 
-const UPDATABLE_FIELDS = ['name', 'email', 'phone', 'document_number', 'rg', 'notes'];
+const UPDATABLE_FIELDS = ['name', 'email', 'phone', 'document_number', 'rg', 'address', 'notes'];
 
 const isAuthorized = canAccessBackOffice;
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await getCurrentUser();
+  if (!isAuthorized(user)) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase.from('tenants').select('*').eq('id', id).maybeSingle();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: 'Inquilino não encontrado.' }, { status: 404 });
+  return NextResponse.json(data);
+}
 
 export async function PUT(
   request: NextRequest,

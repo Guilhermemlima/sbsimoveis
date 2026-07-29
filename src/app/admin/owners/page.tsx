@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
 import { UserPlus, Trash2, Pencil } from 'lucide-react';
 import type { PropertyOwner, OwnerPaymentMethod } from '@/types';
@@ -18,6 +19,8 @@ const emptyForm = {
   email: '',
   phone: '',
   document_number: '',
+  rg: '',
+  address: '',
   bank_name: '',
   bank_agency: '',
   bank_account: '',
@@ -65,6 +68,8 @@ export default function OwnersPage() {
       email: owner.email ?? '',
       phone: owner.phone ?? '',
       document_number: owner.document_number ?? '',
+      rg: owner.rg ?? '',
+      address: owner.address ?? '',
       bank_name: owner.bank_name ?? '',
       bank_agency: owner.bank_agency ?? '',
       bank_account: owner.bank_account ?? '',
@@ -183,6 +188,22 @@ export default function OwnersPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
               />
             </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">RG</label>
+              <input
+                value={form.rg}
+                onChange={(e) => set('rg', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Endereço</label>
+              <input
+                value={form.address}
+                onChange={(e) => set('address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
+              />
+            </div>
             <div className="md:col-span-2 border-t border-gray-100 pt-4 mt-2">
               <h3 className="text-sm font-bold text-navy-950 mb-1">Forma de Pagamento</h3>
               <p className="text-xs text-gray-500">Dados usados nos repasses ao proprietário</p>
@@ -287,7 +308,11 @@ export default function OwnersPage() {
               <tbody>
                 {owners.map((owner) => (
                   <tr key={owner.id} className="border-t border-gray-100">
-                    <td className="px-6 py-4 font-medium text-navy-950">{owner.name}</td>
+                    <td className="px-6 py-4 font-medium text-navy-950">
+                      <Link href={`/admin/owners/${owner.id}`} className="hover:text-gold-600 hover:underline">
+                        {owner.name}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 text-gray-600">
                       {owner.phone || owner.email || '—'}
                     </td>

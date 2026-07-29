@@ -63,13 +63,13 @@ export async function POST(request: NextRequest) {
   const formData = await request.formData();
   const propertyId = String(formData.get('property_id') ?? '');
   const name = String(formData.get('name') ?? '').trim();
-  const file = formData.get('file');
+  const files = formData.getAll('file').filter((f): f is File => f instanceof File);
 
-  if (!propertyId || !name || !(file instanceof File)) {
+  if (!propertyId || !name || files.length === 0) {
     return NextResponse.json({ error: 'Selecione o imóvel, o nome e o arquivo.' }, { status: 400 });
   }
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Arquivo maior que 15MB.' }, { status: 400 });
+  if (files.some((f) => f.size > MAX_SIZE)) {
+    return NextResponse.json({ error: 'Cada arquivo deve ter no máximo 15MB.' }, { status: 400 });
   }
 
   const { data: property } = await supabase
@@ -86,33 +86,38 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
   }
 
-  const ext = file.name.split('.').pop() || 'pdf';
-  const path = `${propertyId}/${crypto.randomUUID()}.${ext}`;
+  const created = [];
+  for (const [index, file] of files.entries()) {
+    const ext = file.name.split('.').pop() || 'pdf';
+    const path = `${propertyId}/${crypto.randomUUID()}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
 
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    if (uploadError) {
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    }
+
+    const { data: doc, error: insertError } = await supabase
+      .from('property_documents')
+      .insert({
+        property_id: propertyId,
+        name: files.length > 1 ? `${name} (${index + 1})` : name,
+        file_path: path,
+        file_type: file.type,
+        uploaded_by: user.id,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      await supabase.storage.from(BUCKET).remove([path]);
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    created.push(doc);
   }
 
-  const { data: doc, error: insertError } = await supabase
-    .from('property_documents')
-    .insert({
-      property_id: propertyId,
-      name,
-      file_path: path,
-      file_type: file.type,
-      uploaded_by: user.id,
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    await supabase.storage.from(BUCKET).remove([path]);
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
-  }
-
-  return NextResponse.json(doc, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }

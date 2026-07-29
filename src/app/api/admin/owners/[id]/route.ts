@@ -8,6 +8,8 @@ const UPDATABLE_FIELDS = [
   'email',
   'phone',
   'document_number',
+  'rg',
+  'address',
   'bank_name',
   'bank_agency',
   'bank_account',
@@ -19,6 +21,24 @@ const UPDATABLE_FIELDS = [
 ];
 
 const isAuthorized = canAccessBackOffice;
+
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const user = await getCurrentUser();
+  if (!isAuthorized(user)) {
+    return NextResponse.json({ error: 'Não autorizado.' }, { status: 403 });
+  }
+
+  const { id } = await params;
+  const supabase = createServiceRoleClient();
+  const { data, error } = await supabase.from('property_owners').select('*').eq('id', id).maybeSingle();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (!data) return NextResponse.json({ error: 'Proprietário não encontrado.' }, { status: 404 });
+  return NextResponse.json(data);
+}
 
 export async function PUT(
   request: NextRequest,

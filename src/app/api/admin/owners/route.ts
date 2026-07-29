@@ -48,6 +48,8 @@ export async function POST(request: NextRequest) {
       email: body.email || null,
       phone: body.phone || null,
       document_number: body.document_number || null,
+      rg: body.rg || null,
+      address: body.address || null,
       bank_name: body.bank_name || null,
       bank_agency: body.bank_agency || null,
       bank_account: body.bank_account || null,

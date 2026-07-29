@@ -319,6 +319,8 @@ export interface PropertyOwner {
   email?: string | null;
   phone?: string | null;
   document_number?: string | null;
+  rg?: string | null;
+  address?: string | null;
   bank_name?: string | null;
   bank_agency?: string | null;
   bank_account?: string | null;
@@ -362,6 +364,7 @@ export interface Tenant {
   phone?: string | null;
   document_number?: string | null;
   rg?: string | null;
+  address?: string | null;
   notes?: string | null;
   created_at: string;
   updated_at: string;

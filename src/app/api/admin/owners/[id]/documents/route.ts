@@ -20,9 +20,9 @@ export async function GET(
   const supabase = createServiceRoleClient();
 
   const { data: documents, error } = await supabase
-    .from('client_documents')
+    .from('owner_documents')
     .select('*')
-    .eq('client_id', id)
+    .eq('owner_id', id)
     .order('created_at', { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
@@ -51,15 +51,9 @@ export async function POST(
   const { id } = await params;
   const supabase = createServiceRoleClient();
 
-  const { data: client } = await supabase
-    .from('users')
-    .select('id')
-    .eq('id', id)
-    .eq('role', 'client')
-    .maybeSingle();
-
-  if (!client) {
-    return NextResponse.json({ error: 'Cliente não encontrado.' }, { status: 404 });
+  const { data: owner } = await supabase.from('property_owners').select('id').eq('id', id).maybeSingle();
+  if (!owner) {
+    return NextResponse.json({ error: 'Proprietário não encontrado.' }, { status: 404 });
   }
 
   const formData = await request.formData();
@@ -76,7 +70,7 @@ export async function POST(
   const created = [];
   for (const [index, file] of files.entries()) {
     const ext = file.name.split('.').pop() || 'pdf';
-    const path = `client-${id}/${crypto.randomUUID()}.${ext}`;
+    const path = `owner-${id}/${crypto.randomUUID()}.${ext}`;
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
@@ -87,9 +81,9 @@ export async function POST(
     }
 
     const { data: doc, error: insertError } = await supabase
-      .from('client_documents')
+      .from('owner_documents')
       .insert({
-        client_id: id,
+        owner_id: id,
         name: files.length > 1 ? `${name} (${index + 1})` : name,
         file_path: path,
         file_type: file.type,

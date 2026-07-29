@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
 import { UserPlus, Trash2, KeyRound, ShieldCheck, Pencil } from 'lucide-react';
 import type { Tenant } from '@/types';
@@ -11,6 +12,7 @@ const emptyForm = {
   phone: '',
   document_number: '',
   rg: '',
+  address: '',
 };
 
 export default function TenantsPage() {
@@ -56,6 +58,7 @@ export default function TenantsPage() {
       phone: tenant.phone ?? '',
       document_number: tenant.document_number ?? '',
       rg: tenant.rg ?? '',
+      address: tenant.address ?? '',
     });
     setFormError('');
     setFormOpen(true);
@@ -182,6 +185,14 @@ export default function TenantsPage() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
               />
             </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Endereço</label>
+              <input
+                value={form.address}
+                onChange={(e) => set('address', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-gold-500"
+              />
+            </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
                 E-mail (necessário para criar login do portal)
@@ -277,7 +288,11 @@ export default function TenantsPage() {
               <tbody>
                 {tenants.map((tenant) => (
                   <tr key={tenant.id} className="border-t border-gray-100">
-                    <td className="px-6 py-4 font-medium text-navy-950">{tenant.name}</td>
+                    <td className="px-6 py-4 font-medium text-navy-950">
+                      <Link href={`/admin/tenants/${tenant.id}`} className="hover:text-gold-600 hover:underline">
+                        {tenant.name}
+                      </Link>
+                    </td>
                     <td className="px-6 py-4 text-gray-600">
                       {tenant.phone || tenant.email || '—'}
                     </td>

@@ -58,42 +58,47 @@ export async function POST(
 
   const formData = await request.formData();
   const name = String(formData.get('name') ?? '').trim();
-  const file = formData.get('file');
+  const files = formData.getAll('file').filter((f): f is File => f instanceof File);
 
-  if (!name || !(file instanceof File)) {
+  if (!name || files.length === 0) {
     return NextResponse.json({ error: 'Dê um nome ao documento e escolha o arquivo.' }, { status: 400 });
   }
-  if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Arquivo maior que 15MB.' }, { status: 400 });
+  if (files.some((f) => f.size > MAX_SIZE)) {
+    return NextResponse.json({ error: 'Cada arquivo deve ter no máximo 15MB.' }, { status: 400 });
   }
 
-  const ext = file.name.split('.').pop() || 'pdf';
-  const path = `guarantor-${id}/${crypto.randomUUID()}.${ext}`;
+  const created = [];
+  for (const [index, file] of files.entries()) {
+    const ext = file.name.split('.').pop() || 'pdf';
+    const path = `guarantor-${id}/${crypto.randomUUID()}.${ext}`;
 
-  const { error: uploadError } = await supabase.storage
-    .from(BUCKET)
-    .upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET)
+      .upload(path, await file.arrayBuffer(), { contentType: file.type, upsert: false });
 
-  if (uploadError) {
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    if (uploadError) {
+      return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    }
+
+    const { data: doc, error: insertError } = await supabase
+      .from('guarantor_documents')
+      .insert({
+        guarantor_id: id,
+        name: files.length > 1 ? `${name} (${index + 1})` : name,
+        file_path: path,
+        file_type: file.type,
+        uploaded_by: user!.id,
+      })
+      .select()
+      .single();
+
+    if (insertError) {
+      await supabase.storage.from(BUCKET).remove([path]);
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
+    }
+
+    created.push(doc);
   }
 
-  const { data: doc, error: insertError } = await supabase
-    .from('guarantor_documents')
-    .insert({
-      guarantor_id: id,
-      name,
-      file_path: path,
-      file_type: file.type,
-      uploaded_by: user!.id,
-    })
-    .select()
-    .single();
-
-  if (insertError) {
-    await supabase.storage.from(BUCKET).remove([path]);
-    return NextResponse.json({ error: insertError.message }, { status: 500 });
-  }
-
-  return NextResponse.json(doc, { status: 201 });
+  return NextResponse.json(created, { status: 201 });
 }

@@ -2,28 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Mail, Phone, MapPin, User } from 'lucide-react';
 import PartyDocumentsPanel from '@/components/admin/PartyDocumentsPanel';
+import type { Tenant } from '@/types';
 
-interface GuarantorInfo {
-  id: string;
-  name: string;
-  document_number: string | null;
-  rg: string | null;
-  address: string | null;
-  phone: string | null;
-  email: string | null;
-  notes: string | null;
-}
-
-export default function GuarantorDetailClient({ id }: { id: string }) {
-  const [guarantor, setGuarantor] = useState<GuarantorInfo | null>(null);
+export default function TenantDetailClient({ id }: { id: string }) {
+  const [tenant, setTenant] = useState<Tenant | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/admin/guarantors/${id}`)
+    fetch(`/api/admin/tenants/${id}`)
       .then((res) => (res.ok ? res.json() : null))
-      .then((data) => setGuarantor(data))
+      .then((data) => setTenant(data))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -35,10 +25,10 @@ export default function GuarantorDetailClient({ id }: { id: string }) {
     );
   }
 
-  if (!guarantor) {
+  if (!tenant) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">Fiador não encontrado.</p>
+        <p className="text-gray-600">Inquilino não encontrado.</p>
       </div>
     );
   }
@@ -48,38 +38,38 @@ export default function GuarantorDetailClient({ id }: { id: string }) {
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4">
           <Link
-            href="/admin/guarantors"
+            href="/admin/clients"
             className="inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm"
           >
             <ArrowLeft className="w-4 h-4" />
-            Voltar para Fiadores
+            Voltar para Clientes
           </Link>
           <div className="flex items-center gap-2 mb-2">
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-100 border border-amber-400/40">
-              <ShieldCheck className="w-3 h-3" />
-              Fiador
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-100 border border-blue-400/40">
+              <User className="w-3 h-3" />
+              Inquilino
             </span>
           </div>
-          <h1 className="text-3xl font-bold mb-2">{guarantor.name}</h1>
+          <h1 className="text-3xl font-bold mb-2">{tenant.name}</h1>
           <div className="flex flex-wrap gap-4 text-navy-100 text-sm">
-            {guarantor.document_number && <span>CPF: {guarantor.document_number}</span>}
-            {guarantor.rg && <span>RG: {guarantor.rg}</span>}
-            {guarantor.email && (
+            {tenant.document_number && <span>CPF: {tenant.document_number}</span>}
+            {tenant.rg && <span>RG: {tenant.rg}</span>}
+            {tenant.email && (
               <span className="inline-flex items-center gap-1.5">
                 <Mail className="w-4 h-4" />
-                {guarantor.email}
+                {tenant.email}
               </span>
             )}
-            {guarantor.phone && (
+            {tenant.phone && (
               <span className="inline-flex items-center gap-1.5">
                 <Phone className="w-4 h-4" />
-                {guarantor.phone}
+                {tenant.phone}
               </span>
             )}
-            {guarantor.address && (
+            {tenant.address && (
               <span className="inline-flex items-center gap-1.5">
                 <MapPin className="w-4 h-4" />
-                {guarantor.address}
+                {tenant.address}
               </span>
             )}
           </div>
@@ -87,18 +77,18 @@ export default function GuarantorDetailClient({ id }: { id: string }) {
       </div>
 
       <div className="container mx-auto px-4 py-10 space-y-8">
-        {guarantor.notes && (
+        {tenant.notes && (
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-lg font-bold text-navy-950 mb-2">Observações</h2>
-            <p className="text-sm text-navy-950 whitespace-pre-wrap">{guarantor.notes}</p>
+            <p className="text-sm text-navy-950 whitespace-pre-wrap">{tenant.notes}</p>
           </div>
         )}
 
         <PartyDocumentsPanel
-          endpoint={`/api/admin/guarantors/${id}/documents`}
-          title="Documentos do Fiador"
-          emptyLabel="Nenhum documento anexado a este fiador ainda."
-          placeholder="Ex: Comprovante de Renda, RG, CPF"
+          endpoint={`/api/admin/tenants/${id}/documents`}
+          title="Documentos do Inquilino"
+          emptyLabel="Nenhum documento anexado a este inquilino ainda."
+          placeholder="Ex: RG, CPF, Comprovante de Renda, Contrato"
         />
       </div>
     </div>

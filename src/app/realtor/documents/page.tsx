@@ -25,7 +25,7 @@ export default function RealtorDocumentsPage() {
 
   const [propertyId, setPropertyId] = useState('');
   const [name, setName] = useState('');
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
 
   const loadDocuments = () => {
     fetch('/api/realtor/documents')
@@ -44,7 +44,7 @@ export default function RealtorDocumentsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!propertyId || !name || !file) {
+    if (!propertyId || !name || files.length === 0) {
       setError('Selecione o imóvel, dê um nome ao documento e escolha o arquivo.');
       return;
     }
@@ -53,7 +53,7 @@ export default function RealtorDocumentsPage() {
     const body = new FormData();
     body.append('property_id', propertyId);
     body.append('name', name);
-    body.append('file', file);
+    files.forEach((f) => body.append('file', f));
 
     const res = await fetch('/api/realtor/documents', { method: 'POST', body });
     setSubmitting(false);
@@ -66,7 +66,7 @@ export default function RealtorDocumentsPage() {
 
     setPropertyId('');
     setName('');
-    setFile(null);
+    setFiles([]);
     setFormOpen(false);
     loadDocuments();
   };
@@ -148,15 +148,18 @@ export default function RealtorDocumentsPage() {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Arquivo</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Arquivo(s)</label>
               <input
                 required
                 type="file"
+                multiple
                 accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
                 className="w-full text-sm text-gray-600"
               />
-              <p className="text-xs text-gray-500 mt-1">PDF, Word ou imagem, até 15MB.</p>
+              <p className="text-xs text-gray-500 mt-1">
+                PDF, Word ou imagem, até 15MB cada. Pode selecionar vários de uma vez.
+              </p>
             </div>
 
             <div className="md:col-span-2">

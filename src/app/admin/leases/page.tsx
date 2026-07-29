@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { Plus, X, Loader2, FileText, ShieldCheck, FileEdit, Umbrella, Upload, Download, Trash2 } from 'lucide-react';
+import { Plus, X, Loader2, FileText, ShieldCheck, FileEdit, Umbrella, Upload, Download, Trash2, PenLine, RefreshCw, ExternalLink } from 'lucide-react';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import type { Property, PropertyOwner, Tenant, Guarantor, BillingResponsible, DepositDeduction } from '@/types';
 
@@ -12,6 +12,10 @@ interface Lease {
   property_id: string;
   owner_id: string;
   tenant_id: string;
+  guarantor_id?: string | null;
+  realtor_id?: string | null;
+  owners?: { owner_id: string; name: string }[];
+  tenants?: { tenant_id: string; name: string }[];
   start_date: string;
   end_date: string;
   due_day: number;
@@ -37,6 +41,38 @@ interface Lease {
   guarantorName?: string | null;
   properties?: { title: string; code: string; city: string; neighborhood: string };
 }
+
+interface SignatureRequestSigner {
+  id: string;
+  party_role: string;
+  name: string;
+  email: string;
+  sign_url: string | null;
+  signed_at: string | null;
+  rejected_at: string | null;
+}
+
+interface SignatureRequest {
+  id: string;
+  status: string;
+  document_name: string | null;
+  created_at: string;
+  signedDownloadUrl: string | null;
+  signature_request_signers: SignatureRequestSigner[];
+}
+
+const SIGNATURE_STATUS_LABEL: Record<string, string> = {
+  pending: 'Pendente',
+  completed: 'Concluída',
+  rejected: 'Recusada',
+};
+
+const PARTY_ROLE_LABEL: Record<string, string> = {
+  owner: 'Proprietário',
+  tenant: 'Inquilino',
+  guarantor: 'Fiador',
+  realtor: 'Corretor',
+};
 
 const DEPOSIT_STATUS_LABEL: Record<string, string> = {
   held: 'Retida',
@@ -104,6 +140,7 @@ export default function LeasesPage() {
   const [owners, setOwners] = useState<PropertyOwner[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [guarantors, setGuarantors] = useState<Guarantor[]>([]);
+  const [realtors, setRealtors] = useState<{ id: string; name: string; email: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -133,6 +170,14 @@ export default function LeasesPage() {
     fileName: null,
   });
   const [insuranceUploading, setInsuranceUploading] = useState(false);
+
+  const [signatureLeaseId, setSignatureLeaseId] = useState<string | null>(null);
+  const [signatureRequests, setSignatureRequests] = useState<SignatureRequest[]>([]);
+  const [signatureLoading, setSignatureLoading] = useState(false);
+  const [signatureError, setSignatureError] = useState('');
+  const [signatureFile, setSignatureFile] = useState<File | null>(null);
+  const [selectedSigners, setSelectedSigners] = useState<Record<string, boolean>>({});
+  const [signatureSubmitting, setSignatureSubmitting] = useState(false);
 
   const [form, setForm] = useState<Record<string, string>>({
     property_id: '',
@@ -215,6 +260,9 @@ export default function LeasesPage() {
     fetch('/api/admin/guarantors')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setGuarantors(Array.isArray(data) ? data : []));
+    fetch('/api/admin/realtors')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setRealtors(Array.isArray(data) ? data : []));
   }, []);
 
   const availableProperties = useMemo(
@@ -371,6 +419,83 @@ export default function LeasesPage() {
     await fetch(`/api/admin/leases/${insuranceLeaseId}/insurance-policy`, { method: 'DELETE' });
     setInsuranceFileInfo({ downloadUrl: null, fileName: null });
     loadLeases();
+  };
+
+  const signatureLease = leases.find((l) => l.id === signatureLeaseId);
+
+  const signerCandidates = useMemo(() => {
+    if (!signatureLease) return [];
+    const candidates: { key: string; party_role: string; party_id: string; name: string; email: string }[] = [];
+
+    for (const o of signatureLease.owners ?? []) {
+      const full = owners.find((x) => x.id === o.owner_id);
+      if (full?.email) candidates.push({ key: `owner:${o.owner_id}`, party_role: 'owner', party_id: o.owner_id, name: full.name, email: full.email });
+    }
+    for (const t of signatureLease.tenants ?? []) {
+      const full = tenants.find((x) => x.id === t.tenant_id);
+      if (full?.email) candidates.push({ key: `tenant:${t.tenant_id}`, party_role: 'tenant', party_id: t.tenant_id, name: full.name, email: full.email });
+    }
+    if (signatureLease.guarantor_id) {
+      const full = guarantors.find((x) => x.id === signatureLease.guarantor_id);
+      if (full?.email) candidates.push({ key: `guarantor:${full.id}`, party_role: 'guarantor', party_id: full.id, name: full.name, email: full.email });
+    }
+    if (signatureLease.realtor_id) {
+      const full = realtors.find((x) => x.id === signatureLease.realtor_id);
+      if (full?.email) candidates.push({ key: `realtor:${full.id}`, party_role: 'realtor', party_id: full.id, name: full.name, email: full.email });
+    }
+
+    return candidates;
+  }, [signatureLease, owners, tenants, guarantors, realtors]);
+
+  const loadSignatureRequests = (leaseId: string) => {
+    setSignatureLoading(true);
+    fetch(`/api/admin/leases/${leaseId}/signature-request`)
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setSignatureRequests(Array.isArray(data) ? data : []))
+      .finally(() => setSignatureLoading(false));
+  };
+
+  const openSignature = (lease: Lease) => {
+    setSignatureLeaseId(lease.id);
+    setSignatureError('');
+    setSignatureFile(null);
+    setSelectedSigners({});
+    loadSignatureRequests(lease.id);
+  };
+
+  const submitSignatureRequest = async () => {
+    if (!signatureLeaseId || !signatureFile) {
+      setSignatureError('Escolha o arquivo do contrato em PDF.');
+      return;
+    }
+    const chosen = signerCandidates.filter((c) => selectedSigners[c.key]);
+    if (chosen.length === 0) {
+      setSignatureError('Selecione ao menos um signatário.');
+      return;
+    }
+
+    setSignatureError('');
+    setSignatureSubmitting(true);
+
+    const body = new FormData();
+    body.append('file', signatureFile);
+    body.append(
+      'signers',
+      JSON.stringify(chosen.map((c) => ({ party_role: c.party_role, party_id: c.party_id, name: c.name, email: c.email })))
+    );
+
+    const res = await fetch(`/api/admin/leases/${signatureLeaseId}/signature-request`, { method: 'POST', body });
+    setSignatureSubmitting(false);
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setSignatureError(data.error || 'Não foi possível enviar para assinatura.');
+      return;
+    }
+
+    setSignatureFile(null);
+    setSelectedSigners({});
+    loadSignatureRequests(signatureLeaseId);
   };
 
   const settleDeposit = async () => {
@@ -960,6 +1085,7 @@ export default function LeasesPage() {
                   <th className="px-6 py-3">Caução</th>
                   <th className="px-6 py-3">Seguro Fiança</th>
                   <th className="px-6 py-3">Retenção 1º Aluguel</th>
+                  <th className="px-6 py-3">Assinatura</th>
                   <th className="px-6 py-3">Ações</th>
                 </tr>
               </thead>
@@ -1038,6 +1164,15 @@ export default function LeasesPage() {
                       ) : (
                         <span className="text-gray-400">—</span>
                       )}
+                    </td>
+                    <td className="px-6 py-4">
+                      <button
+                        onClick={() => openSignature(lease)}
+                        className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs"
+                      >
+                        <PenLine className="w-4 h-4" />
+                        Assinatura Digital
+                      </button>
                     </td>
                     <td className="px-6 py-4">
                       <Link
@@ -1292,6 +1427,168 @@ export default function LeasesPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {signatureLease && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[85vh] overflow-y-auto p-6">
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h3 className="text-lg font-bold text-navy-950 flex items-center gap-2">
+                    <PenLine className="w-5 h-5 text-navy-600" />
+                    Assinatura Digital — {signatureLease.properties?.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Envio do contrato para assinatura via Autentique (terceirizado)
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSignatureLeaseId(null)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {signatureError && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm mb-4">
+                  {signatureError}
+                </div>
+              )}
+
+              <div className="border border-gray-200 rounded-lg p-4 mb-6">
+                <p className="text-sm font-semibold text-navy-950 mb-3">Nova solicitação de assinatura</p>
+
+                <div className="mb-3">
+                  <label className="block text-xs font-semibold text-gray-600 mb-1">
+                    Arquivo do contrato (PDF)
+                  </label>
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={(e) => setSignatureFile(e.target.files?.[0] ?? null)}
+                    className="w-full text-sm text-gray-600"
+                  />
+                </div>
+
+                <p className="text-xs font-semibold text-gray-600 mb-2">Signatários</p>
+                {signerCandidates.length === 0 ? (
+                  <p className="text-sm text-gray-400 mb-3">
+                    Nenhuma parte com e-mail cadastrado encontrada para este contrato (proprietário,
+                    inquilino, fiador ou corretor).
+                  </p>
+                ) : (
+                  <div className="space-y-2 mb-3">
+                    {signerCandidates.map((c) => (
+                      <label key={c.key} className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={!!selectedSigners[c.key]}
+                          onChange={(e) =>
+                            setSelectedSigners((prev) => ({ ...prev, [c.key]: e.target.checked }))
+                          }
+                        />
+                        <span className="font-medium text-navy-950">{PARTY_ROLE_LABEL[c.party_role]}</span>
+                        <span className="text-gray-600">
+                          {c.name} · {c.email}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={submitSignatureRequest}
+                  disabled={signatureSubmitting}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-gold-500 text-navy-950 rounded-lg font-bold text-sm hover:bg-gold-400 transition-colors disabled:opacity-50"
+                >
+                  {signatureSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {signatureSubmitting ? 'Enviando...' : 'Enviar para assinatura'}
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-navy-950">Solicitações enviadas</p>
+                <button
+                  onClick={() => signatureLeaseId && loadSignatureRequests(signatureLeaseId)}
+                  disabled={signatureLoading}
+                  className="inline-flex items-center gap-1 text-xs text-navy-700 hover:text-navy-900 font-semibold"
+                >
+                  {signatureLoading ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  )}
+                  Atualizar status
+                </button>
+              </div>
+
+              {signatureRequests.length === 0 ? (
+                <p className="text-sm text-gray-400">Nenhuma solicitação de assinatura enviada ainda.</p>
+              ) : (
+                <div className="space-y-3">
+                  {signatureRequests.map((r) => (
+                    <div key={r.id} className="border border-gray-200 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-semibold text-navy-950">{r.document_name}</span>
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
+                            r.status === 'completed'
+                              ? 'bg-green-100 text-green-800'
+                              : r.status === 'rejected'
+                                ? 'bg-red-100 text-red-700'
+                                : 'bg-yellow-100 text-yellow-800'
+                          }`}
+                        >
+                          {SIGNATURE_STATUS_LABEL[r.status] ?? r.status}
+                        </span>
+                      </div>
+                      <ul className="space-y-1">
+                        {r.signature_request_signers.map((s) => (
+                          <li key={s.id} className="flex items-center justify-between text-xs">
+                            <span className="text-gray-600">
+                              {PARTY_ROLE_LABEL[s.party_role] ?? s.party_role} — {s.name}
+                            </span>
+                            <span className="flex items-center gap-2">
+                              {s.signed_at ? (
+                                <span className="text-green-700 font-semibold">Assinado</span>
+                              ) : s.rejected_at ? (
+                                <span className="text-red-600 font-semibold">Recusado</span>
+                              ) : (
+                                <span className="text-yellow-700 font-semibold">Pendente</span>
+                              )}
+                              {!s.signed_at && !s.rejected_at && s.sign_url && (
+                                <a
+                                  href={s.sign_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-0.5 text-navy-700 hover:text-navy-900"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                  Link
+                                </a>
+                              )}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                      {r.signedDownloadUrl && (
+                        <a
+                          href={r.signedDownloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 mt-2 text-xs text-navy-900 hover:text-gold-600 font-semibold"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          Baixar contrato assinado
+                        </a>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}

@@ -18,6 +18,7 @@ interface Lease {
   rent_value: number;
   admin_fee_percentage: number;
   deposit_value: number;
+  deposit_months?: number | null;
   deposit_status: string;
   deposit_returned_amount?: number | null;
   first_rent_retention_type: string;
@@ -120,6 +121,7 @@ export default function LeasesPage() {
     rent_value: '',
     admin_fee_percentage: '10',
     deposit_value: '0',
+    deposit_months: '',
     water_responsible: 'tenant',
     energy_responsible: 'tenant',
     iptu_responsible: 'owner',
@@ -642,6 +644,19 @@ export default function LeasesPage() {
               <CurrencyInput value={form.deposit_value} onChange={(v) => set('deposit_value', v)} />
             </div>
 
+            <div>
+              <label className={labelClass}>Caução — quantidade de meses</label>
+              <input
+                type="number"
+                min="0"
+                step="1"
+                value={form.deposit_months}
+                onChange={(e) => set('deposit_months', e.target.value)}
+                placeholder="Ex: 1, 2, 3"
+                className={inputClass}
+              />
+            </div>
+
             <div className="md:col-span-2 bg-gray-50 rounded-lg p-4 space-y-4">
               <p className="text-sm font-semibold text-navy-950">
                 Taxa de administração do primeiro aluguel
@@ -869,8 +884,11 @@ export default function LeasesPage() {
                           className="inline-flex items-center gap-1 text-navy-700 hover:text-navy-900 font-semibold text-xs"
                         >
                           <ShieldCheck className="w-4 h-4" />
-                          R$ {Number(lease.deposit_value).toLocaleString('pt-BR')} ·{' '}
-                          {DEPOSIT_STATUS_LABEL[lease.deposit_status] ?? lease.deposit_status}
+                          <span>
+                            R$ {Number(lease.deposit_value).toLocaleString('pt-BR')}
+                            {lease.deposit_months ? ` (${lease.deposit_months}x)` : ''} ·{' '}
+                            {DEPOSIT_STATUS_LABEL[lease.deposit_status] ?? lease.deposit_status}
+                          </span>
                         </button>
                       ) : (
                         <span className="text-xs text-gray-400">Sem caução</span>
@@ -924,6 +942,9 @@ export default function LeasesPage() {
                   </h3>
                   <p className="text-sm text-gray-500">
                     Valor retido: R$ {Number(depositLease.deposit_value).toLocaleString('pt-BR')}
+                    {depositLease.deposit_months
+                      ? ` (equivalente a ${depositLease.deposit_months} ${depositLease.deposit_months === 1 ? 'mês' : 'meses'} de aluguel)`
+                      : ''}
                   </p>
                 </div>
                 <button onClick={() => setDepositLeaseId(null)} className="text-gray-400 hover:text-gray-600">

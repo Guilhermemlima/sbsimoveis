@@ -14,6 +14,7 @@ const UPDATABLE_FIELDS = [
   'insurance_responsible',
   'condo_responsible',
   'deposit_value',
+  'deposit_months',
   'status',
   'notes',
   'guarantor_id',
@@ -70,7 +71,12 @@ export async function PUT(
 
   const updates: Record<string, unknown> = {};
   for (const key of [...UPDATABLE_FIELDS, ...RETENTION_FIELDS]) {
-    if (body[key] !== undefined) updates[key] = body[key];
+    if (body[key] === undefined) continue;
+    if (key === 'deposit_months') {
+      updates[key] = body[key] === '' || body[key] === null ? null : Number(body[key]);
+    } else {
+      updates[key] = body[key];
+    }
   }
   updates.updated_at = new Date().toISOString();
 

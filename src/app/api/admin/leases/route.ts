@@ -191,6 +191,7 @@ export async function POST(request: NextRequest) {
       insurance_responsible: body.insurance_responsible || 'tenant',
       condo_responsible: body.condo_responsible || 'tenant',
       deposit_value: Number(body.deposit_value) || 0,
+      deposit_months: body.deposit_months ? Number(body.deposit_months) : null,
       deposit_received_date: Number(body.deposit_value) > 0 ? body.start_date : null,
       first_rent_retention_type: body.first_rent_retention_type || 'none',
       first_rent_retention_percentage:

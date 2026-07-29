@@ -388,6 +388,7 @@ export interface LeaseContract {
   insurance_responsible: BillingResponsible;
   condo_responsible: BillingResponsible;
   deposit_value: number;
+  deposit_months?: number | null;
   deposit_status: DepositStatus;
   deposit_received_date?: string | null;
   deposit_returned_date?: string | null;

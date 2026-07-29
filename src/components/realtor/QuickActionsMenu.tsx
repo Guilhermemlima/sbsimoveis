@@ -48,6 +48,7 @@ function buildCategories(permissions: string[]): ActionCategory[] {
         accent: 'border-gray-400',
         items: [
           { href: '/admin/rent-charges', label: 'Cobranças de Locação' },
+          { href: '/admin/rent-charges/overdue', label: 'Parcelas Vencidas' },
           { href: '/admin/payouts', label: 'Repasses a Proprietários' },
           { href: '/admin/expenses', label: 'Despesas' },
           { href: '/admin/schedule', label: 'Cronograma Financeiro' },

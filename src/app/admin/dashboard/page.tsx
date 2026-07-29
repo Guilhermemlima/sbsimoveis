@@ -193,7 +193,7 @@ export default function AdminDashboard() {
               </div>
 
               <Link
-                href="/admin/rent-charges"
+                href="/admin/rent-charges/overdue"
                 className={`p-4 rounded-xl shadow border transition ${alerts.counts.overdueRentCharges > 0 ? 'bg-red-50 border-red-200 hover:bg-red-100' : 'bg-white border-transparent'}`}
               >
                 <AlertTriangle className={`w-5 h-5 mb-1 ${alerts.counts.overdueRentCharges > 0 ? 'text-red-600' : 'text-gray-400'}`} />

@@ -15,6 +15,7 @@ import {
   Landmark,
   BarChart3,
 } from 'lucide-react';
+import { WhatsAppIcon } from '@/components/common/SocialIcons';
 import OpportunitiesCarousel from '@/components/public/OpportunitiesCarousel';
 import Reveal from '@/components/common/Reveal';
 import { useAppSettings } from '@/lib/settings-context';
@@ -245,31 +246,43 @@ export default function HomePage() {
                 icon: Home,
                 title: 'Compra de Imóvel',
                 description: 'Encontre e compre seu imóvel dos sonhos com segurança.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e quero comprar um imóvel. Podem me ajudar a encontrar as melhores opções?',
               },
               {
                 icon: HandCoins,
                 title: 'Venda de Imóvel',
                 description: 'Venda seu imóvel rápido e pelo melhor preço.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e quero vender meu imóvel. Como funciona o processo?',
               },
               {
                 icon: KeyRound,
                 title: 'Aluguel',
                 description: 'Alugue imóveis com condições flexíveis e seguras.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e tenho interesse em alugar um imóvel. Quais estão disponíveis?',
               },
               {
                 icon: Gem,
                 title: 'Avaliação',
                 description: 'Avaliação profissional do seu imóvel por peritos.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e gostaria de solicitar uma avaliação do meu imóvel.',
               },
               {
                 icon: Landmark,
                 title: 'Financiamento',
                 description: 'Ajudamos a encontrar as melhores opções de crédito.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e quero saber mais sobre financiamento imobiliário.',
               },
               {
                 icon: BarChart3,
                 title: 'Consultoria',
                 description: 'Consultoria especializada em investimentos imobiliários.',
+                message:
+                  'Olá! Vim pelo site da SBS Imóveis e gostaria de uma consultoria sobre investimento em imóveis.',
               },
             ].map((service, index) => (
               <Reveal key={index} delay={(index % 3) * 100}>
@@ -277,8 +290,14 @@ export default function HomePage() {
                   <service.icon className="w-10 h-10 mb-4 mx-auto text-gold-600" strokeWidth={1.5} />
                   <h3 className="text-xl font-bold mb-3 text-navy-950">{service.title}</h3>
                   <p className="text-gray-600 mb-4">{service.description}</p>
-                  <a href="#contact" className="text-gold-600 font-semibold hover:underline">
-                    Saber mais →
+                  <a
+                    href={`https://wa.me/${settings.whatsapp_number}?text=${encodeURIComponent(service.message)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-gold-600 font-semibold hover:underline"
+                  >
+                    <WhatsAppIcon className="w-4 h-4" />
+                    Falar no WhatsApp
                   </a>
                 </div>
               </Reveal>

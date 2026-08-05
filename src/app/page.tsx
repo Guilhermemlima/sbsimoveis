@@ -153,15 +153,27 @@ export default function HomePage() {
                 </div>
               </div>
 
-              <div className="flex gap-4 flex-wrap justify-center text-sm text-gray-600">
-                <Link href="/imoveis?purpose=sale" className="hover:text-gold-600 transition-colors">
-                  🏠 Comprar
+              <div className="flex gap-6 flex-wrap justify-center text-sm text-gray-600">
+                <Link
+                  href="/imoveis?purpose=sale"
+                  className="inline-flex items-center gap-1.5 hover:text-gold-600 transition-colors"
+                >
+                  <Home className="w-4 h-4" strokeWidth={1.5} />
+                  Comprar
                 </Link>
-                <Link href="/alugar" className="hover:text-gold-600 transition-colors">
-                  📋 Alugar
+                <Link
+                  href="/alugar"
+                  className="inline-flex items-center gap-1.5 hover:text-gold-600 transition-colors"
+                >
+                  <KeyRound className="w-4 h-4" strokeWidth={1.5} />
+                  Alugar
                 </Link>
-                <Link href="/imoveis?is_opportunity=true" className="hover:text-gold-600 transition-colors">
-                  ⚡ Oportunidades
+                <Link
+                  href="/imoveis?is_opportunity=true"
+                  className="inline-flex items-center gap-1.5 hover:text-gold-600 transition-colors"
+                >
+                  <Gem className="w-4 h-4" strokeWidth={1.5} />
+                  Oportunidades
                 </Link>
               </div>
             </form>
@@ -199,7 +211,7 @@ export default function HomePage() {
                 icon: <Users className="w-8 h-8 text-navy-900" />,
                 title: 'Equipe Profissional',
                 description:
-                  'Corretores experientes prontos para ajudar você 24/7.',
+                  'Corretores experientes e credenciados para orientar você em cada etapa.',
               },
             ].map((item, index) => (
               <Reveal key={index} delay={index * 120}>

@@ -17,7 +17,10 @@ function buildCategories(permissions: string[]): ActionCategory[] {
     },
   ];
 
-  const vendasItems: ActionItem[] = [{ href: '/admin/leads', label: 'Leads (CRM)' }];
+  const vendasItems: ActionItem[] = [
+    { href: '/admin/crm', label: 'CRM — Captação' },
+    { href: '/admin/leads', label: 'Contatos do Site' },
+  ];
   if (permissions.includes('manage_sales')) vendasItems.push({ href: '/admin/sales', label: 'Vendas' });
   if (permissions.includes('view_reports')) vendasItems.push({ href: '/admin/reports', label: 'Relatórios' });
   if (hasFullAccess) vendasItems.push({ href: '/admin/clients', label: 'Clientes' });

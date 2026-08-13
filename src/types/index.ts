@@ -715,6 +715,63 @@ export interface LeaseAmendment {
   updated_at: string;
 }
 
+// CRM Pipeline (captação) Types
+export type CrmDealType = 'venda' | 'locacao';
+
+export type CrmDealStage =
+  | 'assinatura_opcao'
+  | 'fotos_imovel'
+  | 'divulgacao'
+  | 'comprador_locador'
+  | 'vistoria'
+  | 'contrato_assinado'
+  | 'perdido';
+
+export interface CrmDeal {
+  id: string;
+  deal_type: CrmDealType;
+  title: string;
+  stage: CrmDealStage;
+  property_id?: string | null;
+  property_address?: string | null;
+  owner_name?: string | null;
+  owner_phone?: string | null;
+  owner_email?: string | null;
+  client_name?: string | null;
+  client_phone?: string | null;
+  client_email?: string | null;
+  deal_value?: number | null;
+  realtor_id?: string | null;
+  notes?: string | null;
+  closed_at?: string | null;
+  created_by?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CrmDealFile {
+  id: string;
+  deal_id: string;
+  stage: CrmDealStage;
+  name: string;
+  file_path: string;
+  file_type: string | null;
+  uploaded_by?: string | null;
+  created_at: string;
+  downloadUrl?: string | null;
+}
+
+export interface CrmDealStageHistory {
+  id: string;
+  deal_id: string;
+  from_stage: CrmDealStage | null;
+  to_stage: CrmDealStage;
+  changed_by?: string | null;
+  changedByName?: string | null;
+  note?: string | null;
+  created_at: string;
+}
+
 // Legal Case Types
 export type LegalCaseType =
   | 'contract'

@@ -26,8 +26,15 @@ export default function CategorizedActionsMenu({ categories }: { categories: Act
         setOpenKey(null);
       }
     }
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === 'Escape') setOpenKey(null);
+    }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, []);
 
   return (
@@ -35,12 +42,7 @@ export default function CategorizedActionsMenu({ categories }: { categories: Act
       {categories.map((category) => {
         const isOpen = openKey === category.key;
         return (
-          <div
-            key={category.key}
-            className="relative"
-            onMouseEnter={() => setOpenKey(category.key)}
-            onMouseLeave={() => setOpenKey((prev) => (prev === category.key ? null : prev))}
-          >
+          <div key={category.key} className="relative">
             <button
               type="button"
               onClick={() => setOpenKey(isOpen ? null : category.key)}

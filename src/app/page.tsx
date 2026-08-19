@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import {
   Search,
   MapPin,
@@ -50,15 +51,28 @@ export default function HomePage() {
   return (
     <>
       {/* Hero Banner */}
-      <section className="relative overflow-hidden bg-noise-navy text-white py-24 md:py-36">
-        {/* Decorative floating glow */}
-        <div
-          className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-gold-500/20 blur-3xl animate-float"
+      <section className="relative overflow-hidden bg-navy-950 text-white py-24 md:py-36">
+        {/* Foto de fundo */}
+        <Image
+          src="/hero-fundo.jpeg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
           aria-hidden="true"
         />
+
+        {/* Camadas escuras: sem elas o texto branco some sobre a foto clara */}
+        <div className="absolute inset-0 bg-navy-950/70" aria-hidden="true" />
         <div
-          className="pointer-events-none absolute -bottom-32 -left-16 h-80 w-80 rounded-full bg-navy-500/30 blur-3xl animate-float"
-          style={{ animationDelay: '2s' }}
+          className="absolute inset-0 bg-gradient-to-b from-navy-950/80 via-navy-950/40 to-navy-950/90"
+          aria-hidden="true"
+        />
+
+        {/* Brilho dourado sutil, mantido por cima da foto */}
+        <div
+          className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-gold-500/15 blur-3xl animate-float"
           aria-hidden="true"
         />
 

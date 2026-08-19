@@ -4,6 +4,7 @@ import { canManageLeads } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { DEAL_TYPE_LABEL } from '@/lib/crm-stages';
+import { garantirProprietario } from '@/lib/crm-autocreate';
 import type { CrmDealType } from '@/types';
 
 export async function GET() {
@@ -74,6 +75,20 @@ export async function POST(request: NextRequest) {
   const supabase = createServiceRoleClient();
   const realtorId = canManageLeads(user) && body.realtor_id ? body.realtor_id : user.role === 'realtor' ? user.id : null;
 
+  // Se o proprietário foi digitado e nenhum cadastro foi escolhido, cria o
+  // cadastro real — assim ele passa a existir na aba Clientes / Proprietários,
+  // em vez de ficar só como texto dentro da captação.
+  const ownerId =
+    body.owner_id ||
+    (await garantirProprietario(supabase, {
+      name: body.owner_name,
+      email: body.owner_email,
+      phone: body.owner_phone,
+      document_number: body.owner_document,
+      rg: body.owner_rg,
+      address: body.owner_address,
+    }));
+
   const { data, error } = await supabase
     .from('crm_deals')
     .insert({
@@ -82,7 +97,10 @@ export async function POST(request: NextRequest) {
       stage: 'assinatura_opcao',
       property_id: body.property_id || null,
       property_address: body.property_address || null,
-      owner_id: body.owner_id || null,
+      owner_id: ownerId,
+      owner_document: body.owner_document || null,
+      owner_rg: body.owner_rg || null,
+      owner_address: body.owner_address || null,
       tenant_id: body.tenant_id || null,
       guarantor_id: body.guarantor_id || null,
       client_id: body.client_id || null,

@@ -47,6 +47,9 @@ const emptyForm = {
   owner_name: '',
   owner_phone: '',
   owner_email: '',
+  owner_document: '',
+  owner_rg: '',
+  owner_address: '',
   deal_value: '',
   notes: '',
 };
@@ -281,6 +284,37 @@ export default function CrmPipelinePage() {
                 onChange={(e) => set('owner_email', e.target.value)}
                 className={inputClass}
               />
+            </div>
+            <div>
+              <label className={labelClass}>CPF/CNPJ</label>
+              <input
+                value={form.owner_document}
+                onChange={(e) => set('owner_document', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>RG</label>
+              <input
+                value={form.owner_rg}
+                onChange={(e) => set('owner_rg', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+            <div>
+              <label className={labelClass}>Endereço do proprietário</label>
+              <input
+                value={form.owner_address}
+                onChange={(e) => set('owner_address', e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div className="md:col-span-3 -mt-1">
+              <p className="text-xs text-gray-500">
+                Preenchendo o proprietário, o cadastro dele é criado automaticamente e passa a aparecer
+                em Clientes e Proprietários.
+              </p>
             </div>
 
             <div className="md:col-span-3">

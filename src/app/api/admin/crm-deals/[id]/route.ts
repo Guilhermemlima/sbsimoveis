@@ -4,6 +4,8 @@ import { canManageLeads } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { logAudit } from '@/lib/audit';
 import { stageLabel } from '@/lib/crm-stages';
+import { garantirProprietario, garantirInquilino, garantirComprador } from '@/lib/crm-autocreate';
+import { syncCrmFile } from '@/lib/crm-sync';
 
 const BUCKET = 'property-documents';
 const SIGNED_URL_TTL_SECONDS = 3600;
@@ -26,6 +28,12 @@ const UPDATABLE_FIELDS = [
   'tenant_id',
   'guarantor_id',
   'client_id',
+  'owner_document',
+  'owner_rg',
+  'owner_address',
+  'client_document',
+  'client_rg',
+  'client_address',
 ];
 
 async function loadOwnedDeal(id: string, user: SessionUser) {
@@ -128,10 +136,76 @@ export async function PUT(
     }
   }
 
+  // Cria o cadastro real a partir do que foi digitado, quando ainda não há
+  // um vinculado — o mesmo comportamento da criação da captação.
+  const avisos: string[] = [];
+
+  if (!deal.owner_id && !body.owner_id && (body.owner_name || deal.owner_name)) {
+    const ownerId = await garantirProprietario(supabase, {
+      name: body.owner_name ?? deal.owner_name,
+      email: body.owner_email ?? deal.owner_email,
+      phone: body.owner_phone ?? deal.owner_phone,
+      document_number: body.owner_document ?? deal.owner_document,
+      rg: body.owner_rg ?? deal.owner_rg,
+      address: body.owner_address ?? deal.owner_address,
+    });
+    if (ownerId) updates.owner_id = ownerId;
+  }
+
+  // O cliente vira inquilino (locação) ou comprador (venda).
+  const clientName = body.client_name ?? deal.client_name;
+  const semClienteVinculado = !deal.tenant_id && !deal.client_id && !body.tenant_id && !body.client_id;
+
+  if (semClienteVinculado && clientName) {
+    const pessoa = {
+      name: clientName,
+      email: body.client_email ?? deal.client_email,
+      phone: body.client_phone ?? deal.client_phone,
+      document_number: body.client_document ?? deal.client_document,
+      rg: body.client_rg ?? deal.client_rg,
+      address: body.client_address ?? deal.client_address,
+    };
+
+    if (deal.deal_type === 'locacao') {
+      const tenantId = await garantirInquilino(supabase, pessoa);
+      if (tenantId) updates.tenant_id = tenantId;
+    } else {
+      const { id: clientId, aviso } = await garantirComprador(supabase, pessoa);
+      if (clientId) updates.client_id = clientId;
+      if (aviso) avisos.push(aviso);
+    }
+  }
+
   updates.updated_at = new Date().toISOString();
 
   const { data, error } = await supabase.from('crm_deals').update(updates).eq('id', id).select().single();
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+
+  // Com os cadastros criados, tenta enviar os anexos que estavam pendentes.
+  let anexosSincronizados = 0;
+  if (updates.owner_id || updates.tenant_id || updates.client_id) {
+    const { data: pendentes } = await supabase
+      .from('crm_deal_files')
+      .select('*')
+      .eq('deal_id', id)
+      .is('synced_to', null);
+
+    for (const file of pendentes ?? []) {
+      const sync = await syncCrmFile(supabase, data, file, user.id);
+      if (sync.synced_to || sync.synced_error) {
+        await supabase
+          .from('crm_deal_files')
+          .update({
+            synced_to: sync.synced_to,
+            synced_ref_id: sync.synced_ref_id,
+            synced_error: sync.synced_error,
+            synced_at: sync.synced_to ? new Date().toISOString() : null,
+          })
+          .eq('id', file.id);
+      }
+      if (sync.synced_to) anexosSincronizados += 1;
+    }
+  }
 
   if (stageChanged) {
     await supabase.from('crm_deal_stage_history').insert({
@@ -151,7 +225,7 @@ export async function PUT(
     });
   }
 
-  return NextResponse.json(data);
+  return NextResponse.json({ ...data, avisos, anexosSincronizados });
 }
 
 export async function DELETE(

@@ -42,6 +42,12 @@ interface DealDetail {
   client_name: string | null;
   client_phone: string | null;
   client_email: string | null;
+  client_document: string | null;
+  client_rg: string | null;
+  client_address: string | null;
+  owner_document: string | null;
+  owner_rg: string | null;
+  owner_address: string | null;
   deal_value: number | null;
   notes: string | null;
   realtorName: string | null;
@@ -73,7 +79,14 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
   const [error, setError] = useState('');
 
   // Dados do comprador/locador, editáveis a partir da etapa correspondente.
-  const [clientForm, setClientForm] = useState({ client_name: '', client_phone: '', client_email: '' });
+  const [clientForm, setClientForm] = useState({
+    client_name: '',
+    client_phone: '',
+    client_email: '',
+    client_document: '',
+    client_rg: '',
+    client_address: '',
+  });
   const [savingClient, setSavingClient] = useState(false);
 
   // Vínculos com cadastros já existentes no sistema.
@@ -102,6 +115,9 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
             client_name: data.client_name ?? '',
             client_phone: data.client_phone ?? '',
             client_email: data.client_email ?? '',
+            client_document: data.client_document ?? '',
+            client_rg: data.client_rg ?? '',
+            client_address: data.client_address ?? '',
           });
         }
       })
@@ -222,12 +238,19 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
 
   const saveClient = async () => {
     setSavingClient(true);
-    await fetch(`/api/admin/crm-deals/${id}`, {
+    const res = await fetch(`/api/admin/crm-deals/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(clientForm),
     });
+    const data = await res.json().catch(() => ({}));
     setSavingClient(false);
+
+    // O cadastro é criado no servidor; avisa se algo impediu (ex: sem e-mail).
+    if (data.avisos?.length) alert(data.avisos.join('\n'));
+    else if (data.anexosSincronizados > 0) {
+      alert(`Cadastro criado. ${data.anexosSincronizados} anexo(s) pendente(s) sincronizado(s).`);
+    }
     load();
   };
 
@@ -515,25 +538,31 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
                         Dados do {deal.deal_type === 'venda' ? 'comprador' : 'locatário'}
                       </p>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-2">
-                        <input
-                          value={clientForm.client_name}
-                          onChange={(e) => setClientForm((f) => ({ ...f, client_name: e.target.value }))}
-                          placeholder="Nome"
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        />
-                        <input
-                          value={clientForm.client_phone}
-                          onChange={(e) => setClientForm((f) => ({ ...f, client_phone: e.target.value }))}
-                          placeholder="Telefone"
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        />
-                        <input
-                          value={clientForm.client_email}
-                          onChange={(e) => setClientForm((f) => ({ ...f, client_email: e.target.value }))}
-                          placeholder="E-mail"
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
-                        />
+                        {(
+                          [
+                            ['client_name', 'Nome'],
+                            ['client_document', 'CPF/CNPJ'],
+                            ['client_rg', 'RG'],
+                            ['client_phone', 'Telefone'],
+                            ['client_email', 'E-mail'],
+                            ['client_address', 'Endereço'],
+                          ] as [keyof typeof clientForm, string][]
+                        ).map(([campo, rotulo]) => (
+                          <input
+                            key={campo}
+                            value={clientForm[campo]}
+                            onChange={(e) => setClientForm((f) => ({ ...f, [campo]: e.target.value }))}
+                            placeholder={rotulo}
+                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          />
+                        ))}
                       </div>
+                      <p className="text-[11px] text-gray-500 mb-2">
+                        Ao salvar, o cadastro é criado automaticamente
+                        {deal.deal_type === 'venda'
+                          ? ' em Clientes (comprador precisa de e-mail, que vira o login dele).'
+                          : ' em Inquilinos e passa a aparecer em Clientes.'}
+                      </p>
                       <button
                         onClick={saveClient}
                         disabled={savingClient}

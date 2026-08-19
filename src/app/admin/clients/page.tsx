@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import BackToDashboardLink from '@/components/common/BackToDashboardLink';
-import { UserPlus, ShieldCheck, ShieldOff, Power, FileText, Users, Home, ShoppingBag } from 'lucide-react';
+import { UserPlus, ShieldCheck, ShieldOff, Power, FileText, Users, Home, ShoppingBag, Trash2 } from 'lucide-react';
 
 type PartyType = 'buyer' | 'tenant' | 'owner';
 
@@ -138,6 +138,26 @@ export default function AdminClientsPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ is_active: !person.is_active }),
     });
+    load();
+  };
+
+  /**
+   * Remove proprietário ou inquilino. A API recusa quando a pessoa tem
+   * contrato vinculado, para não quebrar o histórico — nesse caso o motivo
+   * é mostrado ao usuário.
+   */
+  const removePerson = async (person: Person) => {
+    const rotulo = TYPE_LABEL[person.type].toLowerCase();
+    if (!confirm(`Remover o ${rotulo} "${person.name}"? Esta ação não pode ser desfeita.`)) return;
+
+    const endpoint = person.type === 'owner' ? 'owners' : 'tenants';
+    const res = await fetch(`/api/admin/${endpoint}/${person.id}`, { method: 'DELETE' });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || 'Não foi possível remover.');
+      return;
+    }
     load();
   };
 
@@ -378,13 +398,22 @@ export default function AdminClientsPage() {
                               <FileText className="w-3 h-3" />
                               Documentos
                             </Link>
-                            {person.type === 'buyer' && (
+                            {person.type === 'buyer' ? (
                               <button
                                 onClick={() => toggleActive(person)}
                                 className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-300 hover:bg-gray-50 transition-colors"
+                                title="Comprador tem login no portal, por isso é desativado em vez de excluído"
                               >
                                 <Power className="w-3 h-3" />
                                 {person.is_active ? 'Desativar' : 'Reativar'}
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => removePerson(person)}
+                                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-red-200 text-red-600 hover:bg-red-50 transition-colors"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                                Remover
                               </button>
                             )}
                           </div>

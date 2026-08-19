@@ -82,7 +82,8 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
     owners: Opt[];
     tenants: Opt[];
     guarantors: Opt[];
-  }>({ properties: [], owners: [], tenants: [], guarantors: [] });
+    clients: Opt[];
+  }>({ properties: [], owners: [], tenants: [], guarantors: [], clients: [] });
   const [savingLink, setSavingLink] = useState(false);
   const [resyncing, setResyncing] = useState<string | null>(null);
 
@@ -127,8 +128,9 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
       pegar('/api/admin/owners', (o) => ({ id: o.id, name: o.name ?? '' })),
       pegar('/api/admin/tenants', (t) => ({ id: t.id, name: t.name ?? '' })),
       pegar('/api/admin/guarantors', (g) => ({ id: g.id, name: g.name ?? '' })),
-    ]).then(([properties, owners, tenants, guarantors]) =>
-      setOpts({ properties, owners, tenants, guarantors })
+      pegar('/api/admin/clients', (c) => ({ id: c.id, name: c.name ?? '' })),
+    ]).then(([properties, owners, tenants, guarantors, clients]) =>
+      setOpts({ properties, owners, tenants, guarantors, clients })
     );
   }, [id]);
 
@@ -586,6 +588,7 @@ export default function CrmDealDetailClient({ id }: { id: string }) {
                   ['property_id', 'Imóvel', opts.properties, deal.property_id, null],
                   ['owner_id', 'Proprietário', opts.owners, deal.owner_id, 'owner'],
                   ['tenant_id', 'Inquilino', opts.tenants, deal.tenant_id, 'tenant'],
+                  ['client_id', 'Comprador (cliente)', opts.clients, deal.client_id, null],
                   ['guarantor_id', 'Fiador', opts.guarantors, deal.guarantor_id, 'guarantor'],
                 ] as [string, string, Opt[], string | null, 'owner' | 'tenant' | 'guarantor' | null][]
               ).map(([campo, rotulo, lista, atual, tipoCadastro]) => (

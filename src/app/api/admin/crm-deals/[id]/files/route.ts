@@ -3,6 +3,7 @@ import { getCurrentUser } from '@/lib/auth/session';
 import { canManageLeads } from '@/lib/auth/permissions';
 import { createServiceRoleClient } from '@/lib/supabase';
 import { ALL_STAGES } from '@/lib/crm-stages';
+import { syncCrmFile } from '@/lib/crm-sync';
 
 const BUCKET = 'property-documents';
 const MAX_SIZE = 15 * 1024 * 1024;
@@ -54,7 +55,9 @@ export async function POST(
 
   const { data: deal } = await supabase
     .from('crm_deals')
-    .select('id, realtor_id')
+    .select(
+      'id, realtor_id, title, property_id, owner_id, tenant_id, guarantor_id, client_id, inspection_id'
+    )
     .eq('id', id)
     .maybeSingle();
 
@@ -109,7 +112,38 @@ export async function POST(
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
-    created.push(doc);
+    // Manda uma cópia para o módulo correspondente à etapa (documentos do
+    // imóvel, galeria, vistoria etc). Se não der, o motivo fica gravado em
+    // synced_error e aparece na tela — o anexo no CRM não se perde.
+    const sync = await syncCrmFile(
+      supabase,
+      {
+        id: deal.id,
+        title: deal.title,
+        property_id: deal.property_id,
+        owner_id: deal.owner_id,
+        tenant_id: deal.tenant_id,
+        guarantor_id: deal.guarantor_id,
+        client_id: deal.client_id,
+        inspection_id: deal.inspection_id,
+      },
+      doc,
+      user.id
+    );
+
+    if (sync.synced_to || sync.synced_error) {
+      await supabase
+        .from('crm_deal_files')
+        .update({
+          synced_to: sync.synced_to,
+          synced_ref_id: sync.synced_ref_id,
+          synced_error: sync.synced_error,
+          synced_at: sync.synced_to ? new Date().toISOString() : null,
+        })
+        .eq('id', doc.id);
+    }
+
+    created.push({ ...doc, ...sync });
   }
 
   return NextResponse.json(created, { status: 201 });

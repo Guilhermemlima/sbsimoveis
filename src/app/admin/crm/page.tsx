@@ -43,6 +43,7 @@ const emptyForm = {
   deal_type: 'venda' as CrmDealType,
   property_id: '',
   property_address: '',
+  owner_id: '',
   owner_name: '',
   owner_phone: '',
   owner_email: '',
@@ -58,6 +59,7 @@ export default function CrmPipelinePage() {
   const [deals, setDeals] = useState<Deal[]>([]);
   const [loading, setLoading] = useState(true);
   const [properties, setProperties] = useState<PropertyOption[]>([]);
+  const [owners, setOwners] = useState<{ id: string; name: string; email: string | null; phone: string | null }[]>([]);
   const [typeFilter, setTypeFilter] = useState<'all' | CrmDealType>('all');
   const [moving, setMoving] = useState(false);
 
@@ -78,7 +80,22 @@ export default function CrmPipelinePage() {
     fetch('/api/realtor/properties')
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => setProperties(Array.isArray(data) ? data : []));
+    fetch('/api/admin/owners')
+      .then((res) => (res.ok ? res.json() : []))
+      .then((data) => setOwners(Array.isArray(data) ? data : []));
   }, []);
+
+  /** Ao escolher um proprietário cadastrado, preenche nome/telefone/e-mail. */
+  const pickOwner = (ownerId: string) => {
+    const o = owners.find((x) => x.id === ownerId);
+    setForm((f) => ({
+      ...f,
+      owner_id: ownerId,
+      owner_name: o?.name ?? f.owner_name,
+      owner_phone: o?.phone ?? f.owner_phone,
+      owner_email: o?.email ?? f.owner_email,
+    }));
+  };
 
   const set = (key: keyof typeof form, value: string) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -220,6 +237,23 @@ export default function CrmPipelinePage() {
                 onChange={(e) => set('property_address', e.target.value)}
                 className={inputClass}
               />
+            </div>
+
+            <div className="md:col-span-3 bg-gold-50/60 border border-gold-200 rounded-lg p-3">
+              <label className={labelClass}>Proprietário já cadastrado</label>
+              <select value={form.owner_id} onChange={(e) => pickOwner(e.target.value)} className={inputClass}>
+                <option value="">Não cadastrado — preencher abaixo</option>
+                {owners.map((o) => (
+                  <option key={o.id} value={o.id}>
+                    {o.name}
+                    {o.email ? ` · ${o.email}` : ''}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                Vinculando o cadastro, os documentos anexados no CRM são copiados automaticamente para a
+                ficha dele.
+              </p>
             </div>
 
             <div>

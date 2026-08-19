@@ -759,6 +759,11 @@ export interface CrmDealFile {
   uploaded_by?: string | null;
   created_at: string;
   downloadUrl?: string | null;
+  /** Módulo para onde o anexo foi copiado (ex: property_images). */
+  synced_to?: string | null;
+  synced_ref_id?: string | null;
+  synced_error?: string | null;
+  synced_at?: string | null;
 }
 
 export interface CrmDealStageHistory {

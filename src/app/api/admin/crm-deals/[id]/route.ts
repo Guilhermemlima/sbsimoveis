@@ -22,6 +22,10 @@ const UPDATABLE_FIELDS = [
   'deal_value',
   'realtor_id',
   'notes',
+  'owner_id',
+  'tenant_id',
+  'guarantor_id',
+  'client_id',
 ];
 
 async function loadOwnedDeal(id: string, user: SessionUser) {

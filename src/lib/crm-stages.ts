@@ -1,5 +1,16 @@
 import type { CrmDealStage, CrmDealType } from '@/types';
 
+/** Nome amigável do módulo para onde um anexo do CRM foi copiado. */
+export const SYNC_TARGET_LABEL: Record<string, string> = {
+  property_documents: 'Documentos do Imóvel',
+  property_images: 'Fotos do Imóvel',
+  owner_documents: 'Documentos do Proprietário',
+  tenant_documents: 'Documentos do Inquilino',
+  guarantor_documents: 'Documentos do Fiador',
+  client_documents: 'Documentos do Cliente',
+  inspection_media: 'Vistorias',
+};
+
 export const DEAL_TYPE_LABEL: Record<CrmDealType, string> = {
   venda: 'Venda',
   locacao: 'Locação',

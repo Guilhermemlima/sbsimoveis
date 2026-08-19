@@ -22,7 +22,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   company_name: 'SBS Imóveis',
   company_logo_url: null,
   company_phone: '(42) 98444-7987',
-  company_email: 'contato@sbsimoveis.com',
+  company_email: 'diretoriasbsimoveis@gmail.com',
   company_address: 'Guarapuava, PR',
   company_city: 'Guarapuava',
   whatsapp_number: '5542984447987',

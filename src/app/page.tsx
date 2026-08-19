@@ -64,14 +64,11 @@ export default function HomePage() {
 
         <div className="container relative mx-auto px-4">
           <div className="max-w-3xl mx-auto text-center">
-            <span className="animate-fade-in-up inline-block mb-5 px-4 py-1.5 rounded-full border border-gold-400/40 bg-gold-500/10 text-gold-300 text-sm font-medium tracking-wide">
-              Corretora de imóveis premium
-            </span>
-            <h1 className="animate-fade-in-up font-display text-5xl md:text-6xl font-bold mb-6 leading-tight [animation-delay:100ms]">
+            <h1 className="animate-fade-in-up font-display text-5xl md:text-6xl font-bold mb-6 leading-tight">
               Encontre seu{' '}
               <span className="text-gradient-gold-animated">Imóvel Perfeito</span>
             </h1>
-            <p className="animate-fade-in-up text-xl md:text-2xl text-navy-100 mb-10 [animation-delay:200ms]">
+            <p className="animate-fade-in-up text-xl md:text-2xl text-navy-100 mb-10 [animation-delay:100ms]">
               Plataforma confiável para compra, venda e aluguel de imóveis com segurança
               e transparência.
             </p>
@@ -79,7 +76,7 @@ export default function HomePage() {
             {/* Quick Search */}
             <form
               onSubmit={handleSearch}
-              className="animate-fade-in-up bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 md:p-8 text-gray-900 [animation-delay:300ms]"
+              className="animate-fade-in-up bg-white/95 backdrop-blur rounded-2xl shadow-2xl p-6 md:p-8 text-gray-900 [animation-delay:200ms]"
             >
               {/* Finalidade Toggle */}
               <div

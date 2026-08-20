@@ -63,10 +63,12 @@ export default function HomePage() {
           aria-hidden="true"
         />
 
-        {/* Camadas escuras: sem elas o texto branco some sobre a foto clara */}
-        <div className="absolute inset-0 bg-navy-950/70" aria-hidden="true" />
+        {/* Camadas escuras: sem elas o texto branco some sobre a foto clara.
+            Mantidas leves no meio, onde a casa aparece, e mais fechadas no
+            topo e na base, onde ficam o titulo e a caixa de busca. */}
+        <div className="absolute inset-0 bg-navy-950/45" aria-hidden="true" />
         <div
-          className="absolute inset-0 bg-gradient-to-b from-navy-950/80 via-navy-950/40 to-navy-950/90"
+          className="absolute inset-0 bg-gradient-to-b from-navy-950/70 via-navy-950/20 to-navy-950/80"
           aria-hidden="true"
         />
 

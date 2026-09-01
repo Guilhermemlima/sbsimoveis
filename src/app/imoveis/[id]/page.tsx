@@ -1,5 +1,4 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, MapPin, Bed, Bath, Maximize2, Car } from 'lucide-react';
 import { createServiceRoleClient } from '@/lib/supabase';
@@ -7,6 +6,7 @@ import { getAppSettings } from '@/lib/settings';
 import { youTubeEmbedUrl } from '@/lib/youtube';
 import ShareButton from '@/components/public/ShareButton';
 import InterestButton from '@/components/public/InterestButton';
+import PropertyGallery from '@/components/public/PropertyGallery';
 
 const TYPE_LABEL: Record<string, string> = {
   house: 'Casa',
@@ -50,11 +50,11 @@ export default async function PropertyDetailPage({
     .eq('id', id)
     .then(() => {});
 
-  const images = [...(property.property_images ?? [])].sort(
-    (a, b) => (a.order ?? 0) - (b.order ?? 0)
-  );
-  const mainImage =
-    images.find((img) => img.is_main)?.image_url ?? images[0]?.image_url ?? '/placeholder.jpg';
+  // A foto de capa abre a galeria; o resto segue a ordem definida no cadastro.
+  const images = [...(property.property_images ?? [])].sort((a, b) => {
+    if (a.is_main !== b.is_main) return a.is_main ? -1 : 1;
+    return (a.order ?? 0) - (b.order ?? 0);
+  });
   const videoEmbedUrl = property.video_url ? youTubeEmbedUrl(property.video_url) : null;
 
   return (
@@ -69,24 +69,7 @@ export default async function PropertyDetailPage({
         </Link>
 
         <div className="bg-white rounded-2xl shadow-md overflow-hidden mb-8">
-          <div className="relative w-full h-[420px] bg-gray-200">
-            <Image
-              src={mainImage}
-              alt={property.title}
-              fill
-              unoptimized={mainImage !== '/placeholder.jpg'}
-              className="object-cover"
-            />
-          </div>
-          {images.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-6 gap-2 p-4">
-              {images.map((img) => (
-                <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden">
-                  <Image src={img.image_url} alt="" fill unoptimized className="object-cover" />
-                </div>
-              ))}
-            </div>
-          )}
+          <PropertyGallery images={images} title={property.title} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

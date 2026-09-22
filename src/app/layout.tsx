@@ -6,6 +6,7 @@ import Footer from '@/components/common/Footer';
 import { getCurrentUser } from '@/lib/auth/session';
 import { getAppSettings } from '@/lib/settings';
 import { SettingsProvider } from '@/lib/settings-context';
+import PublicChrome from '@/components/system/PublicChrome';
 
 const jakarta = Plus_Jakarta_Sans({
   variable: '--font-jakarta',
@@ -67,11 +68,15 @@ export default async function RootLayout({
           <a href="#conteudo-principal" className="skip-link">
             Pular para o conteúdo principal
           </a>
-          <Header />
+          <PublicChrome>
+            <Header />
+          </PublicChrome>
           <main id="conteudo-principal" className="min-h-screen">
             {children}
           </main>
-          <Footer userRole={user?.role ?? null} />
+          <PublicChrome>
+            <Footer userRole={user?.role ?? null} />
+          </PublicChrome>
         </SettingsProvider>
       </body>
     </html>

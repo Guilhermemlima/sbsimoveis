@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 import { getCurrentUser } from '@/lib/auth/session';
+import SystemShell from '@/components/system/SystemShell';
 
 export default async function RealtorAreaLayout({
   children,
@@ -11,5 +12,9 @@ export default async function RealtorAreaLayout({
     redirect('/login');
   }
 
-  return <>{children}</>;
+  return (
+    <SystemShell name={user.name} role={user.role} permissions={user.permissions}>
+      {children}
+    </SystemShell>
+  );
 }

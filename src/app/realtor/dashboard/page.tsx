@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { Home, Users, DollarSign, Key } from 'lucide-react';
 import Link from 'next/link';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import LogoutButton from '@/components/common/LogoutButton';
-import QuickActionsMenu from '@/components/realtor/QuickActionsMenu';
 import { formatDateBR } from '@/lib/format';
 
 interface RealtorData {
@@ -39,7 +37,6 @@ interface DashboardData {
 export default function RealtorDashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [permissions, setPermissions] = useState<string[]>([]);
 
   useEffect(() => {
     fetch('/api/realtor/dashboard-stats')
@@ -48,10 +45,6 @@ export default function RealtorDashboard() {
         if (json) setData(json);
       })
       .finally(() => setLoading(false));
-
-    fetch('/api/me')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((me) => setPermissions(me?.permissions ?? []));
   }, []);
 
   if (loading || !data) {
@@ -83,13 +76,6 @@ export default function RealtorDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-10">
-        {/* Quick Actions */}
-        <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300 mb-10">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Ações Rápidas</h2>
-          <p className="text-sm text-gray-500 mb-6">Passe o mouse ou toque em uma área para ver as opções</p>
-          <QuickActionsMenu permissions={permissions} />
-        </div>
-
         {/* KPI Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
           <div className="card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
@@ -224,9 +210,6 @@ export default function RealtorDashboard() {
                 </div>
               </div>
             </div>
-
-            {/* Logout */}
-            <LogoutButton />
           </div>
         </div>
 

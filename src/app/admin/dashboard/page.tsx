@@ -4,8 +4,6 @@ import { useEffect, useState } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { TrendingUp, Home, Users, DollarSign, BellRing, AlertTriangle, Wrench, ClipboardCheck, FileEdit, Percent } from 'lucide-react';
 import Link from 'next/link';
-import LogoutButton from '@/components/common/LogoutButton';
-import AdminActionsMenu from '@/components/admin/AdminActionsMenu';
 
 interface ScheduleItem {
   id: string;
@@ -133,20 +131,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="container mx-auto px-4 py-10">
-        {/* Management Sections */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          {/* Quick Actions */}
-          <div className="lg:col-span-2 card-premium bg-white p-6 rounded-xl shadow border border-transparent hover:border-gold-300">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Ações de Gestão</h2>
-            <p className="text-sm text-gray-500 mb-6">Passe o mouse ou toque em uma área para ver as opções</p>
-            <AdminActionsMenu />
-          </div>
-
-          <div className="lg:col-span-3">
-            <LogoutButton />
-          </div>
-        </div>
-
         {notifications.total > 0 && (
           <Link
             href="/admin/schedule"

@@ -15,8 +15,8 @@ export interface ActionResult {
 const ONE_WEEK = 60 * 60 * 24 * 7;
 
 function defaultRedirectFor(role: string): string {
-  if (role === 'admin') return '/admin/dashboard';
-  if (role === 'realtor') return '/realtor/dashboard';
+  // O CRM e a tela principal de quem opera o sistema.
+  if (role === 'admin' || role === 'realtor') return '/admin/crm';
   if (role === 'tenant') return '/tenant/dashboard';
   if (role === 'finance') return '/staff/finance';
   if (role === 'inspector') return '/staff/inspector';

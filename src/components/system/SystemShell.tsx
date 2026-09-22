@@ -52,9 +52,6 @@ export default function SystemShell({ name, role, permissions, children }: Syste
     return () => document.removeEventListener('keydown', onKey);
   }, [menuAberto]);
 
-  const tituloAtual =
-    grupos.flatMap((g) => g.items).find((i) => i.href === hrefAtivo)?.label ?? 'Sistema';
-
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Fundo escuro da gaveta no celular */}
@@ -136,6 +133,15 @@ export default function SystemShell({ name, role, permissions, children }: Syste
         </nav>
 
         <div className="shrink-0 border-t border-gray-100 p-3">
+          <div className="mb-2 flex items-center gap-3 px-3 py-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy-950 text-xs font-bold text-gold-300">
+              {iniciais(name)}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-semibold leading-tight text-navy-950">{name}</p>
+              <p className="truncate text-xs leading-tight text-gray-500">{ROLE_LABEL[role] ?? role}</p>
+            </div>
+          </div>
           <Link
             href="/"
             onClick={() => setMenuAberto(false)}
@@ -144,33 +150,31 @@ export default function SystemShell({ name, role, permissions, children }: Syste
             <ExternalLink className="h-[18px] w-[18px] shrink-0 text-gray-400" />
             Ver o site
           </Link>
+          <LogoutButton className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition hover:bg-red-50 hover:text-red-600 disabled:opacity-50" />
         </div>
       </aside>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-gray-200 bg-white/95 px-4 backdrop-blur sm:px-6">
+        {/* No computador o menu lateral basta; no celular sobra so esta barra
+            estreita para abrir a gaveta. */}
+        <div className="flex h-14 items-center gap-3 bg-navy-950 px-4 lg:hidden">
           <button
             type="button"
             onClick={() => setMenuAberto(true)}
             aria-label="Abrir menu"
-            className="rounded-lg p-2 text-gray-600 hover:bg-gray-100 lg:hidden"
+            className="rounded-lg p-2 text-white hover:bg-white/10"
           >
             <Menu className="h-5 w-5" />
           </button>
-
-          <p className="truncate font-semibold text-navy-950">{tituloAtual}</p>
-
-          <div className="ml-auto flex items-center gap-3">
-            <div className="hidden text-right sm:block">
-              <p className="text-sm font-semibold leading-tight text-navy-950">{name}</p>
-              <p className="text-xs leading-tight text-gray-500">{ROLE_LABEL[role] ?? role}</p>
-            </div>
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-navy-950 text-xs font-bold text-gold-300">
-              {iniciais(name)}
-            </span>
-            <LogoutButton className="flex items-center gap-1.5 rounded-lg border border-gray-200 px-3 py-2 text-sm font-semibold text-gray-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-600 disabled:opacity-50" />
-          </div>
-        </header>
+          <Image
+            src="/logo-header.webp"
+            alt="SBS Imóveis"
+            width={600}
+            height={358}
+            priority
+            className="h-8 w-auto"
+          />
+        </div>
 
         <main>{children}</main>
       </div>

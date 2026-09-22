@@ -1,4 +1,5 @@
 import {
+  Activity,
   AlertTriangle,
   BarChart3,
   Building2,
@@ -80,6 +81,7 @@ export function buildNav(role: string, permissions: string[]): NavGroup[] {
 
   const operacoes: NavItem[] = full
     ? [
+        { href: '/admin/operacional', label: 'Painel Operacional', icon: Activity },
         { href: '/admin/inspections', label: 'Vistorias', icon: ClipboardCheck },
         { href: '/admin/maintenance', label: 'Manutenção', icon: Wrench },
         { href: '/admin/legal-cases', label: 'Jurídico', icon: Scale },

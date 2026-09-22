@@ -1,8 +1,7 @@
 import type { UserRole } from '@/types';
 
 export function dashboardHrefFor(role?: UserRole | null): string {
-  if (role === 'admin') return '/admin/dashboard';
-  if (role === 'realtor') return '/realtor/dashboard';
+  if (role === 'admin' || role === 'realtor') return '/admin/crm';
   if (role === 'client') return '/client/dashboard';
   if (role === 'tenant') return '/tenant/dashboard';
   if (role === 'finance') return '/staff/finance';

@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import BackToDashboardLink from '@/components/common/BackToDashboardLink';
 import CurrencyInput from '@/components/common/CurrencyInput';
 import {
   Plus,
@@ -154,7 +153,6 @@ export default function CrmPipelinePage() {
       <div className="bg-noise-navy text-white py-8">
         <div className="container mx-auto px-4 flex flex-wrap items-center justify-between gap-4">
           <div>
-            <BackToDashboardLink />
             <h1 className="text-3xl font-bold mb-2">CRM — Captação</h1>
             <p className="text-navy-100">
               Da assinatura da opção até o contrato assinado, com os documentos de cada etapa

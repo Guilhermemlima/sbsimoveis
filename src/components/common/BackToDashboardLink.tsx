@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
 const DASHBOARD_BY_ROLE: Record<string, string> = {
-  admin: '/admin/dashboard',
-  realtor: '/realtor/dashboard',
+  admin: '/admin/crm',
+  realtor: '/admin/crm',
   finance: '/staff/finance',
   inspector: '/staff/inspector',
   maintenance_staff: '/staff/maintenance',
@@ -14,7 +14,7 @@ const DASHBOARD_BY_ROLE: Record<string, string> = {
 };
 
 export default function BackToDashboardLink({ className }: { className?: string }) {
-  const [href, setHref] = useState('/admin/dashboard');
+  const [href, setHref] = useState('/admin/crm');
 
   useEffect(() => {
     fetch('/api/me')
@@ -30,7 +30,7 @@ export default function BackToDashboardLink({ className }: { className?: string 
       className={className ?? 'inline-flex items-center gap-2 text-navy-100 hover:text-white mb-4 text-sm'}
     >
       <ArrowLeft className="w-4 h-4" />
-      Voltar ao Dashboard
+      Voltar ao início
     </Link>
   );
 }

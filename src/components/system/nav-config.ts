@@ -51,7 +51,6 @@ export function buildNav(role: string, permissions: string[]): NavGroup[] {
   const can = (permission: string) => !isRealtor || permissions.includes(permission);
 
   const comercial: NavItem[] = [
-    { href: '/admin/crm', label: 'CRM — Captação', icon: KanbanSquare },
     { href: '/admin/leads', label: 'Contatos do Site', icon: Contact },
   ];
   if (full) comercial.push({ href: '/admin/clients', label: 'Clientes', icon: Users });
@@ -105,9 +104,11 @@ export function buildNav(role: string, permissions: string[]): NavGroup[] {
     {
       label: null,
       items: [
+        // O CRM e a tela principal de quem opera o sistema.
+        { href: '/admin/crm', label: 'CRM — Captação', icon: KanbanSquare },
         {
           href: isRealtor ? '/realtor/dashboard' : '/admin/dashboard',
-          label: 'Painel',
+          label: 'Indicadores',
           icon: LayoutDashboard,
         },
       ],

@@ -3,14 +3,20 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import { Menu, X } from 'lucide-react';
+import { CircleUserRound, Menu, X } from 'lucide-react';
 import { useAppSettings } from '@/lib/settings-context';
+import { dashboardHrefFor, dashboardLabelFor } from '@/lib/dashboard-nav';
+import type { UserRole } from '@/types';
 import { WhatsAppIcon, InstagramIcon, FacebookIcon } from '@/components/common/SocialIcons';
 
-export default function Header() {
+export default function Header({ userRole = null }: { userRole?: UserRole | null }) {
   const settings = useAppSettings();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+
+  // Atalho para a area restrita, para nao precisar descer ate o rodape.
+  const areaHref = userRole ? dashboardHrefFor(userRole) : '/login';
+  const areaLabel = userRole ? dashboardLabelFor(userRole) : 'Área do Corretor';
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -99,6 +105,17 @@ export default function Header() {
                 <WhatsAppIcon className="w-4 h-4" />
               </a>
             </div>
+
+            <span className="h-5 w-px bg-white/15" aria-hidden="true" />
+
+            <Link
+              href={areaHref}
+              title={areaLabel}
+              aria-label={areaLabel}
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-gold-400/40 text-gold-300 transition-all hover:border-gold-400 hover:bg-gold-400 hover:text-navy-950"
+            >
+              <CircleUserRound className="h-5 w-5" />
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -134,6 +151,14 @@ export default function Header() {
             </Link>
             <Link href="/contato" className="block text-navy-100 hover:text-white transition">
               Contato
+            </Link>
+
+            <Link
+              href={areaHref}
+              className="flex items-center gap-2 rounded-lg border border-gold-400/40 px-3 py-2 font-semibold text-gold-300 transition hover:bg-gold-400 hover:text-navy-950"
+            >
+              <CircleUserRound className="h-5 w-5" />
+              {areaLabel}
             </Link>
 
             <div className="flex items-center gap-2 pt-1">

@@ -69,7 +69,7 @@ export default async function RootLayout({
             Pular para o conteúdo principal
           </a>
           <PublicChrome>
-            <Header />
+            <Header userRole={user?.role ?? null} />
           </PublicChrome>
           <main id="conteudo-principal" className="min-h-screen">
             {children}

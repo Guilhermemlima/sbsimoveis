@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import FittedImage from '@/components/public/FittedImage';
 import { Property } from '@/types';
 import { Heart, MapPin, Bed, Bath, Maximize2, Badge } from 'lucide-react';
-import { useState } from 'react';
 import { useAppSettings } from '@/lib/settings-context';
 
 interface PropertyCardProps {
@@ -19,7 +18,6 @@ export default function PropertyCard({
   onFavoritToggle,
 }: PropertyCardProps) {
   const settings = useAppSettings();
-  const [isImageLoading, setIsImageLoading] = useState(true);
 
   const images = property.property_images ?? [];
   const coverImageUrl =
@@ -44,16 +42,12 @@ export default function PropertyCard({
   return (
     <div className="card-premium bg-white rounded-xl shadow-md overflow-hidden border border-transparent hover:border-gold-300">
       {/* Image Container */}
-      <div className="relative w-full h-48 bg-gray-200 overflow-hidden group">
-        <Image
+      <div className="relative w-full aspect-[4/3] bg-navy-950 overflow-hidden group">
+        <FittedImage
           src={coverImageUrl}
           alt={property.title}
-          fill
-          unoptimized={coverImageUrl !== '/placeholder.jpg'}
-          className={`object-cover w-full h-full transition-transform duration-500 group-hover:scale-110 ${
-            isImageLoading ? 'blur-sm' : 'blur-0'
-          }`}
-          onLoad={() => setIsImageLoading(false)}
+          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 400px"
+          className="transition-transform duration-500 group-hover:scale-105"
         />
         <div
           className="absolute inset-0 bg-gradient-to-t from-navy-950/60 via-transparent to-transparent"

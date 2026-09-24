@@ -24,7 +24,7 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
   const [atual, setAtual] = useState(0);
   const [ampliada, setAmpliada] = useState(false);
   const [tocando, setTocando] = useState(true);
-  const [pausadoNoMouse, setPausadoNoMouse] = useState(false);
+  const [pausado, setPausado] = useState(false);
   const toqueX = useRef<number | null>(null);
 
   const total = images.length;
@@ -33,15 +33,16 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
   const anterior = useCallback(() => setAtual((i) => (i - 1 + total) % total), [total]);
   const proxima = useCallback(() => setAtual((i) => (i + 1) % total), [total]);
 
-  // Passagem automatica. Para com o mouse em cima, com a foto ampliada, com o
-  // botao de pausa e para quem pediu menos animacao no sistema. Como o efeito
-  // depende de `atual`, cada clique manual tambem reinicia a contagem.
+  // Passagem automatica. Para com o mouse em cima, com o teclado dentro da
+  // galeria, com a foto ampliada, com o botao de pausa e para quem pediu menos
+  // animacao no sistema. Como o efeito depende de `atual`, cada clique manual
+  // tambem reinicia a contagem.
   useEffect(() => {
-    if (!temVarias || !tocando || ampliada || pausadoNoMouse) return;
+    if (!temVarias || !tocando || ampliada || pausado) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const id = setTimeout(proxima, INTERVALO_MS);
     return () => clearTimeout(id);
-  }, [atual, temVarias, tocando, ampliada, pausadoNoMouse, proxima]);
+  }, [atual, temVarias, tocando, ampliada, pausado, proxima]);
 
   // Setas do teclado navegam; Esc fecha a imagem ampliada.
   useEffect(() => {
@@ -92,8 +93,10 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
         className="relative w-full aspect-[4/3] md:aspect-[16/10] bg-navy-950 overflow-hidden"
         onTouchStart={aoTocarInicio}
         onTouchEnd={aoTocarFim}
-        onMouseEnter={() => setPausadoNoMouse(true)}
-        onMouseLeave={() => setPausadoNoMouse(false)}
+        onMouseEnter={() => setPausado(true)}
+        onMouseLeave={() => setPausado(false)}
+        onFocusCapture={() => setPausado(true)}
+        onBlurCapture={() => setPausado(false)}
       >
         <button
           type="button"
@@ -133,11 +136,13 @@ export default function PropertyGallery({ images, title }: PropertyGalleryProps)
               <ChevronRight className="w-5 h-5" />
             </button>
 
+            {/* So no celular e no tablet: no computador, parar o mouse em cima
+                ou entrar com o teclado ja pausa, entao o botao seria ruido. */}
             <button
               type="button"
               onClick={() => setTocando((t) => !t)}
               aria-label={tocando ? 'Pausar passagem automática' : 'Retomar passagem automática'}
-              className="absolute bottom-3 left-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80"
+              className="absolute bottom-3 left-3 z-20 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white transition hover:bg-black/80 lg:hidden"
             >
               {tocando ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
             </button>
